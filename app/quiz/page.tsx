@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan } from 'lucide-react';
+import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan, Frown, Meh, Smile, Calculator, FileText, Cpu, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -20,8 +20,12 @@ interface Step {
     subtitle?: string;
     options?: Option[];
     theme?: 'green' | 'light';
-    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro';
+    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation';
     placeholder?: string;
+    comparison?: {
+        left: { title: string; subtitle: string; icon?: React.ReactNode };
+        right: { title: string; subtitle: string; icon?: React.ReactNode };
+    };
 }
 
 const steps: Step[] = [
@@ -217,6 +221,77 @@ const steps: Step[] = [
         question: 'A simple scan can tell you everything about your food',
         theme: 'light',
         type: 'feature_intro'
+    },
+    {
+        id: 'eating_struggle',
+        question: 'Do you always struggle with eating the wrong things after you dine?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'always', label: 'Always', icon: <Frown className="w-6 h-6 text-purple-400" /> },
+            { id: 'sometimes', label: 'Sometimes', icon: <Meh className="w-6 h-6 text-blue-400" /> },
+            { id: 'rarely', label: 'Rarely', icon: <Smile className="w-6 h-6 text-yellow-500" /> },
+        ]
+    },
+    {
+        id: 'scanner_comparison_1',
+        question: 'Supports barcode and direct food scanning',
+        theme: 'light',
+        type: 'scanner_comparison',
+        comparison: {
+            left: { title: 'Traditional Method:', subtitle: 'Only available for food with barcode', icon: <Search className="w-10 h-10 text-white" /> },
+            right: { title: 'Fastic AI Scanner:', subtitle: 'Simply take a picture of the food to get details', icon: <Scan className="w-10 h-10 text-[#00ca86]" /> }
+        }
+    },
+    {
+        id: 'scanner_comparison_2',
+        question: 'Say goodbye to manual input, AI recognition is faster',
+        theme: 'light',
+        type: 'scanner_comparison',
+        comparison: {
+            left: { title: 'Traditional Method:', subtitle: 'Loging food portions manually takes forever', icon: <Calculator className="w-10 h-10 text-white" /> },
+            right: { title: 'Fastic AI Scanner:', subtitle: 'A simple scan instantly reveals your food portions', icon: <Image src="/fit_physique_goal.png" alt="Portion" width={40} height={40} className="rounded-lg" /> }
+        }
+    },
+    {
+        id: 'scanner_comparison_3',
+        question: "Can't find yor meal? AI tracker identifies every meal",
+        theme: 'light',
+        type: 'scanner_comparison',
+        comparison: {
+            left: { title: 'Traditional Method:', subtitle: 'Only a limited number of foods can be recognized', icon: <FileText className="w-10 h-10 text-white" /> },
+            right: { title: 'Fastic AI Scanner:', subtitle: 'Accurately identifies all food components', icon: <Scan className="w-12 h-12 text-[#00ca86]" /> }
+        }
+    },
+    {
+        id: 'calorie_knowledge',
+        question: 'Do you know the relationship between calories and weight?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'yes', label: 'Yes, calorie intake affects body weight', icon: <ThumbsUp className="w-6 h-6 text-blue-400" /> },
+            { id: 'somewhat', label: 'Somewhat, calories impact weight.', icon: <Activity className="w-6 h-6 text-orange-400" /> },
+            { id: 'no', label: "No, I'm not sure how calories influence weight.", icon: <XCircle className="w-6 h-6 text-rose-400" /> },
+        ]
+    },
+    {
+        id: 'tech_intro',
+        question: 'Fastic uses the latest technologies to provide you with the best weight loss experience',
+        theme: 'light',
+        type: 'tech_intro'
+    },
+    {
+        id: 'transformation_guarantee',
+        question: 'With the revolutionary AI tracker, your success is guaranteed!',
+        theme: 'light',
+        type: 'transformation'
+    },
+    {
+        id: 'eating_habits_intro',
+        question: "Let's learn more about your eating habits",
+        subtitle: 'Making smart food decisions is key to sustainable weight loss.',
+        theme: 'light',
+        type: 'summary'
     }
 ];
 
@@ -616,12 +691,12 @@ export default function QuizPage() {
                             </div>
                         </div>
                     ) : currentStepData.type === 'summary' ? (
-                        <div className="flex flex-col items-center space-y-8 py-4 animate-fade-in">
+                        <div className="flex flex-col items-center space-y-8 py-4 animate-fade-in text-center">
                             <div className="relative w-72 h-72 md:w-80 md:h-80">
                                 <div className="absolute inset-0 bg-[#e8f5e9] rounded-full scale-95 opacity-50" />
                                 <div className="relative w-full h-full flex items-center justify-center p-4">
                                     <Image
-                                        src="/success_cat.png"
+                                        src={currentStepData.id === 'ai_tracker_intro' || currentStepData.id === 'eating_habits_intro' ? "/bear_with_flag.png" : "/success_cat.png"}
                                         alt="Success motivation"
                                         width={400}
                                         height={400}
@@ -630,12 +705,18 @@ export default function QuizPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-4 max-w-md text-center">
+                            <div className="space-y-4 max-w-md">
                                 <h1 className="text-2xl md:text-3xl font-black text-slate-800 leading-tight">
-                                    Losing <span className="text-[#00ca86]">{Math.max(0, Number(answers['weight']) - Number(answers['goal_weight'])) || 0} {weightUnit}</span> will bring you health benefits. You can do it!
+                                    {(currentStepData.id === 'ai_tracker_intro' || currentStepData.id === 'eating_habits_intro') ? (
+                                        <span className="text-[#ff8a65]">{currentStepData.question}</span>
+                                    ) : (
+                                        <>
+                                            Losing <span className="text-[#00ca86]">{Math.max(0, Number(answers['weight']) - Number(answers['goal_weight'])) || 0} {weightUnit}</span> will bring you health benefits. You can do it!
+                                        </>
+                                    )}
                                 </h1>
                                 <p className="text-slate-500 font-medium text-base md:text-lg leading-relaxed px-4">
-                                    89% of users see obvious results with FastingPro's plan, and find it easy to maintain their progress.
+                                    {currentStepData.subtitle || "89% of users see obvious results with FastingPro's plan, and find it easy to maintain their progress."}
                                 </p>
                             </div>
 
@@ -650,7 +731,7 @@ export default function QuizPage() {
                                     }}
                                     className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
                                 >
-                                    Got it
+                                    {currentStepData.id === 'ai_tracker_intro' || currentStepData.id === 'eating_habits_intro' ? "Next" : "Got it"}
                                 </button>
                             </div>
                         </div>
@@ -845,6 +926,129 @@ export default function QuizPage() {
                                     className="object-cover"
                                 />
                             </div>
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        if (currentStep < steps.length - 1) {
+                                            setCurrentStep(currentStep + 1);
+                                        } else {
+                                            router.push('/register');
+                                        }
+                                    }}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'scanner_comparison' ? (
+                        <div className="flex flex-col items-center space-y-12 animate-fade-in py-8">
+                            <h3 className="text-3xl font-black text-slate-800 leading-tight px-4 text-center">
+                                {currentStepData.question}
+                            </h3>
+
+                            <div className="relative w-full max-w-md h-[400px] mt-8">
+                                {/* Left Card (Traditional) */}
+                                <div className="absolute top-0 left-0 w-[70%] bg-[#8c91b5] rounded-[2rem] p-6 shadow-xl space-y-4 z-10 translate-x-4 translate-y-4">
+                                    <p className="text-white/80 font-bold text-sm uppercase tracking-wider">{currentStepData.comparison?.left.title}</p>
+                                    <p className="text-white text-xl font-black leading-tight">{currentStepData.comparison?.left.subtitle}</p>
+                                    <div className="relative w-24 h-24 mx-auto opacity-30 mt-8 flex items-center justify-center">
+                                        {currentStepData.comparison?.left.icon}
+                                    </div>
+                                </div>
+
+                                {/* Right Card (AI) */}
+                                <div className="absolute top-12 right-4 w-[75%] bg-[#ffb71b] rounded-[2.5rem] p-8 shadow-2xl space-y-4 z-20 border-4 border-white">
+                                    <div className="absolute -top-4 -right-4 bg-white rounded-full p-1 shadow-lg">
+                                        <div className="bg-[#00ca86] rounded-full p-2">
+                                            <Check className="w-6 h-6 text-white stroke-[4]" />
+                                        </div>
+                                    </div>
+                                    <p className="text-slate-800 font-bold text-sm uppercase tracking-wider">{currentStepData.comparison?.right.title}</p>
+                                    <p className="text-slate-900 text-2xl font-black leading-tight">{currentStepData.comparison?.right.subtitle}</p>
+                                    <div className="relative w-32 h-32 mx-auto mt-4 flex items-center justify-center overflow-hidden">
+                                        <div className={`relative bg-white rounded-2xl p-2 border-2 border-slate-800 flex flex-col items-center justify-center h-28 w-full rotate-2 shadow-inner`}>
+                                            <div className="absolute top-0 left-0 w-full h-full opacity-10 flex items-center justify-center">
+                                                <Timer className="w-20 h-20" />
+                                            </div>
+                                            {currentStepData.comparison?.right.icon}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        if (currentStep < steps.length - 1) {
+                                            setCurrentStep(currentStep + 1);
+                                        } else {
+                                            router.push('/register');
+                                        }
+                                    }}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'tech_intro' ? (
+                        <div className="flex flex-col items-center space-y-12 animate-fade-in py-8">
+                            <h3 className="text-3xl font-black text-slate-800 leading-tight px-4 text-center">
+                                {currentStepData.question}
+                            </h3>
+
+                            <div className="relative w-full max-w-md h-[400px] flex items-center justify-center">
+                                {/* Background Decorative Orb */}
+                                <div className="absolute w-64 h-64 bg-[#fff3d6] rounded-full opacity-50 blur-2xl"></div>
+
+                                {/* Central Core */}
+                                <div className="relative w-48 h-48 bg-[#fff3d6] rounded-full flex items-center justify-center border-4 border-white shadow-inner">
+                                    <div className="absolute w-full h-full rounded-full border-2 border-dashed border-[#ffb71b]/30 animate-spin-slow"></div>
+                                    <div className="relative w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                        <div className="w-12 h-12 bg-[#00ca86] rounded-full flex items-center justify-center">
+                                            <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                                <div className="w-3 h-3 bg-[#00ca86] rounded-full"></div>
+                                            </div>
+                                        </div>
+                                        {/* Circuit Lines */}
+                                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-0.5 h-8 bg-[#ffb71b]"></div>
+                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-0.5 h-8 bg-[#ffb71b]"></div>
+                                        <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-0.5 w-8 bg-[#ffb71b]"></div>
+                                        <div className="absolute -right-8 top-1/2 -translate-y-1/2 h-0.5 w-8 bg-[#ffb71b]"></div>
+                                    </div>
+                                </div>
+
+                                {/* Tech Nodes */}
+                                <div className="absolute top-4 left-4 flex flex-col items-center group">
+                                    <div className="w-16 h-16 bg-[#2ed199] rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                        <Scan className="w-8 h-8 text-white" />
+                                    </div>
+                                    <span className="mt-2 text-xs font-black text-slate-700 uppercase tracking-tighter">Image Recognition</span>
+                                </div>
+
+                                <div className="absolute top-4 right-4 flex flex-col items-center group">
+                                    <div className="w-16 h-16 bg-[#fde1f1] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                        <Brain className="w-8 h-8 text-[#ff6cb7]" />
+                                    </div>
+                                    <span className="mt-2 text-xs font-black text-slate-700 uppercase tracking-tighter">Machine Learning</span>
+                                </div>
+
+                                <div className="absolute bottom-4 left-4 flex flex-col items-center group">
+                                    <div className="w-16 h-16 bg-[#ff8a65] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                        <BarChart3 className="w-8 h-8 text-white" />
+                                    </div>
+                                    <span className="mt-2 text-xs font-black text-slate-700 uppercase tracking-tighter">Analytics</span>
+                                </div>
+
+                                <div className="absolute bottom-4 right-4 flex flex-col items-center group">
+                                    <div className="w-16 h-16 bg-[#ced8ff] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                        <Cpu className="w-8 h-8 text-[#5a76ff]" />
+                                    </div>
+                                    <span className="mt-2 text-xs font-black text-slate-700 uppercase tracking-tighter">AI</span>
+                                </div>
+                            </div>
+
                             <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
                                 <button
                                     onClick={() => {
