@@ -163,71 +163,82 @@ export default function QuizPage() {
         );
     }
 
+    const currentStepData = steps[currentStep];
+    const isLight = currentStepData.theme === 'light';
     const quizProgress = ((currentStep + 1) / steps.length) * 100;
 
     return (
-        <main className="min-h-screen bg-[#00ca86] text-white selection:bg-white/20">
+        <main className={`min-h-screen transition-colors duration-500 ${isLight ? 'bg-slate-50 text-slate-900' : 'bg-[#00ca86] text-white'} selection:bg-orange-500/20`}>
             <header className="h-16 flex items-center px-6 max-w-2xl mx-auto w-full">
                 {currentStep > 0 ? (
                     <button
                         onClick={() => setCurrentStep(currentStep - 1)}
-                        className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors"
+                        className={`p-2 -ml-2 rounded-full transition-colors ${isLight ? 'hover:bg-slate-200 text-slate-600' : 'hover:bg-white/10 text-white'}`}
                     >
                         <ChevronLeft className="w-6 h-6" />
                     </button>
                 ) : (
                     <button
                         onClick={() => setView('intro')}
-                        className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors"
+                        className={`p-2 -ml-2 rounded-full transition-colors ${isLight ? 'hover:bg-slate-200 text-slate-600' : 'hover:bg-white/10 text-white'}`}
                     >
                         <ChevronLeft className="w-6 h-6" />
                     </button>
                 )}
                 <div className="flex-1 flex justify-center mr-6">
                     <div className="flex items-center gap-1">
-                        <Timer className="w-5 h-5" />
-                        <span className="font-bold tracking-tight">FastingPro</span>
+                        <Timer className={`w-5 h-5 ${isLight ? 'text-[#00ca86]' : 'text-white'}`} />
+                        <span className={`font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>FastingPro</span>
                     </div>
                 </div>
             </header>
 
-            <div className="h-2 bg-black/10 w-full font-bold">
+            <div className={`h-2 w-full font-bold ${isLight ? 'bg-slate-200' : 'bg-black/10'}`}>
                 <div
-                    className="h-full bg-white transition-all duration-500 ease-out"
+                    className={`h-full transition-all duration-500 ease-out ${isLight ? 'bg-[#00ca86]' : 'bg-white'}`}
                     style={{ width: `${quizProgress}%` }}
                 />
             </div>
 
-            <div className="max-w-xl mx-auto px-6 py-12 md:py-20 animate-fade-in">
+            <div className="max-w-xl mx-auto px-6 py-12 md:py-20 animate-fade-in text-center md:text-left">
                 <div className="space-y-8">
-                    <div className="space-y-2">
-                        <span className="text-white/70 text-sm font-bold uppercase tracking-widest">
-                            Step {currentStep + 1} of {steps.length}
-                        </span>
-                        <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">
-                            {steps[currentStep].question}
-                        </h1>
+                    <div className="space-y-4">
+                        {currentStepData.sectionTitle && (
+                            <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight animate-slide-up">
+                                {currentStepData.sectionTitle}
+                            </h2>
+                        )}
+                        <div className="space-y-1">
+                            {!currentStepData.sectionTitle && (
+                                <span className={`text-sm font-bold uppercase tracking-widest ${isLight ? 'text-slate-400' : 'text-white/70'}`}>
+                                    Step {currentStep + 1} of {steps.length}
+                                </span>
+                            )}
+                            <h1 className={`text-3xl md:text-4xl font-extrabold leading-tight ${isLight && currentStepData.sectionTitle ? 'text-slate-500 text-xl md:text-2xl font-medium' : 'text-inherit'}`}>
+                                {currentStepData.question}
+                            </h1>
+                        </div>
                     </div>
 
                     <div className="grid gap-4">
-                        {steps[currentStep].options.map((option) => (
+                        {currentStepData.options.map((option) => (
                             <button
                                 key={option.id}
                                 onClick={() => handleOptionSelect(option.id)}
                                 className={`
                   group relative flex items-center gap-4 p-6 rounded-3xl text-left transition-all duration-200
-                  ${answers[steps[currentStep].id] === option.id
-                                        ? 'bg-white text-[#00ca86] shadow-xl scale-[1.02]'
-                                        : 'bg-white/10 hover:bg-white/20 text-white'}
+                  ${answers[currentStepData.id] === option.id
+                                        ? (isLight ? 'bg-white text-[#00ca86] ring-2 ring-[#00ca86] shadow-lg' : 'bg-white text-[#00ca86] shadow-xl scale-[1.02]')
+                                        : (isLight ? 'bg-white hover:bg-slate-50 text-slate-700 shadow-sm border border-slate-100' : 'bg-white/10 hover:bg-white/20 text-white')}
                 `}
                             >
-                                {/* @ts-ignore */}
                                 {option.icon && (
                                     <div className={`
                     p-3 rounded-2xl transition-colors
-                    ${answers[steps[currentStep].id] === option.id ? 'bg-[#00ca86]/10' : 'bg-white/10'}
+                    ${answers[currentStepData.id] === option.id
+                                            ? (isLight ? 'bg-[#00ca86]/10' : 'bg-[#00ca86]/10')
+                                            : (isLight ? 'bg-slate-100' : 'bg-white/10')}
                   `}>
-                                        {/* @ts-ignore */}
                                         {option.icon}
                                     </div>
                                 )}
@@ -235,17 +246,19 @@ export default function QuizPage() {
                                 <div className="flex-1">
                                     <div className="font-bold text-lg">{option.label}</div>
                                     {option.description && (
-                                        <div className="text-sm opacity-80 mt-0.5">{option.description}</div>
+                                        <div className={`text-sm mt-0.5 ${isLight ? 'text-slate-500' : 'text-white/80'}`}>
+                                            {option.description}
+                                        </div>
                                     )}
                                 </div>
 
                                 <div className={`
                   w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
-                  ${answers[steps[currentStep].id] === option.id
-                                        ? 'border-[#00ca86] bg-[#00ca86]'
-                                        : 'border-white/20 group-hover:border-white/40'}
+                  ${answers[currentStepData.id] === option.id
+                                        ? (isLight ? 'border-[#00ca86] bg-[#00ca86]' : 'border-[#00ca86] bg-[#00ca86]')
+                                        : (isLight ? 'border-slate-200 bg-slate-100' : 'border-white/20 group-hover:border-white/40')}
                 `}>
-                                    {answers[steps[currentStep].id] === option.id && (
+                                    {answers[currentStepData.id] === option.id && (
                                         <Check className="w-4 h-4 text-white" strokeWidth={4} />
                                     )}
                                 </div>
