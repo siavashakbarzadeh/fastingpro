@@ -174,6 +174,12 @@ export default function Home() {
   const [view, setView] = useState<'intro' | 'quiz'>('quiz'); // Direct to quiz
 
   const handleNext = () => {
+    // If user selected 'get_pregnant' in the goal step, redirect to /get-pregnant
+    if (steps[currentStep].id === 'goal' && (answers['goal'] || []).includes('get_pregnant')) {
+      router.push('/get-pregnant');
+      return;
+    }
+
     let nextStep = currentStep + 1;
 
     // Conditional Logic for Women's Health
