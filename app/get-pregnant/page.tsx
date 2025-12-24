@@ -28,6 +28,15 @@ const steps: Step[] = [
             { id: 'lonely', label: 'Lonely' },
         ]
     },
+    {
+        id: 'previous_pregnancy',
+        question: 'Have you ever been pregnant before?',
+        options: [
+            { id: 'yes', label: 'Yes' },
+            { id: 'no', label: 'No' },
+            { id: 'prefer_not', label: 'Prefer not to answer' },
+        ]
+    },
 ];
 
 export default function GetPregnantPage() {
