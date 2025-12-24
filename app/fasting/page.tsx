@@ -2187,6 +2187,39 @@ export default function FastingSetupPage() {
                                 </button>
                             </div>
                         </div>
+                    ) : currentStepData.type === 'motivation_intro' ? (
+                        <div className="flex flex-col items-center space-y-8 py-4 animate-fade-in text-center">
+                            <div className="relative w-72 h-72 md:w-80 md:h-80">
+                                <div className="absolute inset-0 bg-[#e8f5e9] rounded-full scale-95 opacity-50" />
+                                <div className="relative w-full h-full flex items-center justify-center p-4">
+                                    <Image
+                                        src="/success_cat.png"
+                                        alt="Motivation Cat"
+                                        width={400}
+                                        height={400}
+                                        className="object-contain"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 max-w-md">
+                                <h1 className="text-2xl md:text-3xl font-black text-[#ff8a65] leading-tight">
+                                    {currentStepData.question}
+                                </h1>
+                                <p className="text-slate-500 font-medium text-base md:text-lg leading-relaxed px-4">
+                                    {currentStepData.subtitle}
+                                </p>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     ) : currentStepData.type === 'feature_highlight' ? (
                         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
                             <h3 className="text-3xl font-black text-slate-800 text-center px-4">
