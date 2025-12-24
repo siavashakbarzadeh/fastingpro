@@ -17,8 +17,11 @@ interface Step {
     id: string;
     sectionTitle?: string;
     question: string;
-    options: Option[];
+    subtitle?: string;
+    options?: Option[];
     theme?: 'green' | 'light';
+    type?: 'select' | 'input';
+    placeholder?: string;
 }
 
 const steps: Step[] = [
@@ -58,11 +61,20 @@ const steps: Step[] = [
         sectionTitle: "Let's Create Your Body Profile",
         question: 'Select your gender:',
         theme: 'light',
+        type: 'select',
         options: [
             { id: 'female', label: 'Female', icon: <User className="w-6 h-6 text-pink-500" /> },
             { id: 'male', label: 'Male', icon: <User className="w-6 h-6 text-blue-500" /> },
             { id: 'divers', label: 'Divers', icon: <User className="w-6 h-6 text-purple-500" /> },
         ]
+    },
+    {
+        id: 'age',
+        question: 'How old are you?',
+        subtitle: 'We ask this to establish if FastingPro is safe for you',
+        theme: 'light',
+        type: 'input',
+        placeholder: 'I am ... years old'
     }
 ];
 
@@ -93,8 +105,8 @@ export default function QuizPage() {
         }
     }, [view]);
 
-    const handleOptionSelect = (optionId: string) => {
-        const newAnswers = { ...answers, [steps[currentStep].id]: optionId };
+    const handleOptionSelect = (optionId: string | number) => {
+        const newAnswers = { ...answers, [currentStepData.id]: String(optionId) };
         setAnswers(newAnswers);
 
         if (currentStep < steps.length - 1) {
@@ -207,62 +219,114 @@ export default function QuizPage() {
                             </h2>
                         )}
                         <div className="space-y-1">
-                            {!currentStepData.sectionTitle && (
+                            {!currentStepData.sectionTitle && !currentStepData.subtitle && (
                                 <span className={`text-sm font-bold uppercase tracking-widest ${isLight ? 'text-slate-400' : 'text-white/70'}`}>
                                     Step {currentStep + 1} of {steps.length}
                                 </span>
                             )}
-                            <h1 className={`text-3xl md:text-4xl font-extrabold leading-tight ${isLight && currentStepData.sectionTitle ? 'text-slate-500 text-xl md:text-2xl font-medium' : 'text-inherit'}`}>
+                            <h1 className={`text-3xl md:text-4xl font-extrabold leading-tight ${isLight && (currentStepData.sectionTitle || currentStepData.subtitle) ? 'text-slate-900' : 'text-inherit'}`}>
                                 {currentStepData.question}
                             </h1>
+                            {currentStepData.subtitle && (
+                                <p className="text-slate-500 font-medium text-lg mt-2">
+                                    {currentStepData.subtitle}
+                                </p>
+                            )}
                         </div>
                     </div>
 
-                    <div className="grid gap-4">
-                        {currentStepData.options.map((option) => (
-                            <button
-                                key={option.id}
-                                onClick={() => handleOptionSelect(option.id)}
-                                className={`
+                    {currentStepData.type === 'input' ? (
+                        <div className="space-y-12">
+                            <div className="relative">
+                                <input
+                                    type="number"
+                                    placeholder={currentStepData.placeholder}
+                                    value={answers[currentStepData.id] || ''}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...answers, [currentStepData.id]: e.target.value })}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && answers[currentStepData.id]) {
+                                            if (currentStep < steps.length - 1) {
+                                                setCurrentStep(currentStep + 1);
+                                            } else {
+                                                router.push('/register');
+                                            }
+                                        }
+                                    }}
+                                    className="w-full bg-white border-2 border-slate-100 rounded-2xl p-6 text-xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#00ca86] transition-all placeholder:text-slate-300"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        if (answers[currentStepData.id]) {
+                                            if (currentStep < steps.length - 1) {
+                                                setCurrentStep(currentStep + 1);
+                                            } else {
+                                                router.push('/register');
+                                            }
+                                        }
+                                    }}
+                                    disabled={!answers[currentStepData.id] || answers[currentStepData.id].length === 0}
+                                    className={`
+                              w-full py-5 rounded-2xl text-xl font-black transition-all shadow-lg
+                              ${answers[currentStepData.id] && answers[currentStepData.id].length > 0
+                                            ? 'bg-[#00ca86] text-white hover:scale-[1.02] active:scale-[0.98]'
+                                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'}
+                            `}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid gap-4">
+                            {currentStepData.options?.map((option) => (
+                                <button
+                                    key={option.id}
+                                    onClick={() => handleOptionSelect(option.id)}
+                                    className={`
                   group relative flex items-center gap-4 p-6 rounded-3xl text-left transition-all duration-200
                   ${answers[currentStepData.id] === option.id
-                                        ? (isLight ? 'bg-white text-[#00ca86] ring-2 ring-[#00ca86] shadow-lg' : 'bg-white text-[#00ca86] shadow-xl scale-[1.02]')
-                                        : (isLight ? 'bg-white hover:bg-slate-50 text-slate-700 shadow-sm border border-slate-100' : 'bg-white/10 hover:bg-white/20 text-white')}
+                                            ? (isLight ? 'bg-white text-[#00ca86] ring-2 ring-[#00ca86] shadow-lg' : 'bg-white text-[#00ca86] shadow-xl scale-[1.02]')
+                                            : (isLight ? 'bg-white hover:bg-slate-50 text-slate-700 shadow-sm border border-slate-100' : 'bg-white/10 hover:bg-white/20 text-white')}
                 `}
-                            >
-                                {option.icon && (
-                                    <div className={`
+                                >
+                                    {option.icon && (
+                                        <div className={`
                     p-3 rounded-2xl transition-colors
                     ${answers[currentStepData.id] === option.id
-                                            ? (isLight ? 'bg-[#00ca86]/10' : 'bg-[#00ca86]/10')
-                                            : (isLight ? 'bg-slate-100' : 'bg-white/10')}
+                                                ? (isLight ? 'bg-[#00ca86]/10' : 'bg-[#00ca86]/10')
+                                                : (isLight ? 'bg-slate-100' : 'bg-white/10')}
                   `}>
-                                        {option.icon}
-                                    </div>
-                                )}
-
-                                <div className="flex-1">
-                                    <div className="font-bold text-lg">{option.label}</div>
-                                    {option.description && (
-                                        <div className={`text-sm mt-0.5 ${isLight ? 'text-slate-500' : 'text-white/80'}`}>
-                                            {option.description}
+                                            {option.icon}
                                         </div>
                                     )}
-                                </div>
 
-                                <div className={`
+                                    <div className="flex-1">
+                                        <div className="font-bold text-lg">{option.label}</div>
+                                        {option.description && (
+                                            <div className={`text-sm mt-0.5 ${isLight ? 'text-slate-500' : 'text-white/80'}`}>
+                                                {option.description}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className={`
                   w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
                   ${answers[currentStepData.id] === option.id
-                                        ? (isLight ? 'border-[#00ca86] bg-[#00ca86]' : 'border-[#00ca86] bg-[#00ca86]')
-                                        : (isLight ? 'border-slate-200 bg-slate-100' : 'border-white/20 group-hover:border-white/40')}
+                                            ? (isLight ? 'border-[#00ca86] bg-[#00ca86]' : 'border-[#00ca86] bg-[#00ca86]')
+                                            : (isLight ? 'border-slate-200 bg-slate-100' : 'border-white/20 group-hover:border-white/40')}
                 `}>
-                                    {answers[currentStepData.id] === option.id && (
-                                        <Check className="w-4 h-4 text-white" strokeWidth={4} />
-                                    )}
-                                </div>
-                            </button>
-                        ))}
-                    </div>
+                                        {answers[currentStepData.id] === option.id && (
+                                            <Check className="w-4 h-4 text-white" strokeWidth={4} />
+                                        )}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </main>
