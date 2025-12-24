@@ -21,6 +21,8 @@ interface Step {
     options?: Option[];
     theme?: 'green' | 'light';
     type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro' | 'date_picker' | 'goal_chart' | 'weight_comparison_bar' | 'statement_relation' | 'social_proof' | 'feature_highlight' | 'processing_plan' | 'subscription_plan' | 'payment_method';
+    multiSelect?: boolean;
+    layout?: 'list' | 'grid';
     placeholder?: string;
     bg?: string;
     comparison?: {
@@ -33,13 +35,21 @@ interface Step {
 const steps: Step[] = [
     {
         id: 'goal',
-        question: 'What is your main goal?',
-        theme: 'green',
+        question: 'What can we help you do?',
+        subtitle: 'Select all goals that apply.',
+        theme: 'light',
+        type: 'select',
+        multiSelect: true,
+        layout: 'grid',
         options: [
-            { id: 'weight_goal', label: 'Lose weight', icon: <Target className="w-6 h-6" /> },
-            { id: 'health', label: 'Improve health', icon: <Heart className="w-6 h-6" /> },
-            { id: 'mind', label: 'Mental clarity', icon: <Brain className="w-6 h-6" /> },
-            { id: 'energy', label: 'More energy', icon: <Zap className="w-6 h-6" /> },
+            { id: 'get_pregnant', label: 'Get pregnant', icon: <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center text-3xl">🤰</div> },
+            { id: 'track_pregnancy', label: 'Track my pregnancy', icon: <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center text-3xl">👶</div> },
+            { id: 'track_period', label: 'Track my period', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">📅</div> },
+            { id: 'understand_body', label: 'Understand my body', icon: <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-3xl">🧠</div> },
+            { id: 'fasting', label: 'Fasting', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">⚖️</div> },
+            { id: 'enhance_sex_life', label: 'Enhance my sex life', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🔥</div> },
+            { id: 'decode_discharge', label: 'Decode my discharge', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🧪</div> },
+            { id: 'none', label: 'None of the above', icon: <div className="w-16 h-16 rounded-full bg-pink-50 flex items-center justify-center text-3xl">❤️</div> },
         ]
     },
     {
@@ -72,6 +82,22 @@ const steps: Step[] = [
             { id: 'female', label: 'Female', icon: <User className="w-6 h-6 text-pink-500" /> },
             { id: 'male', label: 'Male', icon: <User className="w-6 h-6 text-blue-500" /> },
             { id: 'divers', label: 'Divers', icon: <User className="w-6 h-6 text-purple-500" /> },
+        ]
+    },
+    {
+        id: 'women_health_goals',
+        question: "What's your goal?",
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'get_pregnant', label: 'Get pregnant', icon: <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-xl">🤰</div> },
+            { id: 'track_pregnancy', label: 'Track my pregnancy', icon: <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-xl">👶</div> },
+            { id: 'track_period', label: 'Track my period', icon: <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl">📅</div> },
+            { id: 'understand_body', label: 'Understand my body', icon: <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-xl">🧠</div> },
+            { id: 'lose_weight', label: 'Lose weight', icon: <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-xl">⚖️</div> },
+            { id: 'enhance_sex_life', label: 'Enhance my sex life', icon: <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-xl">🔥</div> },
+            { id: 'decode_discharge', label: 'Decode my discharge', icon: <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-xl">🧪</div> },
+            { id: 'none', label: 'None of the above', icon: <div className="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-xl">❤️</div> },
         ]
     },
     {
@@ -792,7 +818,7 @@ function SignalBars({ level }: { level: number }) {
     );
 }
 
-export default function QuizPage() {
+export default function FastingSetupPage() {
     const router = useRouter();
     const [view, setView] = useState<'intro' | 'quiz'>('intro');
     const [loadingProgress, setLoadingProgress] = useState(0);
@@ -865,16 +891,39 @@ export default function QuizPage() {
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
+            const nextStepData = steps[currentStep + 1];
+
+            // Branching logic for Women's Health
+            if (nextStepData.id === 'women_health_goals' && answers['gender'] !== 'female') {
+                setCurrentStep(currentStep + 2); // Skip women_health_goals
+                return;
+            }
+
             setCurrentStep(currentStep + 1);
         } else {
             router.push('/register');
         }
     };
 
-    const handleOptionSelect = (optionId: string | number) => {
-        const newAnswers = { ...answers, [currentStepData.id]: String(optionId) };
-        setAnswers(newAnswers);
-        handleNext();
+    const handleOptionSelect = (optionId: string) => {
+        const step = steps[currentStep];
+        if (step.multiSelect) {
+            const currentAnswers = answers[step.id] || [];
+            if (currentAnswers.includes(optionId)) {
+                setAnswers({
+                    ...answers,
+                    [step.id]: currentAnswers.filter((id: string) => id !== optionId)
+                });
+            } else {
+                setAnswers({
+                    ...answers,
+                    [step.id]: [...currentAnswers, optionId]
+                });
+            }
+        } else {
+            setAnswers({ ...answers, [step.id]: optionId });
+            handleNext();
+        }
     };
 
     if (view === 'intro') {
@@ -943,7 +992,13 @@ export default function QuizPage() {
             <header className="h-16 flex items-center px-6 max-w-2xl mx-auto w-full">
                 {currentStep > 0 ? (
                     <button
-                        onClick={() => setCurrentStep(currentStep - 1)}
+                        onClick={() => {
+                            if (currentStep > 0 && steps[currentStep].id === 'age' && answers['gender'] !== 'female') {
+                                setCurrentStep(currentStep - 2); // Skip back past women_health_goals
+                            } else {
+                                setCurrentStep(currentStep - 1);
+                            }
+                        }}
                         className={`p-2 -ml-2 rounded-full transition-colors ${isLight ? 'hover:bg-slate-200 text-slate-600' : 'hover:bg-white/10 text-white'}`}
                     >
                         <ChevronLeft className="w-6 h-6" />
@@ -1777,6 +1832,16 @@ export default function QuizPage() {
                             <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/50 border border-slate-50">
                                 <div className="text-center space-y-2 mb-8">
                                     <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">BMR (Basal Metabolic Rate)</p>
+                                    <div className="mb-8">
+                                        <h2 className="text-4xl font-extrabold text-gray-900 mb-2 leading-tight">
+                                            {currentStepData.question}
+                                        </h2>
+                                        {currentStepData.subtitle && (
+                                            <p className="text-xl text-gray-500 font-medium">
+                                                {currentStepData.subtitle}
+                                            </p>
+                                        )}
+                                    </div>
                                     <h4 className="text-4xl font-black text-slate-800">
                                         {(() => {
                                             const weight = parseFloat(answers['weight_current'] || '70');
