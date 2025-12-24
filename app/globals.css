@@ -11,4 +11,11 @@ body {
   color: rgb(var(--foreground));
   background: rgb(var(--background));
   min-height: 100vh;
+  antialiased;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 }
