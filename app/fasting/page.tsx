@@ -1439,8 +1439,17 @@ export default function FastingSetupPage() {
                                             <div>
                                                 <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Medical Conditions</p>
                                                 <p className="text-slate-800 text-lg font-black">
-                                                    {answers['medical_conditions'] === 'none' ? 'None' :
-                                                        answers['medical_conditions']?.replace('_', ' ').replace(/\b\w/g, (l: any) => l.toUpperCase()) || 'None'}
+                                                    {(() => {
+                                                        const condition = answers['medical_conditions'];
+                                                        if (Array.isArray(condition)) {
+                                                            return condition.length > 0
+                                                                ? condition.map(c => c.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())).join(', ')
+                                                                : 'None';
+                                                        }
+                                                        return condition === 'none' || !condition
+                                                            ? 'None'
+                                                            : condition.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+                                                    })()}
                                                 </p>
                                             </div>
                                         </div>
