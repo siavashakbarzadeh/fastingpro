@@ -20,7 +20,7 @@ interface Step {
     subtitle?: string;
     options?: Option[];
     theme?: 'green' | 'light';
-    type?: 'select' | 'input' | 'height';
+    type?: 'select' | 'input' | 'height' | 'weight' | 'summary';
     placeholder?: string;
 }
 
@@ -30,7 +30,7 @@ const steps: Step[] = [
         question: 'What is your main goal?',
         theme: 'green',
         options: [
-            { id: 'weight', label: 'Lose weight', icon: <Target className="w-6 h-6" /> },
+            { id: 'weight_goal', label: 'Lose weight', icon: <Target className="w-6 h-6" /> },
             { id: 'health', label: 'Improve health', icon: <Heart className="w-6 h-6" /> },
             { id: 'mind', label: 'Mental clarity', icon: <Brain className="w-6 h-6" /> },
             { id: 'energy', label: 'More energy', icon: <Zap className="w-6 h-6" /> },
@@ -82,6 +82,26 @@ const steps: Step[] = [
         subtitle: 'Height is needed to determine a safe weight loss rate.',
         theme: 'light',
         type: 'height'
+    },
+    {
+        id: 'weight',
+        question: 'What is your current weight?',
+        subtitle: 'Weight is needed to determine a safe weight loss rate.',
+        theme: 'light',
+        type: 'weight'
+    },
+    {
+        id: 'goal_weight',
+        question: "What's your goal weight?",
+        subtitle: 'A rough estimate will do - you can always change this later.',
+        theme: 'light',
+        type: 'weight'
+    },
+    {
+        id: 'encouragement',
+        question: '',
+        theme: 'light',
+        type: 'summary'
     }
 ];
 
@@ -91,7 +111,8 @@ export default function QuizPage() {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [currentStep, setCurrentStep] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
-    const [unit, setUnit] = useState<'ft' | 'cm'>('ft');
+    const [heightUnit, setHeightUnit] = useState<'ft' | 'cm'>('ft');
+    const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('kg');
 
     const currentStepData = steps[currentStep];
     const isLight = currentStepData.theme === 'light';
@@ -248,14 +269,14 @@ export default function QuizPage() {
                             <div className="flex justify-center">
                                 <div className="inline-flex bg-slate-100 p-1 rounded-full">
                                     <button
-                                        onClick={() => setUnit('ft')}
-                                        className={`px-12 py-3 rounded-full font-black transition-all ${unit === 'ft' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}
+                                        onClick={() => setHeightUnit('ft')}
+                                        className={`px-12 py-3 rounded-full font-black transition-all ${heightUnit === 'ft' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}
                                     >
                                         ft
                                     </button>
                                     <button
-                                        onClick={() => setUnit('cm')}
-                                        className={`px-12 py-3 rounded-full font-black transition-all ${unit === 'cm' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}
+                                        onClick={() => setHeightUnit('cm')}
+                                        className={`px-12 py-3 rounded-full font-black transition-all ${heightUnit === 'cm' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}
                                     >
                                         cm
                                     </button>
@@ -263,7 +284,7 @@ export default function QuizPage() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                {unit === 'ft' ? (
+                                {heightUnit === 'ft' ? (
                                     <>
                                         <div className="relative group">
                                             <input
@@ -305,7 +326,7 @@ export default function QuizPage() {
                             <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
                                 <button
                                     onClick={() => {
-                                        const canProceed = unit === 'ft'
+                                        const canProceed = heightUnit === 'ft'
                                             ? answers['height_ft'] && answers['height_in']
                                             : answers['height_cm'];
 
@@ -317,10 +338,73 @@ export default function QuizPage() {
                                             }
                                         }
                                     }}
-                                    disabled={!(unit === 'ft' ? (answers['height_ft'] && answers['height_in']) : answers['height_cm'])}
+                                    disabled={!(heightUnit === 'ft' ? (answers['height_ft'] && answers['height_in']) : answers['height_cm'])}
                                     className={`
                               w-full py-5 rounded-2xl text-xl font-black transition-all shadow-lg
-                              ${(unit === 'ft' ? (answers['height_ft'] && answers['height_in']) : answers['height_cm'])
+                              ${(heightUnit === 'ft' ? (answers['height_ft'] && answers['height_in']) : answers['height_cm'])
+                                            ? 'bg-[#00ca86] text-white hover:scale-[1.02] active:scale-[0.98]'
+                                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'}
+                            `}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'weight' ? (
+                        <div className="space-y-10">
+                            <div className="flex justify-center">
+                                <div className="inline-flex bg-slate-100 p-1 rounded-full">
+                                    <button
+                                        onClick={() => setWeightUnit('lbs')}
+                                        className={`px-12 py-3 rounded-full font-black transition-all ${weightUnit === 'lbs' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}
+                                    >
+                                        lbs
+                                    </button>
+                                    <button
+                                        onClick={() => setWeightUnit('kg')}
+                                        className={`px-12 py-3 rounded-full font-black transition-all ${weightUnit === 'kg' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}
+                                    >
+                                        kg
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="relative">
+                                <input
+                                    type="number"
+                                    placeholder={currentStepData.id === 'weight' ? "Current weight" : "Target weight"}
+                                    value={answers[currentStepData.id] || ''}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...answers, [currentStepData.id]: e.target.value })}
+                                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                        if (e.key === 'Enter' && answers[currentStepData.id]) {
+                                            if (currentStep < steps.length - 1) {
+                                                setCurrentStep(currentStep + 1);
+                                            } else {
+                                                router.push('/register');
+                                            }
+                                        }
+                                    }}
+                                    className="w-full bg-white border-2 border-slate-100 rounded-2xl p-6 text-xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#00ca86] transition-all placeholder:text-slate-300 pr-12"
+                                    autoFocus
+                                />
+                                <span className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-slate-500 pointer-events-none text-xl">{weightUnit}</span>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        if (answers[currentStepData.id]) {
+                                            if (currentStep < steps.length - 1) {
+                                                setCurrentStep(currentStep + 1);
+                                            } else {
+                                                router.push('/register');
+                                            }
+                                        }
+                                    }}
+                                    disabled={!answers[currentStepData.id] || answers[currentStepData.id].length === 0}
+                                    className={`
+                              w-full py-5 rounded-2xl text-xl font-black transition-all shadow-lg
+                              ${answers[currentStepData.id] && answers[currentStepData.id].length > 0
                                             ? 'bg-[#00ca86] text-white hover:scale-[1.02] active:scale-[0.98]'
                                             : 'bg-slate-200 text-slate-400 cursor-not-allowed'}
                             `}
