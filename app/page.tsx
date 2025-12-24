@@ -279,6 +279,12 @@ export default function Home() {
         return;
       }
 
+      // If user selects 'get_pregnant' in the goal step, redirect to /get-pregnant
+      if (step.id === 'goal' && optionId === 'get_pregnant') {
+        router.push('/get-pregnant');
+        return;
+      }
+
       if (!step.showNextButton) {
         handleNext();
       }
