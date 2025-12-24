@@ -1858,6 +1858,39 @@ export default function QuizPage() {
                                 Next
                             </button>
                         </div>
+                    ) : currentStepData.type === 'motivation_intro' ? (
+                        <div className="flex flex-col items-center space-y-8 py-4 animate-fade-in text-center pb-20">
+                            <div className="relative w-72 h-72 md:w-80 md:h-80">
+                                <div className="absolute inset-0 bg-orange-50 rounded-full scale-110 opacity-50 blur-2xl" />
+                                <div className="relative w-full h-full flex items-center justify-center p-4">
+                                    <Image
+                                        src="/bear_with_flag.png"
+                                        alt="Motivation Intro"
+                                        width={400}
+                                        height={400}
+                                        className="object-contain drop-shadow-2xl"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 max-w-md px-6">
+                                <h1 className="text-3xl font-black text-[#ff8a65] leading-tight">
+                                    {currentStepData.question}
+                                </h1>
+                                <p className="text-slate-600 font-bold text-lg leading-relaxed">
+                                    {currentStepData.subtitle}
+                                </p>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     ) : currentStepData.type === 'date_picker' ? (
                         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="flex gap-4 justify-center">
