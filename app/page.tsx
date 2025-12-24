@@ -272,6 +272,13 @@ export default function Home() {
       }
     } else {
       setAnswers({ ...answers, [step.id]: optionId });
+
+      // If user selects 'fasting' in the goal step, redirect to /fasting
+      if (step.id === 'goal' && optionId === 'fasting') {
+        router.push('/fasting');
+        return;
+      }
+
       if (!step.showNextButton) {
         handleNext();
       }
