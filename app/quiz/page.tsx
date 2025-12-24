@@ -88,43 +88,39 @@ export default function QuizPage() {
                         {/* Replace with actual image path if possible, using a stylized placeholder for now */}
                         <div className="absolute inset-0 bg-orange-100 rounded-full scale-90 -z-10 opacity-50" />
                         <div className="relative w-full h-full flex items-center justify-center">
-                            {/* Visualizing the woman holding pants illustration */}
-                            <div className="w-full h-full bg-slate-100 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center border-4 border-white">
-                                <div className="text-center p-4">
-                                    {/* Using the generated image if possible, or a representative icon */}
-                                    <Image
-                                        src="/weight_loss_illustration_1766585691612.png"
-                                        alt="Weight loss success"
-                                        width={400}
-                                        height={400}
-                                        className="object-cover"
-                                    />
-                                </div>
+                            <div className="w-full h-full overflow-hidden flex items-center justify-center">
+                                <Image
+                                    src="/weight_loss.png"
+                                    alt="Weight loss success"
+                                    width={400}
+                                    height={400}
+                                    className="object-contain"
+                                />
                             </div>
                         </div>
                     </div>
 
-                    <div className="space-y-3">
-                        <h1 className="text-3xl md:text-4xl font-black text-orange-500 tracking-tight">
+                    <div className="space-y-4">
+                        <h1 className="text-3xl md:text-4xl font-black text-orange-500 tracking-tight leading-tight">
                             Get a new you in 12 weeks
                         </h1>
-                        <p className="text-slate-900 font-bold text-lg md:text-xl leading-snug">
+                        <p className="text-slate-900 font-bold text-lg md:text-xl leading-snug px-4">
                             See how fast you can hit your weight loss goals with FastingPro
                         </p>
                     </div>
 
-                    <div className="w-full space-y-4 pt-4">
-                        <div className="flex items-center justify-center gap-2 text-slate-500 font-medium tracking-wide">
+                    <div className="w-full space-y-6 pt-8">
+                        <div className="flex items-center justify-center gap-3 text-slate-500 font-semibold tracking-wide text-lg">
                             <span>Loading the quiz</span>
-                            <Loader2 className="w-5 h-5 animate-spin text-orange-400" />
+                            <div className="w-6 h-6 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
                         </div>
 
-                        <div className="relative w-full h-12 bg-slate-100 rounded-full overflow-hidden p-1">
+                        <div className="relative w-full h-14 bg-slate-100 rounded-full overflow-hidden">
                             <div
                                 className="h-full bg-orange-500 rounded-full transition-all duration-300 ease-out flex items-center justify-center"
                                 style={{ width: `${loadingProgress}%` }}
                             >
-                                <span className="text-white font-black text-sm drop-shadow-sm">
+                                <span className="text-white font-black text-lg drop-shadow-sm">
                                     {loadingProgress}%
                                 </span>
                             </div>
