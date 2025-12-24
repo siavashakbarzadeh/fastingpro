@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2 } from 'lucide-react';
+import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -20,7 +20,7 @@ interface Step {
     subtitle?: string;
     options?: Option[];
     theme?: 'green' | 'light';
-    type?: 'select' | 'input' | 'height' | 'weight' | 'summary';
+    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial';
     placeholder?: string;
 }
 
@@ -102,8 +102,96 @@ const steps: Step[] = [
         question: '',
         theme: 'light',
         type: 'summary'
+    },
+    {
+        id: 'activity_refined',
+        question: 'What is your current activity level?',
+        subtitle: 'This will help us determine how many extra calories you burn through exercise.',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'sedentary', label: "I'm not that active", icon: <SignalBars level={1} /> },
+            { id: 'occasional', label: "I'm active once in a while", icon: <SignalBars level={2} /> },
+            { id: 'active', label: "I'm active most days", icon: <SignalBars level={3} /> },
+            { id: 'athlete', label: "I'm an athlete", icon: <SignalBars level={4} /> },
+        ]
+    },
+    {
+        id: 'work_schedule',
+        question: "What's your work schedule?",
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'flexible', label: 'Flexible', icon: <GitBranch className="w-6 h-6 text-emerald-500" /> },
+            { id: 'nine_to_five', label: 'Nine to five', icon: <Clock className="w-6 h-6 text-orange-500" /> },
+            { id: 'shifts', label: 'Shifts', icon: <RefreshCcw className="w-6 h-6 text-blue-500" /> },
+            { id: 'strict', label: 'Strict working hours', icon: <Briefcase className="w-6 h-6 text-amber-700" /> },
+            { id: 'unemployed', label: 'Between jobs or unemployed', icon: <Search className="w-6 h-6 text-rose-500" /> },
+            { id: 'seasonal', label: 'Seasonal', icon: <Calendar className="w-6 h-6 text-orange-400" /> },
+        ]
+    },
+    {
+        id: 'knowledge_level',
+        question: 'How familiar are you with the topic of weight loss?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'beginner', label: "I'm new to weight loss", icon: <SignalBars level={1} /> },
+            { id: 'intermediate', label: 'I have some experience but still need guidance', icon: <SignalBars level={2} /> },
+            { id: 'advanced', label: 'I have rich experience', icon: <SignalBars level={3} /> },
+        ]
+    },
+    {
+        id: 'testimonial_james',
+        question: 'Fastic makes weight loss easy & effective',
+        theme: 'light',
+        type: 'testimonial'
+    },
+    {
+        id: 'fasting_history',
+        question: 'Have you ever tried intermittent fasting?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'yes_like', label: 'Yes, I like it', icon: <ThumbsUp className="w-6 h-6 text-blue-400" /> },
+            { id: 'yes_hard', label: "I tried it, but it wasn't for me", icon: <ThumbsDown className="w-6 h-6 text-emerald-500" /> },
+            { id: 'no_want', label: 'No, but I want to try it.', icon: <Hand className="w-6 h-6 text-orange-400" /> },
+            { id: 'no_interest', label: "No, I'm not interested.", icon: <ThumbsDown className="w-6 h-6 text-rose-400" /> },
+        ]
+    },
+    {
+        id: 'medical_conditions',
+        question: 'Do you have any of the following medical conditions?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'none', label: "I don't have any of these", icon: <ThumbsUp className="w-6 h-6 text-blue-300" /> },
+            { id: 'hypertension', label: 'Hypertension', icon: <Activity className="w-6 h-6 text-blue-500" /> },
+            { id: 'cholesterol', label: 'High cholesterol', icon: <Droplets className="w-6 h-6 text-orange-500" /> },
+            { id: 'obesity', label: 'Obesity', icon: <User className="w-6 h-6 text-blue-400" /> },
+            { id: 'diabetes', label: 'Diabetes', icon: <Droplet className="w-6 h-6 text-rose-500" /> },
+            { id: 'heart', label: 'Heart disease', icon: <HeartPulse className="w-6 h-6 text-rose-600" /> },
+            { id: 'cancer', label: 'Cancer', icon: <Zap className="w-6 h-6 text-orange-600" /> },
+            { id: 'lungs', label: 'Lung disease', icon: <Wind className="w-6 h-6 text-orange-400" /> },
+            { id: 'thyroid', label: 'Thyroid disease', icon: <UserCircle className="w-6 h-6 text-blue-300" /> },
+            { id: 'gastric', label: 'Gastric disease', icon: <Container className="w-6 h-6 text-orange-600" /> },
+        ]
     }
 ];
+
+function SignalBars({ level }: { level: number }) {
+    return (
+        <div className="flex items-end gap-1 h-6">
+            {[1, 2, 3, 4].map((i) => (
+                <div
+                    key={i}
+                    className={`w-1.5 rounded-full transition-colors ${i <= level ? 'bg-[#00ca86]' : 'bg-[#00ca86]/20'}`}
+                    style={{ height: `${25 * i}%` }}
+                />
+            ))}
+        </div>
+    );
+}
 
 export default function QuizPage() {
     const router = useRouter();
@@ -498,6 +586,47 @@ export default function QuizPage() {
                                     className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     Got it
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'testimonial' ? (
+                        <div className="flex flex-col items-center space-y-8 animate-fade-in pb-20">
+                            <div className="w-full bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-100">
+                                <div className="relative aspect-[4/3] w-full">
+                                    <Image
+                                        src="/success_story_james.png"
+                                        alt="James Success Story"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="p-8 space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="text-2xl font-black text-slate-800">James</h3>
+                                        <div className="flex gap-0.5">
+                                            {[1, 2, 3, 4, 5].map((s) => (
+                                                <Star key={s} className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <p className="text-slate-600 font-medium text-lg leading-relaxed text-left">
+                                        "I began this journey with another weightloss app but I didn't like it at all. Then a friend recommended Fastic. I've never felt better!"
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        if (currentStep < steps.length - 1) {
+                                            setCurrentStep(currentStep + 1);
+                                        } else {
+                                            router.push('/register');
+                                        }
+                                    }}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
                                 </button>
                             </div>
                         </div>
