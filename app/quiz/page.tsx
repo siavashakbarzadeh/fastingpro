@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan, Frown, Meh, Smile, Calculator, FileText, Cpu, BarChart3, Cookie, GlassWater, Moon, Pizza, Utensils, Wine, Hourglass, Users, HelpCircle, Apple, Salad, BookOpen, Scale, Fish, Leaf, Wheat, GraduationCap, Shirt, Magnet, Ruler, Flower2, Infinity, Palmtree, CakeSlice, IceCream } from 'lucide-react';
+import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan, Frown, Meh, Smile, Calculator, FileText, Cpu, BarChart3, Cookie, GlassWater, Moon, Pizza, Utensils, Wine, Hourglass, Users, HelpCircle, Apple, Salad, BookOpen, Scale, Fish, Leaf, Wheat, GraduationCap, Shirt, Magnet, Ruler, Flower2, Infinity, Palmtree, CakeSlice, IceCream, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -20,7 +20,7 @@ interface Step {
     subtitle?: string;
     options?: Option[];
     theme?: 'green' | 'light';
-    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro' | 'date_picker' | 'goal_chart' | 'weight_comparison_bar' | 'statement_relation' | 'social_proof' | 'feature_highlight';
+    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro' | 'date_picker' | 'goal_chart' | 'weight_comparison_bar' | 'statement_relation' | 'social_proof' | 'feature_highlight' | 'processing_plan' | 'subscription_plan' | 'payment_method';
     placeholder?: string;
     bg?: string;
     comparison?: {
@@ -757,6 +757,24 @@ const steps: Step[] = [
             { id: 'yes', label: 'Yes', icon: <Heart className="w-6 h-6 text-red-500" /> },
             { id: 'no', label: 'No', icon: <XCircle className="w-6 h-6 text-slate-400" /> },
         ]
+    },
+    {
+        id: 'processing_plan',
+        question: 'We are processing your personal plan...',
+        theme: 'light',
+        type: 'processing_plan',
+    },
+    {
+        id: 'subscription_plan',
+        question: 'Get Your Personal Fasting Plan',
+        theme: 'light',
+        type: 'subscription_plan',
+    },
+    {
+        id: 'payment_method',
+        question: 'Choose your payment method',
+        theme: 'light',
+        type: 'payment_method',
     }
 ];
 
@@ -783,6 +801,7 @@ export default function QuizPage() {
     const [heightUnit, setHeightUnit] = useState<'ft' | 'cm'>('ft');
     const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('kg');
     const [bmiValue, setBmiValue] = useState<number | null>(null);
+    const [processProgress, setProcessProgress] = useState(0);
 
     // Calculate BMI whenever height or weight changes
     useEffect(() => {
@@ -826,6 +845,23 @@ export default function QuizPage() {
             return () => clearInterval(interval);
         }
     }, [view]);
+
+    // Handle automated progress for processing_plan step
+    useEffect(() => {
+        if (currentStepData?.type === 'processing_plan') {
+            const interval = setInterval(() => {
+                setProcessProgress((prev) => {
+                    if (prev >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => handleNext(), 500);
+                        return 100;
+                    }
+                    return prev + 1;
+                });
+            }, 50);
+            return () => clearInterval(interval);
+        }
+    }, [currentStep, currentStepData?.type]);
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
@@ -2037,6 +2073,124 @@ export default function QuizPage() {
                                     Next
                                 </button>
                             </div>
+                        </div>
+                    ) : currentStepData.type === 'processing_plan' ? (
+                        <div className="flex flex-col items-center justify-center space-y-12 animate-fade-in py-20 min-h-[60vh]">
+                            <div className="relative w-48 h-48">
+                                <div className="absolute inset-0 border-8 border-slate-100 rounded-full" />
+                                <div className="absolute inset-0 border-8 border-[#00ca86] rounded-full border-t-transparent animate-spin" />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-3xl font-black text-slate-800 tracking-tighter">{processProgress}%</span>
+                                </div>
+                            </div>
+                            <div className="space-y-6 text-center max-w-sm">
+                                <h3 className="text-2xl font-black text-slate-800 leading-tight">
+                                    {processProgress < 30 ? "Analyzing your metabolic profile..." :
+                                        processProgress < 60 ? "Customizing your fasting schedule..." :
+                                            processProgress < 90 ? "Matching with successful user patterns..." :
+                                                "Finalizing your personal plan!"}
+                                </h3>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3 text-slate-500 font-bold">
+                                        <Check className={`w-5 h-5 ${processProgress > 25 ? 'text-[#00ca86]' : 'text-slate-200'}`} />
+                                        <span>Metabolic rate calculated</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-slate-500 font-bold">
+                                        <Check className={`w-5 h-5 ${processProgress > 55 ? 'text-[#00ca86]' : 'text-slate-200'}`} />
+                                        <span>Fast burning zones identified</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-slate-500 font-bold">
+                                        <Check className={`w-5 h-5 ${processProgress > 85 ? 'text-[#00ca86]' : 'text-slate-200'}`} />
+                                        <span>Meal plan generated</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'subscription_plan' ? (
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
+                            <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-[#00ca86]/20 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 bg-[#00ca86] text-white px-6 py-2 rounded-bl-3xl font-black text-sm uppercase tracking-wider">
+                                    Most Popular
+                                </div>
+
+                                <h4 className="text-2xl font-black text-slate-800 mb-6 font-display">12-Week Transformation</h4>
+
+                                <div className="space-y-4 mb-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                            <Check className="w-5 h-5 text-[#00ca86] stroke-[4]" />
+                                        </div>
+                                        <span className="font-bold text-slate-700 text-lg">Personal AI Coach</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                            <Check className="w-5 h-5 text-[#00ca86] stroke-[4]" />
+                                        </div>
+                                        <span className="font-bold text-slate-700 text-lg">Smart Fasting Timer</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                            <Check className="w-5 h-5 text-[#00ca86] stroke-[4]" />
+                                        </div>
+                                        <span className="font-bold text-slate-700 text-lg">Advanced Analytics</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-baseline gap-2 border-t pt-6">
+                                    <span className="text-4xl font-black text-slate-900">$29.99</span>
+                                    <span className="text-slate-400 font-bold">/ 3 months</span>
+                                </div>
+                                <p className="text-slate-400 text-sm font-bold mt-1">Just $2.50 per week</p>
+                            </div>
+
+                            <div className="bg-slate-100 rounded-[2rem] p-6 flex justify-between items-center opacity-70">
+                                <div>
+                                    <h5 className="font-black text-slate-800">1-Month Kickstart</h5>
+                                    <p className="text-slate-500 font-bold">$14.99 / month</p>
+                                </div>
+                                <div className="w-6 h-6 rounded-full border-2 border-slate-300" />
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-black text-xl shadow-lg shadow-emerald-200 hover:bg-[#00b578] transition-all"
+                                >
+                                    Continue to Payment
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'payment_method' ? (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <button
+                                onClick={() => router.push('/register')}
+                                className="w-full bg-[#f8f9ff] p-6 rounded-3xl border-2 border-slate-100 flex items-center justify-between hover:border-[#5a76ff] transition-all group"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center">
+                                        <span className="text-2xl font-black text-blue-600 italic">Pay</span>
+                                    </div>
+                                    <span className="font-black text-slate-800 text-lg">PayPal</span>
+                                </div>
+                                <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-blue-500" />
+                            </button>
+
+                            <button
+                                onClick={() => router.push('/register')}
+                                className="w-full bg-[#f8f9ff] p-6 rounded-3xl border-2 border-slate-100 flex items-center justify-between hover:border-slate-800 transition-all group"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center">
+                                        <CreditCard className="w-6 h-6 text-slate-800" />
+                                    </div>
+                                    <span className="font-black text-slate-800 text-lg">Credit Card</span>
+                                </div>
+                                <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-slate-800" />
+                            </button>
+
+                            <p className="text-slate-400 text-center text-sm font-bold px-8 mt-12">
+                                By continuing, you agree to our Terms of Service and Privacy Policy. Subscriptions automatically renew.
+                            </p>
                         </div>
                     ) : (
                         <div className="grid gap-4">
