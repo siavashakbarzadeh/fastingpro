@@ -18,8 +18,9 @@ interface Step {
   subtitle?: string;
   options?: Option[];
   theme?: 'green' | 'light';
-  type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro' | 'date_picker' | 'goal_chart' | 'weight_comparison_bar' | 'statement_relation' | 'social_proof' | 'feature_highlight' | 'processing_plan' | 'subscription_plan' | 'payment_method';
+  type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro' | 'date_picker' | 'goal_chart' | 'weight_comparison_bar' | 'statement_relation' | 'social_proof' | 'feature_highlight' | 'processing_plan' | 'subscription_plan' | 'payment_method' | 'intro_card';
   multiSelect?: boolean;
+  showNextButton?: boolean;
   layout?: 'list' | 'grid';
   placeholder?: string;
   bg?: string;
@@ -68,6 +69,54 @@ const steps: Step[] = [
       { id: 'track_period', label: 'Track my period', icon: <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-xl">📅</div> },
       { id: 'lose_weight', label: 'Lose weight', icon: <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-xl">⚖️</div> },
       { id: 'feel_better', label: 'Feel better', icon: <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-xl">❤️</div> },
+    ]
+  },
+  {
+    id: 'get_pregnant_intro',
+    type: 'intro_card',
+    question: '',
+    theme: 'light',
+  },
+  {
+    id: 'get_pregnant_feeling',
+    question: 'How are you feeling about getting pregnant?',
+    subtitle: 'The journey to pregnancy is different for everyone — so we’re checking in.',
+    type: 'select',
+    theme: 'light',
+    layout: 'list',
+    showNextButton: true,
+    options: [
+      { id: 'excited', label: 'Excited!', icon: null },
+      { id: 'confident', label: 'Confident', icon: null },
+      { id: 'anxious', label: 'Anxious', icon: null },
+      { id: 'lonely', label: 'Lonely', icon: null },
+    ]
+  },
+  {
+    id: 'get_pregnant_previous',
+    question: 'Have you ever been pregnant before?',
+    type: 'select',
+    theme: 'light',
+    layout: 'list',
+    showNextButton: true,
+    options: [
+      { id: 'yes', label: 'Yes', icon: null },
+      { id: 'no', label: 'No', icon: null },
+      { id: 'prefer_not', label: 'Prefer not to answer', icon: null },
+    ]
+  },
+  {
+    id: 'get_pregnant_children_goal',
+    question: 'How many children do you ultimately want to have?',
+    type: 'select',
+    theme: 'light',
+    layout: 'list',
+    showNextButton: true,
+    options: [
+      { id: '1', label: '1', icon: null },
+      { id: '2', label: '2', icon: null },
+      { id: '3', label: '3', icon: null },
+      { id: 'more_3', label: 'More than 3', icon: null },
     ]
   },
   {
@@ -134,6 +183,31 @@ export default function Home() {
       }
     }
 
+    if (steps[currentStep].id === 'women_health_goals') {
+      const isInterestedInPregnancy = answers['women_health_goals'] === 'pregnant' || (answers['goal'] || []).includes('get_pregnant');
+      if (!isInterestedInPregnancy) {
+        nextStep = steps.findIndex(s => s.id === 'tech_intro');
+      } else {
+        nextStep = steps.findIndex(s => s.id === 'get_pregnant_intro');
+      }
+    }
+
+    if (steps[currentStep].id === 'get_pregnant_intro') {
+      nextStep = steps.findIndex(s => s.id === 'get_pregnant_feeling');
+    }
+
+    if (steps[currentStep].id === 'get_pregnant_feeling') {
+      nextStep = steps.findIndex(s => s.id === 'get_pregnant_previous');
+    }
+
+    if (steps[currentStep].id === 'get_pregnant_previous') {
+      nextStep = steps.findIndex(s => s.id === 'get_pregnant_children_goal');
+    }
+
+    if (steps[currentStep].id === 'get_pregnant_children_goal') {
+      nextStep = steps.findIndex(s => s.id === 'tech_intro');
+    }
+
     if (nextStep < steps.length) {
       setCurrentStep(nextStep);
     } else {
@@ -149,6 +223,31 @@ export default function Home() {
       prevStep = steps.findIndex(s => s.id === 'gender');
     }
 
+    if (steps[currentStep].id === 'tech_intro' && answers['gender'] === 'female') {
+      const isInterestedInPregnancy = answers['women_health_goals'] === 'pregnant' || (answers['goal'] || []).includes('get_pregnant');
+      if (!isInterestedInPregnancy) {
+        prevStep = steps.findIndex(s => s.id === 'women_health_goals');
+      } else {
+        prevStep = steps.findIndex(s => s.id === 'get_pregnant_children_goal');
+      }
+    }
+
+    if (steps[currentStep].id === 'get_pregnant_children_goal') {
+      prevStep = steps.findIndex(s => s.id === 'get_pregnant_previous');
+    }
+
+    if (steps[currentStep].id === 'get_pregnant_previous') {
+      prevStep = steps.findIndex(s => s.id === 'get_pregnant_feeling');
+    }
+
+    if (steps[currentStep].id === 'get_pregnant_feeling') {
+      prevStep = steps.findIndex(s => s.id === 'get_pregnant_intro');
+    }
+
+    if (steps[currentStep].id === 'get_pregnant_intro') {
+      prevStep = steps.findIndex(s => s.id === 'women_health_goals');
+    }
+
     if (prevStep >= 0) {
       setCurrentStep(prevStep);
     } else {
@@ -159,7 +258,7 @@ export default function Home() {
   const handleOptionSelect = (optionId: string) => {
     const step = steps[currentStep];
     if (step.multiSelect) {
-      const currentAnswers: string[] = answers[step.id] || [];
+      const currentAnswers = (answers[step.id] || []) as string[];
       if (currentAnswers.includes(optionId)) {
         setAnswers({
           ...answers,
@@ -173,7 +272,9 @@ export default function Home() {
       }
     } else {
       setAnswers({ ...answers, [step.id]: optionId });
-      handleNext();
+      if (!step.showNextButton) {
+        handleNext();
+      }
     }
   };
 
@@ -196,6 +297,51 @@ export default function Home() {
     };
 
     switch (step.type) {
+      case 'intro_card':
+        return (
+          <div className="flex flex-col items-center text-center space-y-12 py-8 h-full">
+            <div className="relative w-full aspect-[4/3] flex items-center justify-center">
+              {/* Illustration Placeholder (Replacing with a modern SVG or CSS-based illustration) */}
+              <div className="relative w-full h-full">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative w-64 h-64">
+                    <div className="absolute inset-0 bg-pink-100 rounded-full opacity-50 blur-3xl animate-pulse" />
+                    <UserCircle className="w-full h-full text-pink-300" strokeWidth={0.5} />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center text-5xl">
+                      🤰
+                    </div>
+                  </div>
+                </div>
+                {/* Orbital elements based on the image */}
+                <div className="absolute top-[10%] right-[15%] w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center text-2xl animate-bounce">
+                  🧪
+                </div>
+                <div className="absolute bottom-[20%] right-[20%] w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center text-3xl animate-pulse delay-75">
+                  ⚖️
+                </div>
+                <div className="absolute top-[30%] left-[10%] w-14 h-14 bg-white rounded-xl shadow-lg flex items-center justify-center text-2xl">
+                  📅
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full space-y-4">
+              <button
+                onClick={handleNext}
+                className="w-full py-5 rounded-full bg-pink-500 text-white font-black text-xl hover:bg-pink-600 transition-all shadow-xl shadow-pink-200 active:scale-[0.98]"
+              >
+                Yes, fine by me
+              </button>
+              <button
+                onClick={handleNext}
+                className="w-full py-3 text-slate-900 font-black text-lg hover:underline transition-all"
+              >
+                No, thanks
+              </button>
+            </div>
+          </div>
+        );
+
       case 'tech_intro':
         return (
           <div className="text-center space-y-8 py-12">
@@ -294,17 +440,17 @@ export default function Home() {
               </div>
             </div>
 
-            {step.multiSelect && (
+            {(step.multiSelect || step.showNextButton) && (
               <div className="mt-8 pb-8">
                 <button
                   onClick={handleNext}
-                  disabled={!(answers[step.id]?.length > 0)}
-                  className={`w-full py-4 rounded-full text-lg font-bold transition-all ${(answers[step.id]?.length > 0)
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  disabled={step.multiSelect ? !(answers[step.id]?.length > 0) : !answers[step.id]}
+                  className={`w-full py-5 rounded-full text-xl font-black transition-all ${(step.multiSelect ? (answers[step.id]?.length > 0) : !!answers[step.id])
+                    ? 'bg-pink-500 text-white shadow-lg shadow-pink-200'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                     }`}
                 >
-                  Continue
+                  Next
                 </button>
               </div>
             )}

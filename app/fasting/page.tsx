@@ -908,7 +908,7 @@ export default function FastingSetupPage() {
     const handleOptionSelect = (optionId: string) => {
         const step = steps[currentStep];
         if (step.multiSelect) {
-            const currentAnswers: string[] = answers[step.id] || [];
+            const currentAnswers = (answers[step.id] || []) as string[];
             if (currentAnswers.includes(optionId)) {
                 setAnswers({
                     ...answers,
