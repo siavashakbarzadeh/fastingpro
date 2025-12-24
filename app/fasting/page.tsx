@@ -34,25 +34,6 @@ interface Step {
 
 const steps: Step[] = [
     {
-        id: 'goal',
-        question: 'What can we help you do?',
-        subtitle: 'Select all goals that apply.',
-        theme: 'light',
-        type: 'select',
-        multiSelect: true,
-        layout: 'grid',
-        options: [
-            { id: 'get_pregnant', label: 'Get pregnant', icon: <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center text-3xl">🤰</div> },
-            { id: 'track_pregnancy', label: 'Track my pregnancy', icon: <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center text-3xl">👶</div> },
-            { id: 'track_period', label: 'Track my period', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">📅</div> },
-            { id: 'understand_body', label: 'Understand my body', icon: <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-3xl">🧠</div> },
-            { id: 'fasting', label: 'Fasting', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">⚖️</div> },
-            { id: 'enhance_sex_life', label: 'Enhance my sex life', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🔥</div> },
-            { id: 'decode_discharge', label: 'Decode my discharge', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🧪</div> },
-            { id: 'none', label: 'None of the above', icon: <div className="w-16 h-16 rounded-full bg-pink-50 flex items-center justify-center text-3xl">❤️</div> },
-        ]
-    },
-    {
         id: 'experience',
         question: 'How much experience do you have with fasting?',
         theme: 'green',
@@ -82,22 +63,6 @@ const steps: Step[] = [
             { id: 'female', label: 'Female', icon: <User className="w-6 h-6 text-pink-500" /> },
             { id: 'male', label: 'Male', icon: <User className="w-6 h-6 text-blue-500" /> },
             { id: 'divers', label: 'Divers', icon: <User className="w-6 h-6 text-purple-500" /> },
-        ]
-    },
-    {
-        id: 'women_health_goals',
-        question: "What's your goal?",
-        theme: 'light',
-        type: 'select',
-        options: [
-            { id: 'get_pregnant', label: 'Get pregnant', icon: <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-xl">🤰</div> },
-            { id: 'track_pregnancy', label: 'Track my pregnancy', icon: <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-xl">👶</div> },
-            { id: 'track_period', label: 'Track my period', icon: <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl">📅</div> },
-            { id: 'understand_body', label: 'Understand my body', icon: <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-xl">🧠</div> },
-            { id: 'lose_weight', label: 'Lose weight', icon: <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-xl">⚖️</div> },
-            { id: 'enhance_sex_life', label: 'Enhance my sex life', icon: <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-xl">🔥</div> },
-            { id: 'decode_discharge', label: 'Decode my discharge', icon: <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-xl">🧪</div> },
-            { id: 'none', label: 'None of the above', icon: <div className="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-xl">❤️</div> },
         ]
     },
     {
