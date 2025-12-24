@@ -823,7 +823,7 @@ export default function FastingSetupPage() {
     const [view, setView] = useState<'intro' | 'quiz'>('intro');
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [currentStep, setCurrentStep] = useState(0);
-    const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [answers, setAnswers] = useState<Record<string, any>>({});
     const [heightUnit, setHeightUnit] = useState<'ft' | 'cm'>('ft');
     const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('kg');
     const [bmiValue, setBmiValue] = useState<number | null>(null);
