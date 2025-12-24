@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, Loader2 } from 'lucide-react';
+import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -15,14 +15,17 @@ interface Option {
 
 interface Step {
     id: string;
+    sectionTitle?: string;
     question: string;
     options: Option[];
+    theme?: 'green' | 'light';
 }
 
 const steps: Step[] = [
     {
         id: 'goal',
         question: 'What is your main goal?',
+        theme: 'green',
         options: [
             { id: 'weight', label: 'Lose weight', icon: <Target className="w-6 h-6" /> },
             { id: 'health', label: 'Improve health', icon: <Heart className="w-6 h-6" /> },
@@ -33,6 +36,7 @@ const steps: Step[] = [
     {
         id: 'experience',
         question: 'How much experience do you have with fasting?',
+        theme: 'green',
         options: [
             { id: 'beginner', label: 'Never tried it', icon: <div className="w-6 h-6 flex items-center justify-center font-bold">1</div> },
             { id: 'intermediate', label: 'I do it occasionally', icon: <div className="w-6 h-6 flex items-center justify-center font-bold">2</div> },
@@ -42,10 +46,22 @@ const steps: Step[] = [
     {
         id: 'activity',
         question: 'What is your activity level?',
+        theme: 'green',
         options: [
             { id: 'sedentary', label: 'Sedentary', description: 'Office job, little exercise' },
             { id: 'moderate', label: 'Moderate', description: 'Exercise 2-3 times a week' },
             { id: 'active', label: 'Active', description: 'Exercise daily or physical job' },
+        ]
+    },
+    {
+        id: 'gender',
+        sectionTitle: "Let's Create Your Body Profile",
+        question: 'Select your gender:',
+        theme: 'light',
+        options: [
+            { id: 'female', label: 'Female', icon: <User className="w-6 h-6 text-pink-500" /> },
+            { id: 'male', label: 'Male', icon: <User className="w-6 h-6 text-blue-500" /> },
+            { id: 'divers', label: 'Divers', icon: <User className="w-6 h-6 text-purple-500" /> },
         ]
     }
 ];
@@ -56,6 +72,9 @@ export default function QuizPage() {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [currentStep, setCurrentStep] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
+
+    const currentStepData = steps[currentStep];
+    const isLight = currentStepData.theme === 'light';
 
     // Simulate loading progress for the intro screen
     useEffect(() => {
