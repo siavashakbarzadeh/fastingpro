@@ -20,7 +20,7 @@ interface Step {
     subtitle?: string;
     options?: Option[];
     theme?: 'green' | 'light';
-    type?: 'select' | 'input';
+    type?: 'select' | 'input' | 'height';
     placeholder?: string;
 }
 
@@ -75,6 +75,13 @@ const steps: Step[] = [
         theme: 'light',
         type: 'input',
         placeholder: 'I am ... years old'
+    },
+    {
+        id: 'height',
+        question: 'How tall are you?',
+        subtitle: 'Height is needed to determine a safe weight loss rate.',
+        theme: 'light',
+        type: 'height'
     }
 ];
 
@@ -84,6 +91,7 @@ export default function QuizPage() {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [currentStep, setCurrentStep] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [unit, setUnit] = useState<'ft' | 'cm'>('ft');
 
     const currentStepData = steps[currentStep];
     const isLight = currentStepData.theme === 'light';
@@ -235,15 +243,105 @@ export default function QuizPage() {
                         </div>
                     </div>
 
-                    {currentStepData.type === 'input' ? (
+                    {currentStepData.type === 'height' ? (
+                        <div className="space-y-10">
+                            <div className="flex justify-center">
+                                <div className="inline-flex bg-slate-100 p-1 rounded-full">
+                                    <button
+                                        onClick={() => setUnit('ft')}
+                                        className={`px-12 py-3 rounded-full font-black transition-all ${unit === 'ft' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}
+                                    >
+                                        ft
+                                    </button>
+                                    <button
+                                        onClick={() => setUnit('cm')}
+                                        className={`px-12 py-3 rounded-full font-black transition-all ${unit === 'cm' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}
+                                    >
+                                        cm
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {unit === 'ft' ? (
+                                    <>
+                                        <div className="relative group">
+                                            <input
+                                                type="number"
+                                                placeholder="Your height"
+                                                value={answers['height_ft'] || ''}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...answers, 'height_ft': e.target.value })}
+                                                className="w-full bg-white border-2 border-slate-100 rounded-2xl p-6 text-xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#00ca86] transition-all placeholder:text-slate-300 pr-12"
+                                                autoFocus
+                                            />
+                                            <span className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-slate-400 pointer-events-none">ft</span>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="number"
+                                                placeholder="Your height"
+                                                value={answers['height_in'] || ''}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...answers, 'height_in': e.target.value })}
+                                                className="w-full bg-white border-2 border-slate-100 rounded-2xl p-6 text-xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#00ca86] transition-all placeholder:text-slate-300 pr-12"
+                                            />
+                                            <span className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-slate-400 pointer-events-none">in</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="relative col-span-2">
+                                        <input
+                                            type="number"
+                                            placeholder="Your height"
+                                            value={answers['height_cm'] || ''}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...answers, 'height_cm': e.target.value })}
+                                            className="w-full bg-white border-2 border-slate-100 rounded-2xl p-6 text-xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#00ca86] transition-all placeholder:text-slate-300 pr-12"
+                                            autoFocus
+                                        />
+                                        <span className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-slate-400 pointer-events-none">cm</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        const canProceed = unit === 'ft'
+                                            ? answers['height_ft'] && answers['height_in']
+                                            : answers['height_cm'];
+
+                                        if (canProceed) {
+                                            if (currentStep < steps.length - 1) {
+                                                setCurrentStep(currentStep + 1);
+                                            } else {
+                                                router.push('/register');
+                                            }
+                                        }
+                                    }}
+                                    disabled={!(unit === 'ft' ? (answers['height_ft'] && answers['height_in']) : answers['height_cm'])}
+                                    className={`
+                              w-full py-5 rounded-2xl text-xl font-black transition-all shadow-lg
+                              ${(unit === 'ft' ? (answers['height_ft'] && answers['height_in']) : answers['height_cm'])
+                                            ? 'bg-[#00ca86] text-white hover:scale-[1.02] active:scale-[0.98]'
+                                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'}
+                            `}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'input' ? (
                         <div className="space-y-12">
                             <div className="relative">
                                 <input
                                     type="number"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    min="1"
+                                    max="120"
                                     placeholder={currentStepData.placeholder}
                                     value={answers[currentStepData.id] || ''}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...answers, [currentStepData.id]: e.target.value })}
-                                    onKeyDown={(e) => {
+                                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                                         if (e.key === 'Enter' && answers[currentStepData.id]) {
                                             if (currentStep < steps.length - 1) {
                                                 setCurrentStep(currentStep + 1);
