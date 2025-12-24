@@ -876,7 +876,7 @@ export default function FastingSetupPage() {
     useEffect(() => {
         if (currentStepData?.type === 'processing_plan') {
             const interval = setInterval(() => {
-                setProcessProgress((prev) => {
+                setProcessProgress((prev: number) => {
                     if (prev >= 100) {
                         clearInterval(interval);
                         setTimeout(() => handleNext(), 500);
@@ -908,7 +908,7 @@ export default function FastingSetupPage() {
     const handleOptionSelect = (optionId: string) => {
         const step = steps[currentStep];
         if (step.multiSelect) {
-            const currentAnswers = answers[step.id] || [];
+            const currentAnswers: string[] = answers[step.id] || [];
             if (currentAnswers.includes(optionId)) {
                 setAnswers({
                     ...answers,

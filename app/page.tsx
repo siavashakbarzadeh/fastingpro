@@ -159,7 +159,7 @@ export default function Home() {
   const handleOptionSelect = (optionId: string) => {
     const step = steps[currentStep];
     if (step.multiSelect) {
-      const currentAnswers = answers[step.id] || [];
+      const currentAnswers: string[] = answers[step.id] || [];
       if (currentAnswers.includes(optionId)) {
         setAnswers({
           ...answers,
@@ -272,8 +272,8 @@ export default function Home() {
                     key={option.id}
                     onClick={() => handleOptionSelect(option.id)}
                     className={`relative p-6 rounded-2xl border-2 transition-all hover:scale-[1.02] flex flex-col items-center justify-center text-center gap-4 ${isSelected(option.id)
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-100 bg-white hover:border-gray-200'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-100 bg-white hover:border-gray-200'
                       } ${step.layout === 'grid' ? 'aspect-square' : 'w-full flex-row text-left'}`}
                   >
                     <div className={`absolute top-4 right-4 w-5 h-5 rounded-full border-2 ${isSelected(option.id) ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
@@ -300,8 +300,8 @@ export default function Home() {
                   onClick={handleNext}
                   disabled={!(answers[step.id]?.length > 0)}
                   className={`w-full py-4 rounded-full text-lg font-bold transition-all ${(answers[step.id]?.length > 0)
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                 >
                   Continue
