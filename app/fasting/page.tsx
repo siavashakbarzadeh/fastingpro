@@ -823,7 +823,7 @@ export default function FastingSetupPage() {
     const [view, setView] = useState<'intro' | 'quiz'>('intro');
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [currentStep, setCurrentStep] = useState(0);
-    const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
     const [heightUnit, setHeightUnit] = useState<'ft' | 'cm'>('ft');
     const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('kg');
     const [bmiValue, setBmiValue] = useState<number | null>(null);
@@ -908,7 +908,8 @@ export default function FastingSetupPage() {
     const handleOptionSelect = (optionId: string) => {
         const step = steps[currentStep];
         if (step.multiSelect) {
-            const currentAnswers: string[] = answers[step.id] || [];
+            const currentAnswers = (answers[step.id] as string[]) || [];
+
             if (currentAnswers.includes(optionId)) {
                 setAnswers({
                     ...answers,
