@@ -1854,10 +1854,10 @@ export default function FastingSetupPage() {
                                     </div>
                                     <h4 className="text-4xl font-black text-slate-800">
                                         {(() => {
-                                            const weight = parseFloat(answers['weight_current'] || '70');
-                                            const height = parseFloat(answers['height'] || '170');
-                                            const age = parseInt(answers['age'] || '30');
-                                            const gender = answers['gender'] || 'male';
+                                            const weight = parseFloat((answers['weight_current'] as string) || '70');
+                                            const height = parseFloat((answers['height'] as string) || '170');
+                                            const age = parseInt((answers['age'] as string) || '30');
+                                            const gender = (answers['gender'] as string) || 'male';
                                             const val = gender === 'male' ? (10 * weight) + (6.25 * height) - (5 * age) + 5 : (10 * weight) + (6.25 * height) - (5 * age) - 161;
                                             return Math.round(val);
                                         })()} <span className="text-2xl text-slate-400">kcal/day</span>
