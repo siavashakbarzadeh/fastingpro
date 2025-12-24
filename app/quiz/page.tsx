@@ -6,7 +6,20 @@ import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, Loader2 } from 'l
 import Link from 'next/link';
 import Image from 'next/image';
 
-const steps = [
+interface Option {
+    id: string;
+    label: string;
+    icon?: React.ReactNode;
+    description?: string;
+}
+
+interface Step {
+    id: string;
+    question: string;
+    options: Option[];
+}
+
+const steps: Step[] = [
     {
         id: 'goal',
         question: 'What is your main goal?',
@@ -48,7 +61,7 @@ export default function QuizPage() {
     useEffect(() => {
         if (view === 'intro') {
             const interval = setInterval(() => {
-                setLoadingProgress((prev) => {
+                setLoadingProgress((prev: number) => {
                     if (prev >= 100) {
                         clearInterval(interval);
                         setTimeout(() => setView('quiz'), 500);
@@ -202,7 +215,6 @@ export default function QuizPage() {
 
                                 <div className="flex-1">
                                     <div className="font-bold text-lg">{option.label}</div>
-                                    {/* @ts-ignore */}
                                     {option.description && (
                                         <div className="text-sm opacity-80 mt-0.5">{option.description}</div>
                                     )}
