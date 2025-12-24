@@ -1611,6 +1611,115 @@ export default function QuizPage() {
                                 </button>
                             </div>
                         </div>
+                    ) : currentStepData.type === 'transformation' ? (
+                        <div className="flex flex-col items-center space-y-12 animate-fade-in py-8">
+                            <h3 className="text-3xl font-black text-slate-800 leading-tight px-4 text-center">
+                                {currentStepData.question}
+                            </h3>
+                            <div className="relative w-full max-w-[320px] aspect-square">
+                                <div className="absolute inset-0 bg-emerald-50 rounded-full scale-110 opacity-50 blur-2xl" />
+                                <div className="relative w-full h-full flex items-center justify-center">
+                                    <Image
+                                        src="/success_cat.png"
+                                        alt="Transformation Success"
+                                        width={400}
+                                        height={400}
+                                        className="object-contain drop-shadow-2xl animate-bounce-slow"
+                                    />
+                                </div>
+                                {/* Success Badge */}
+                                <div className="absolute -bottom-4 -right-4 bg-white rounded-3xl p-4 shadow-xl border-2 border-emerald-100 flex items-center gap-3 animate-slide-in-right">
+                                    <div className="bg-emerald-500 rounded-full p-2">
+                                        <Check className="w-6 h-6 text-white stroke-[4]" />
+                                    </div>
+                                    <span className="font-black text-slate-800 text-lg uppercase tracking-tight">Success Guaranteed</span>
+                                </div>
+                            </div>
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'food_comparison' ? (
+                        <div className="flex flex-col items-center space-y-12 animate-fade-in py-8">
+                            <h3 className="text-3xl font-black text-slate-800 leading-tight px-4 text-center">
+                                {currentStepData.question}
+                            </h3>
+
+                            <div className="flex gap-4 w-full max-w-2xl px-2">
+                                {/* Left Card */}
+                                <div className="flex-1 bg-[#00ca86] rounded-[2.5rem] p-6 shadow-xl relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform">
+                                        {currentStepData.comparison?.left.icon}
+                                    </div>
+                                    <div className="relative z-10 space-y-4">
+                                        <p className="text-white/80 font-bold text-sm uppercase tracking-wider">{currentStepData.comparison?.left.title}</p>
+                                        <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                                            {React.cloneElement(currentStepData.comparison?.left.icon as React.ReactElement, { className: 'w-10 h-10 text-white' })}
+                                        </div>
+                                        <p className="text-white text-3xl font-black">{currentStepData.comparison?.left.value}</p>
+                                    </div>
+                                </div>
+
+                                {/* Right Card */}
+                                <div className="flex-1 bg-slate-800 rounded-[2.5rem] p-6 shadow-xl relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:-rotate-12 transition-transform">
+                                        {currentStepData.comparison?.right.icon}
+                                    </div>
+                                    <div className="relative z-10 space-y-4">
+                                        <p className="text-white/60 font-bold text-sm uppercase tracking-wider">{currentStepData.comparison?.right.title}</p>
+                                        <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center">
+                                            {React.cloneElement(currentStepData.comparison?.right.icon as React.ReactElement, { className: 'w-10 h-10 text-white/40' })}
+                                        </div>
+                                        <p className="text-white/40 text-3xl font-black">{currentStepData.comparison?.right.value}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="text-slate-500 font-bold text-center px-8 leading-relaxed">
+                                {currentStepData.id === 'food_comparison' ? "Notice how Fastic's recipes are much more calorie-efficient without sacrificing volume." : "Make the smart choice for your body."}
+                            </p>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'exercise_comparison' ? (
+                        <div className="flex flex-col items-center space-y-8 animate-fade-in py-8">
+                            <h3 className="text-3xl font-black text-slate-800 leading-tight px-4 text-center">
+                                {currentStepData.question}
+                            </h3>
+
+                            <div className="grid grid-cols-2 gap-4 w-full max-w-2xl px-4 pb-24">
+                                {currentStepData.exercises?.map((ex, i) => (
+                                    <div key={i} className="bg-white rounded-3xl p-6 shadow-lg border border-slate-100 flex flex-col items-center text-center space-y-3 hover:shadow-xl transition-shadow">
+                                        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-2">
+                                            {ex.icon}
+                                        </div>
+                                        <h4 className="font-black text-slate-800 leading-tight">{ex.name}</h4>
+                                        <p className="text-[#ff8a65] font-black text-xl">{ex.time}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     ) : currentStepData.type === 'meal_comparison' ? (
                         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="flex justify-between items-center px-4">
