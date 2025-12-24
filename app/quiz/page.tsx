@@ -163,8 +163,6 @@ export default function QuizPage() {
         );
     }
 
-    const currentStepData = steps[currentStep];
-    const isLight = currentStepData.theme === 'light';
     const quizProgress = ((currentStep + 1) / steps.length) * 100;
 
     return (
