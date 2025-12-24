@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan, Frown, Meh, Smile, Calculator, FileText, Cpu, BarChart3 } from 'lucide-react';
+import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan, Frown, Meh, Smile, Calculator, FileText, Cpu, BarChart3, Cookie, GlassWater, Moon, Pizza, Utensils, Wine, Hourglass, Users, HelpCircle, Apple, Salad, BookOpen, Scale, Fish, Leaf, Wheat, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -20,12 +20,13 @@ interface Step {
     subtitle?: string;
     options?: Option[];
     theme?: 'green' | 'light';
-    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation';
+    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro';
     placeholder?: string;
     comparison?: {
-        left: { title: string; subtitle: string; icon?: React.ReactNode };
-        right: { title: string; subtitle: string; icon?: React.ReactNode };
+        left: { title: string; subtitle: string; icon?: React.ReactNode; points?: string[]; value?: string };
+        right: { title: string; subtitle: string; icon?: React.ReactNode | string; points?: string[]; value?: string };
     };
+    exercises?: { name: string; time: string; icon: React.ReactNode }[];
 }
 
 const steps: Step[] = [
@@ -292,6 +293,286 @@ const steps: Step[] = [
         subtitle: 'Making smart food decisions is key to sustainable weight loss.',
         theme: 'light',
         type: 'summary'
+    },
+    {
+        id: 'bad_habits',
+        question: 'We all have some bad eating habits. Which is yours?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'sweets', label: 'I like chocolate and candy', icon: <Cookie className="w-6 h-6 text-orange-400" /> },
+            { id: 'soda', label: 'Soda is my best friend', icon: <GlassWater className="w-6 h-6 text-blue-400" /> },
+            { id: 'salty', label: 'I consume a lot of salty food', icon: <Droplets className="w-6 h-6 text-blue-300" /> },
+            { id: 'midnight', label: "I'm a midnight snacker", icon: <Moon className="w-6 h-6 text-indigo-400" /> },
+            { id: 'junk_food', label: 'Junk food is my guilty pleasure', icon: <Pizza className="w-6 h-6 text-rose-400" /> },
+            { id: 'emotional', label: 'I eat whenever I feel bad', icon: <Frown className="w-6 h-6 text-slate-400" /> },
+            { id: 'overeat', label: 'I tend to overeat', icon: <Utensils className="w-6 h-6 text-emerald-500" /> },
+            { id: 'alcohol', label: "I won't say no to a drink", icon: <Wine className="w-6 h-6 text-rose-600" /> },
+            { id: 'none', label: 'None of the above', icon: <XCircle className="w-6 h-6 text-slate-300" /> },
+        ]
+    },
+    {
+        id: 'snacking_triggers',
+        question: 'What typically triggers your urge to snack and nibble?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'food_around', label: 'Food around me', icon: <Cookie className="w-6 h-6 text-orange-300" /> },
+            { id: 'boredom', label: 'Boredom', icon: <Hourglass className="w-6 h-6 text-blue-400" /> },
+            { id: 'hunger', label: 'Hunger', icon: <Soup className="w-6 h-6 text-orange-400" /> },
+            { id: 'others', label: 'Other people snacking', icon: <Users className="w-6 h-6 text-emerald-400" /> },
+            { id: 'something_else', label: 'Something else', icon: <HelpCircle className="w-6 h-6 text-slate-400" /> },
+        ]
+    },
+    {
+        id: 'diet_comparison',
+        question: 'Fastic delivers long term results that fit your life',
+        theme: 'light',
+        type: 'diet_comparison',
+        comparison: {
+            left: {
+                title: 'Restricted Diet',
+                subtitle: '',
+                points: ['Only temporary results', 'Ignores your needs', 'Unpleasant food to stick with', 'Eating the same food repeatedly']
+            },
+            right: {
+                title: 'Fastic Meal Plan',
+                subtitle: '',
+                points: ['Achieves long-lasting results', 'Tailored to your lifestyle', 'Healthy and delicious meals', 'Diverse and flexible meal planning']
+            }
+        }
+    },
+    {
+        id: 'improvement_priority',
+        question: "What's most important when improving your eating habits?",
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'awareness', label: 'Being more aware of food choice', icon: <Smile className="w-6 h-6 text-yellow-400" /> },
+            { id: 'whole_food', label: 'Focusing on whole food', icon: <Salad className="w-6 h-6 text-emerald-500" /> },
+            { id: 'fruits_veggies', label: 'Aiming for more fruits & vegetables', icon: <Apple className="w-6 h-6 text-rose-500" /> },
+            { id: 'nutrition_learning', label: 'Learning more about nutrition', icon: <BookOpen className="w-6 h-6 text-orange-400" /> },
+            { id: 'avoid_temptation', label: 'Avoiding having tempting food nearby', icon: <Ban className="w-6 h-6 text-red-500" /> },
+            { id: 'portion_size', label: 'Paying attention to portion size', icon: <Scale className="w-6 h-6 text-blue-500" /> },
+        ]
+    },
+    {
+        id: 'meal_frequency',
+        question: 'How many meals do you typically eat per day?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            {
+                id: '2_meals',
+                label: '2 meals per day',
+                description: 'Breakfast or Dinner with Lunch',
+                icon: (
+                    <div className="flex gap-2">
+                        <Salad className="w-6 h-6 text-emerald-400" />
+                        <Soup className="w-6 h-6 text-orange-400" />
+                    </div>
+                )
+            },
+            {
+                id: '3_meals',
+                label: '3 meals per day',
+                description: 'Breakfast, Lunch, and Dinner',
+                icon: (
+                    <div className="flex gap-2">
+                        <Salad className="w-6 h-6 text-emerald-400" />
+                        <Soup className="w-6 h-6 text-orange-400" />
+                        <Salad className="w-6 h-6 text-blue-400" />
+                    </div>
+                )
+            },
+            {
+                id: '4_meals',
+                label: '4 meals per day',
+                description: 'Breakfast, Lunch, Dinner, and 1 snack',
+                icon: (
+                    <div className="flex gap-2">
+                        <Salad className="w-6 h-6 text-emerald-400" />
+                        <Soup className="w-6 h-6 text-orange-400" />
+                        <Salad className="w-6 h-6 text-blue-400" />
+                        <Pizza className="w-6 h-6 text-rose-400" />
+                    </div>
+                )
+            },
+            {
+                id: '5_meals',
+                label: '5 meals per day',
+                description: 'Breakfast, Lunch, Dinner, and 2 snacks',
+                icon: (
+                    <div className="flex gap-2">
+                        <Salad className="w-6 h-6 text-emerald-400" />
+                        <Soup className="w-6 h-6 text-orange-400" />
+                        <Salad className="w-6 h-6 text-blue-400" />
+                        <Pizza className="w-6 h-6 text-rose-400" />
+                        <Cookie className="w-6 h-6 text-orange-300" />
+                    </div>
+                )
+            },
+        ]
+    },
+    {
+        id: 'food_comparison',
+        question: 'Learn to make better food choices',
+        theme: 'light',
+        type: 'food_comparison',
+        comparison: {
+            left: {
+                title: "Fastic's recipe",
+                subtitle: '',
+                value: '460 kcal',
+                icon: <Salad className="w-24 h-24 text-white" />
+            },
+            right: {
+                title: 'Other meal',
+                subtitle: '',
+                value: '460 kcal',
+                icon: <Cookie className="w-24 h-24 text-white" />
+            }
+        }
+    },
+    {
+        id: 'exercise_comparison',
+        question: 'Cut 500 calories a day effortlessly',
+        theme: 'light',
+        type: 'exercise_comparison',
+        exercises: [
+            { name: 'Dumbbell lifting', time: '65 min', icon: <Dumbbell className="w-8 h-8 text-indigo-400" /> },
+            { name: 'Running', time: '60 min', icon: <Activity className="w-8 h-8 text-emerald-400" /> },
+            { name: 'Swimming', time: '83 min', icon: <Droplets className="w-8 h-8 text-blue-400" /> },
+            { name: 'Rope skipping', time: '50 min', icon: <Timer className="w-8 h-8 text-yellow-500" /> }
+        ]
+    },
+    {
+        id: 'water_intake',
+        question: 'Daily Water Intake',
+        subtitle: 'How many glasses of water do you drink per day?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            {
+                id: '2_glasses',
+                label: '2 Glasses',
+                icon: (
+                    <div className="flex gap-1">
+                        <GlassWater className="w-5 h-5 text-blue-300" />
+                        <GlassWater className="w-5 h-5 text-blue-300" />
+                    </div>
+                )
+            },
+            {
+                id: '2_6_glasses',
+                label: '2-6 Glasses',
+                icon: (
+                    <div className="flex gap-1">
+                        <GlassWater className="w-5 h-5 text-blue-300" />
+                        <GlassWater className="w-5 h-5 text-blue-300" />
+                        <GlassWater className="w-5 h-5 text-blue-300" />
+                        <GlassWater className="w-5 h-5 text-blue-300" />
+                    </div>
+                )
+            },
+            {
+                id: '6_plus_glasses',
+                label: '6+ Glasses',
+                icon: (
+                    <div className="flex gap-1 flex-wrap max-w-[100px]">
+                        <GlassWater className="w-5 h-5 text-blue-400" />
+                        <GlassWater className="w-5 h-5 text-blue-400" />
+                        <GlassWater className="w-5 h-5 text-blue-400" />
+                        <GlassWater className="w-5 h-5 text-blue-300" />
+                        <GlassWater className="w-5 h-5 text-blue-200" />
+                        <GlassWater className="w-5 h-5 text-blue-100" />
+                    </div>
+                )
+            },
+            {
+                id: 'other_drinks',
+                label: 'I prefer other drinks',
+                icon: (
+                    <div className="flex gap-2">
+                        <Coffee className="w-6 h-6 text-orange-700" />
+                        <Soup className="w-6 h-6 text-emerald-600" />
+                        <GlassWater className="w-6 h-6 text-orange-400" />
+                    </div>
+                )
+            },
+        ]
+    },
+    {
+        id: 'eating_style',
+        question: "What's your preferred eating style?",
+        subtitle: 'Are you currently on a specific diet?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'everything', label: 'I eat everything', icon: <Check className="w-6 h-6 text-emerald-500" /> },
+            { id: 'keto', label: 'Keto', icon: <Salad className="w-6 h-6 text-emerald-400" /> },
+            { id: 'vegan', label: 'Vegan', icon: <Leaf className="w-6 h-6 text-emerald-600" /> },
+            { id: 'vegetarian', label: 'Vegetarian', icon: <Moon className="w-6 h-6 text-yellow-500" /> },
+            { id: 'paleo', label: 'Paleo', icon: <Utensils className="w-6 h-6 text-orange-400" /> },
+            { id: 'climatarian', label: 'Climatarian', icon: <Container className="w-6 h-6 text-orange-600" /> },
+            { id: 'alkaline', label: 'Alkaline', icon: <Apple className="w-6 h-6 text-rose-500" /> },
+            { id: 'pescatarian', label: 'Pescatarian', icon: <Fish className="w-6 h-6 text-blue-400" /> },
+        ]
+    },
+    {
+        id: 'dietary_restrictions',
+        question: 'Do you have any of the following dietary restrictions we should know about?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'none', label: 'None', icon: <XCircle className="w-6 h-6 text-rose-500" /> },
+            { id: 'sugar_free', label: 'Sugar Free', icon: <div className="relative"><Cookie className="w-6 h-6 text-orange-400 opacity-50" /><Ban className="absolute inset-0 w-6 h-6 text-rose-500" /></div> },
+            { id: 'lactose_free', label: 'Lactose Free', icon: <div className="relative"><Droplets className="w-6 h-6 text-blue-400 opacity-50" /><Ban className="absolute inset-0 w-6 h-6 text-rose-500" /></div> },
+            { id: 'gluten_free', label: 'Gluten Free', icon: <div className="relative"><Wheat className="w-6 h-6 text-yellow-600 opacity-50" /><Ban className="absolute inset-0 w-6 h-6 text-rose-500" /></div> },
+            { id: 'nut_free', label: 'Nut Free', icon: <div className="relative"><Container className="w-6 h-6 text-amber-700 opacity-50" /><Ban className="absolute inset-0 w-6 h-6 text-rose-500" /></div> },
+        ]
+    },
+    {
+        id: 'cooking_skills',
+        question: 'How would you describe your cooking skills?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'expert', label: "I'm an expert cook", icon: <Utensils className="w-6 h-6 text-orange-400" /> },
+            { id: 'learning', label: "I'm learning to be a better cook", icon: <GraduationCap className="w-6 h-6 text-indigo-500" /> },
+            { id: 'none', label: "I don't know how to cook at all", icon: <HelpCircle className="w-6 h-6 text-emerald-500" /> },
+        ]
+    },
+    {
+        id: 'meal_prep_time',
+        question: 'How much time are you willing to spend on each meal?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'less_15', label: 'Less than 15 min', icon: <Timer className="w-6 h-6 text-emerald-400" /> },
+            { id: '15_30', label: '15 to 30 min', icon: <Timer className="w-6 h-6 text-orange-400" /> },
+            { id: '30_60', label: '30 to 60 min', icon: <Timer className="w-6 h-6 text-rose-400" /> },
+            { id: 'more_1h', label: 'More than 1 hour', icon: <Clock className="w-6 h-6 text-rose-500" /> },
+        ]
+    },
+    {
+        id: 'meal_comparison',
+        question: 'Learn to make better food choices',
+        theme: 'light',
+        type: 'meal_comparison',
+    },
+    {
+        id: 'nutrition_report',
+        question: 'Nutrition report based on your answers',
+        theme: 'light',
+        type: 'nutrition_report',
+    },
+    {
+        id: 'motivation_intro',
+        question: "Let's find out what motivates you",
+        subtitle: "It's scientifically proven that the right motivation drives long-term change. We just need a few more things from you to finalize your plan.",
+        theme: 'light',
+        type: 'motivation_intro',
     }
 ];
 
@@ -992,6 +1273,55 @@ export default function QuizPage() {
                                 </button>
                             </div>
                         </div>
+                    ) : currentStepData.type === 'diet_comparison' ? (
+                        <div className="flex flex-col items-center space-y-12 animate-fade-in py-8">
+                            <h3 className="text-3xl font-black text-slate-800 leading-tight px-4 text-center">
+                                {currentStepData.question}
+                            </h3>
+
+                            <div className="flex gap-3 w-full max-w-2xl px-2">
+                                {/* Left Card (Restricted Diet) */}
+                                <div className="flex-1 bg-[#fff2f2] rounded-[2rem] p-5 shadow-lg border border-red-50">
+                                    <h4 className="text-lg font-black text-slate-800 mb-6 text-center leading-tight">{currentStepData.comparison?.left.title}</h4>
+                                    <ul className="space-y-4">
+                                        {currentStepData.comparison?.left.points?.map((point, i) => (
+                                            <li key={i} className="flex gap-2 items-start">
+                                                <XCircle className="w-4 h-4 text-red-400 mt-1 shrink-0" />
+                                                <span className="text-slate-600 font-bold text-[13px] leading-tight">{point}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Right Card (Fastic Meal Plan) */}
+                                <div className="flex-1 bg-[#eafff8] rounded-[2rem] p-5 shadow-xl border-2 border-[#00ca86]/10">
+                                    <h4 className="text-lg font-black text-slate-800 mb-6 text-center leading-tight">{currentStepData.comparison?.right.title}</h4>
+                                    <ul className="space-y-4">
+                                        {currentStepData.comparison?.right.points?.map((point, i) => (
+                                            <li key={i} className="flex gap-2 items-start">
+                                                <Check className="w-4 h-4 text-[#00ca86] mt-1 shrink-0 stroke-[4]" />
+                                                <span className="text-slate-700 font-bold text-[13px] leading-tight">{point}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        if (currentStep < steps.length - 1) {
+                                            setCurrentStep(currentStep + 1);
+                                        } else {
+                                            router.push('/register');
+                                        }
+                                    }}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     ) : currentStepData.type === 'tech_intro' ? (
                         <div className="flex flex-col items-center space-y-12 animate-fade-in py-8">
                             <h3 className="text-3xl font-black text-slate-800 leading-tight px-4 text-center">
@@ -1059,6 +1389,171 @@ export default function QuizPage() {
                                         }
                                     }}
                                     className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'meal_comparison' ? (
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="flex justify-between items-center px-4">
+                                <div className="text-center flex-1">
+                                    <div className="w-32 h-32 mx-auto rounded-full bg-emerald-100 flex items-center justify-center overflow-hidden mb-2 ring-4 ring-emerald-50">
+                                        <Salad className="w-20 h-20 text-emerald-500" />
+                                    </div>
+                                    <p className="font-bold text-slate-800">Fastic's meals</p>
+                                </div>
+                                <div className="text-2xl font-black text-emerald-500 mx-4 italic">VS</div>
+                                <div className="text-center flex-1">
+                                    <div className="w-32 h-32 mx-auto rounded-full bg-slate-100 flex items-center justify-center overflow-hidden mb-2 ring-4 ring-slate-50 grayscale">
+                                        <Pizza className="w-20 h-20 text-slate-400" />
+                                    </div>
+                                    <p className="font-bold text-slate-600">Other diet meals</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                {[
+                                    { label: 'More efficient', subLabel: '10-minute quick meals', emoji: '😎', otherEmoji: '🤨', value: 85 },
+                                    { label: 'More nutritious', subLabel: 'Variety of colorful ingredients', emoji: '😊', otherEmoji: '🤨', value: 85 },
+                                    { label: 'More delicious', subLabel: 'Meals you will enjoy eating', emoji: '😋', otherEmoji: '🤨', value: 85 }
+                                ].map((item, idx) => (
+                                    <div key={idx} className="space-y-2">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">{item.emoji}</span>
+                                            <div className="flex-1">
+                                                <div className="bg-slate-100 rounded-full h-10 relative overflow-hidden flex items-center px-4">
+                                                    <div
+                                                        className="absolute left-0 top-0 bottom-0 bg-emerald-100 transition-all duration-1000 ease-out"
+                                                        style={{ width: `${item.value}%` }}
+                                                    />
+                                                    <span className="relative font-bold text-slate-800">{item.label}</span>
+                                                </div>
+                                                <p className="text-sm text-slate-500 mt-1 px-1">{item.subLabel}</p>
+                                            </div>
+                                            <span className="text-2xl">{item.otherEmoji}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="pt-4">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-bold text-lg shadow-lg shadow-emerald-200 hover:bg-[#00b578] transition-all active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'nutrition_report' ? (
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/50 border border-slate-50">
+                                <div className="text-center space-y-2 mb-8">
+                                    <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">BMR (Basal Metabolic Rate)</p>
+                                    <h4 className="text-4xl font-black text-slate-800">
+                                        {(() => {
+                                            const weight = parseFloat(answers['weight_current'] || '70');
+                                            const height = parseFloat(answers['height'] || '170');
+                                            const age = parseInt(answers['age'] || '30');
+                                            const gender = answers['gender'] || 'male';
+                                            const val = gender === 'male' ? (10 * weight) + (6.25 * height) - (5 * age) + 5 : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+                                            return Math.round(val);
+                                        })()} <span className="text-2xl text-slate-400">kcal/day</span>
+                                    </h4>
+                                </div>
+
+                                {/* Donut Chart */}
+                                <div className="relative w-64 h-64 mx-auto mb-10 group">
+                                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 transition-transform duration-700 group-hover:scale-105">
+                                        {/* Carbs 50% */}
+                                        <circle
+                                            cx="50" cy="50" r="40"
+                                            fill="transparent"
+                                            stroke="#ff7b54"
+                                            strokeWidth="12"
+                                            strokeDasharray="125.6 125.6"
+                                            className="transition-all duration-1000"
+                                        />
+                                        {/* Fat 30% */}
+                                        <circle
+                                            cx="50" cy="50" r="40"
+                                            fill="transparent"
+                                            stroke="#a3e635"
+                                            strokeWidth="12"
+                                            strokeDasharray="75.4 175.9"
+                                            strokeDashoffset="-125.6"
+                                            className="transition-all duration-1000 delay-300"
+                                        />
+                                        {/* Protein 20% */}
+                                        <circle
+                                            cx="50" cy="50" r="40"
+                                            fill="transparent"
+                                            stroke="#60a5fa"
+                                            strokeWidth="12"
+                                            strokeDasharray="50.2 201.1"
+                                            strokeDashoffset="-201"
+                                            className="transition-all duration-1000 delay-500"
+                                        />
+                                        <circle cx="50" cy="50" r="28" fill="white" />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                        <p className="text-xs font-bold text-slate-400 uppercase leading-none">Nutritional</p>
+                                        <p className="text-xs font-bold text-slate-400 uppercase leading-none mt-1">Requirements</p>
+                                    </div>
+
+                                    {/* Sector Labels */}
+                                    <div className="absolute top-[40%] left-[15%] bg-slate-800 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm">50%</div>
+                                    <div className="absolute bottom-[20%] right-[30%] bg-slate-800 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm">30%</div>
+                                    <div className="absolute top-[25%] right-[25%] bg-slate-800 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm">20%</div>
+                                </div>
+
+                                {/* Legend */}
+                                <div className="flex justify-center gap-6">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-[#a3e635]"></div>
+                                        <span className="text-sm font-bold text-slate-600">Fat</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-[#ff7b54]"></div>
+                                        <span className="text-sm font-bold text-slate-600">Carbs</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-[#60a5fa]"></div>
+                                        <span className="text-sm font-bold text-slate-600">Protein</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleNext}
+                                className="w-full py-4 bg-[#00ca86] text-white rounded-2xl font-bold text-lg shadow-lg shadow-emerald-200 hover:bg-[#00b578] transition-all active:scale-[0.98]"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    ) : currentStepData.type === 'motivation_intro' ? (
+                        <div className="flex flex-col items-center space-y-8 animate-fade-in py-8">
+                            <div className="relative w-64 h-64">
+                                <Image
+                                    src="/bear_with_flag.png"
+                                    alt="Motivation Bear"
+                                    fill
+                                    className="object-contain"
+                                />
+                            </div>
+                            <div className="text-center space-y-4 max-w-sm">
+                                <h3 className="text-3xl font-black text-[#ff8a00] leading-tight">
+                                    {currentStepData.question}
+                                </h3>
+                                <p className="text-slate-600 font-medium leading-relaxed">
+                                    {currentStepData.subtitle}
+                                </p>
+                            </div>
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-bold text-xl shadow-lg shadow-emerald-200 hover:bg-[#00b578] transition-all active:scale-[1.02] active:shadow-md"
                                 >
                                     Next
                                 </button>
