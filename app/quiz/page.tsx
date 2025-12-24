@@ -462,6 +462,45 @@ export default function QuizPage() {
                                 </button>
                             </div>
                         </div>
+                    ) : currentStepData.type === 'summary' ? (
+                        <div className="flex flex-col items-center space-y-8 py-4 animate-fade-in">
+                            <div className="relative w-72 h-72 md:w-80 md:h-80">
+                                <div className="absolute inset-0 bg-[#e8f5e9] rounded-full scale-95 opacity-50" />
+                                <div className="relative w-full h-full flex items-center justify-center p-4">
+                                    <Image
+                                        src="/success_cat.png"
+                                        alt="Success motivation"
+                                        width={400}
+                                        height={400}
+                                        className="object-contain"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 max-w-md text-center">
+                                <h1 className="text-2xl md:text-3xl font-black text-slate-800 leading-tight">
+                                    Losing <span className="text-[#00ca86]">{Math.max(0, Number(answers['weight']) - Number(answers['goal_weight'])) || 0} {weightUnit}</span> will bring you health benefits. You can do it!
+                                </h1>
+                                <p className="text-slate-500 font-medium text-base md:text-lg leading-relaxed px-4">
+                                    89% of users see obvious results with FastingPro's plan, and find it easy to maintain their progress.
+                                </p>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        if (currentStep < steps.length - 1) {
+                                            setCurrentStep(currentStep + 1);
+                                        } else {
+                                            router.push('/register');
+                                        }
+                                    }}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Got it
+                                </button>
+                            </div>
+                        </div>
                     ) : (
                         <div className="grid gap-4">
                             {currentStepData.options?.map((option) => (
