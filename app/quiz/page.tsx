@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban } from 'lucide-react';
+import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -20,7 +20,7 @@ interface Step {
     subtitle?: string;
     options?: Option[];
     theme?: 'green' | 'light';
-    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial';
+    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro';
     placeholder?: string;
 }
 
@@ -176,6 +176,47 @@ const steps: Step[] = [
             { id: 'thyroid', label: 'Thyroid disease', icon: <UserCircle className="w-6 h-6 text-blue-300" /> },
             { id: 'gastric', label: 'Gastric disease', icon: <Container className="w-6 h-6 text-orange-600" /> },
         ]
+    },
+    {
+        id: 'bmi_summary',
+        question: 'Personal summary based on your answers',
+        theme: 'light',
+        type: 'bmi_summary'
+    },
+    {
+        id: 'ai_tracker_intro',
+        question: "Let's prepare your meals effortlessly!",
+        subtitle: 'Our revolutionary AI tracker makes the weight loss process much easier.',
+        theme: 'light',
+        type: 'summary'
+    },
+    {
+        id: 'meal_habits',
+        question: 'Do you usually keep a record of what you eat?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'every_meal', label: 'Every meal', icon: <Soup className="w-6 h-6 text-orange-400" /> },
+            { id: 'when_remember', label: 'I do when I remember', icon: <Coffee className="w-6 h-6 text-amber-600" /> },
+            { id: 'at_all', label: 'Not at all', icon: <XCircle className="w-6 h-6 text-rose-400" /> },
+        ]
+    },
+    {
+        id: 'nutrient_knowledge',
+        question: 'Do you know what nutrients you have consumed?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'know_all', label: 'I do know all the nutrients', icon: <ThumbsUp className="w-6 h-6 text-blue-400" /> },
+            { id: 'check_often', label: 'I often check the nutrient list', icon: <Scan className="w-6 h-6 text-blue-400" /> },
+            { id: 'not_really', label: 'Not really', icon: <XCircle className="w-6 h-6 text-rose-400" /> },
+        ]
+    },
+    {
+        id: 'ai_scan_intro',
+        question: 'A simple scan can tell you everything about your food',
+        theme: 'light',
+        type: 'feature_intro'
     }
 ];
 
@@ -201,6 +242,30 @@ export default function QuizPage() {
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [heightUnit, setHeightUnit] = useState<'ft' | 'cm'>('ft');
     const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('kg');
+    const [bmiValue, setBmiValue] = useState<number | null>(null);
+
+    // Calculate BMI whenever height or weight changes
+    useEffect(() => {
+        if (answers['weight'] && (answers['height_cm'] || (answers['height_ft'] && answers['height_in']))) {
+            let w = Number(answers['weight']);
+            let h = 0;
+
+            if (heightUnit === 'cm') {
+                h = Number(answers['height_cm']) / 100; // to meters
+            } else {
+                h = (Number(answers['height_ft']) * 12 + Number(answers['height_in'])) * 0.0254; // to meters
+            }
+
+            if (weightUnit === 'lbs') {
+                w = w * 0.453592; // to kg
+            }
+
+            if (h > 0) {
+                const bmi = w / (h * h);
+                setBmiValue(Number(bmi.toFixed(1)));
+            }
+        }
+    }, [answers, heightUnit, weightUnit]);
 
     const currentStepData = steps[currentStep];
     const isLight = currentStepData.theme === 'light';
@@ -615,6 +680,171 @@ export default function QuizPage() {
                                 </div>
                             </div>
 
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        if (currentStep < steps.length - 1) {
+                                            setCurrentStep(currentStep + 1);
+                                        } else {
+                                            router.push('/register');
+                                        }
+                                    }}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'bmi_summary' ? (
+                        <div className="flex flex-col space-y-6 animate-fade-in pb-24">
+                            <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100 p-8 space-y-8">
+                                {/* BMI Header */}
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-bold text-slate-800">Body Mass Index (BMI)</h3>
+                                    <div className="flex items-baseline gap-3">
+                                        <span className="text-4xl font-black text-slate-900">{bmiValue || '0.0'}</span>
+                                        <span className={`text-3xl font-black ${!bmiValue ? 'text-slate-400' :
+                                            bmiValue < 18.5 ? 'text-blue-500' :
+                                                bmiValue < 25 ? 'text-emerald-500' :
+                                                    bmiValue < 30 ? 'text-orange-500' : 'text-rose-500'
+                                            }`}>
+                                            {!bmiValue ? 'Calculating...' :
+                                                bmiValue < 18.5 ? 'Underweight' :
+                                                    bmiValue < 25 ? 'Normal' :
+                                                        bmiValue < 30 ? 'Overweight' : 'Obesity'}
+                                        </span>
+                                    </div>
+                                    <p className="text-slate-500 font-medium leading-relaxed">
+                                        {bmiValue && bmiValue >= 30 ?
+                                            "Your BMI is 30 or higher. This is considered obesity. You may need to lose weight to improve your health." :
+                                            bmiValue && bmiValue >= 25 ?
+                                                "Your BMI is between 25 and 29.9. This is considered overweight. A healthy lifestyle can help you reach a normal weight." :
+                                                bmiValue && bmiValue >= 18.5 ?
+                                                    "Your BMI is within the normal range. Great job! Staying active and eating well will help you maintain this." :
+                                                    "Your BMI is below 18.5. This is considered underweight. You may want to consult with a professional."}
+                                    </p>
+                                </div>
+
+                                {/* BMI Scale */}
+                                <div className="space-y-4">
+                                    <div className="relative h-2 w-full rounded-full overflow-hidden flex">
+                                        <div className="h-full bg-blue-400" style={{ width: '18.5%' }}></div>
+                                        <div className="h-full bg-emerald-400" style={{ width: '25%' }}></div>
+                                        <div className="h-full bg-yellow-400" style={{ width: '25%' }}></div>
+                                        <div className="h-full bg-orange-400" style={{ width: '15%' }}></div>
+                                        <div className="h-full bg-rose-500" style={{ width: '16.5%' }}></div>
+                                    </div>
+                                    {bmiValue && (
+                                        <div className="relative w-full h-4">
+                                            <div
+                                                className="absolute top-0 w-4 h-4 rounded-full bg-rose-500 border-2 border-white shadow-md transition-all duration-1000"
+                                                style={{
+                                                    left: `${Math.min(100, Math.max(0, (bmiValue / 40) * 100))}%`,
+                                                    transform: 'translateX(-50%)'
+                                                }}
+                                            ></div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="h-px bg-slate-100 w-full"></div>
+
+                                {/* Summary Grid */}
+                                <div className="flex justify-between items-end">
+                                    <div className="space-y-6 flex-1">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
+                                                <Weight className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Target Weight</p>
+                                                <p className="text-slate-800 text-lg font-black">{answers['goal_weight'] || '--'} {weightUnit}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
+                                                <Dumbbell className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Level</p>
+                                                <p className="text-slate-800 text-lg font-black">
+                                                    {answers['knowledge_level'] === 'beginner' ? 'Beginner' :
+                                                        answers['knowledge_level'] === 'intermediate' ? 'Intermediate' :
+                                                            answers['knowledge_level'] === 'advanced' ? 'Advanced' : 'Not set'}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
+                                                <User className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Activity Level</p>
+                                                <p className="text-slate-800 text-lg font-black">
+                                                    {answers['activity_refined'] === 'not_active' ? 'Not very active' :
+                                                        answers['activity_refined'] === 'lightly_active' ? 'Lightly active' :
+                                                            answers['activity_refined'] === 'active' ? 'Active' :
+                                                                answers['activity_refined'] === 'athlete' ? 'Athlete' : 'Not set'}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
+                                                <Heart className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Medical Conditions</p>
+                                                <p className="text-slate-800 text-lg font-black">
+                                                    {answers['medical_conditions'] === 'none' ? 'None' :
+                                                        answers['medical_conditions']?.replace('_', ' ').replace(/\b\w/g, (l: any) => l.toUpperCase()) || 'None'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Illustration */}
+                                    <div className="w-1/2 relative aspect-[3/4]">
+                                        <Image
+                                            src="/fit_physique_goal.png"
+                                            alt="Physique Goal"
+                                            fill
+                                            className="object-contain object-bottom drop-shadow-2xl"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        if (currentStep < steps.length - 1) {
+                                            setCurrentStep(currentStep + 1);
+                                        } else {
+                                            router.push('/register');
+                                        }
+                                    }}
+                                    className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'feature_intro' ? (
+                        <div className="flex flex-col items-center space-y-12 animate-fade-in py-8">
+                            <h3 className="text-3xl font-black text-slate-800 leading-tight px-4 text-center">
+                                {currentStepData.question}
+                            </h3>
+                            <div className="relative w-full max-w-[320px] aspect-[9/16] rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-slate-900 bg-slate-100">
+                                <Image
+                                    src="/food_scan.png"
+                                    alt="Food Scan"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
                             <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
                                 <button
                                     onClick={() => {
