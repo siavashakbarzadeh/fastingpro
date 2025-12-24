@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { ArrowRight, Timer, TrendingUp, Zap } from "lucide-react";
+import { ArrowRight, Timer, TrendingUp, Zap, User } from "lucide-react";
 
 export default function Home() {
   return (
@@ -22,13 +22,13 @@ export default function Home() {
               href="/login"
               className="hidden md:block text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
-              Log in
+              Sign In
             </Link>
             <Link
-              href="/register"
-              className="px-4 py-2 text-sm font-bold rounded-full bg-white text-slate-950 hover:bg-slate-200 transition-colors"
+              href="/quiz"
+              className="px-4 py-2 text-sm font-bold rounded-full bg-[#00ca86] text-white hover:bg-[#00b377] transition-colors uppercase tracking-wider"
             >
-              Get Started
+              Take the Quiz
             </Link>
           </div>
         </div>
@@ -60,10 +60,10 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
-              href="/register"
+              href="/quiz"
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-lg transition-all shadow-lg shadow-orange-900/20 flex items-center justify-center gap-2 group"
             >
-              Start for Free
+              Take the Quiz
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
@@ -86,6 +86,53 @@ export default function Home() {
             <div>
               <div className="text-3xl font-bold text-white">10M+</div>
               <div className="text-sm text-slate-500">Fasting Hours</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories (Fastic-inspired) */}
+      <section id="testimonials" className="py-24 px-6 bg-[#00ca86] text-white">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="relative w-72 h-72 md:w-[400px] md:h-[400px] shrink-0">
+              <div className="absolute inset-0 bg-yellow-400 rounded-full -rotate-6 scale-95 opacity-20" />
+              <div className="absolute inset-0 bg-white/10 rounded-full translate-x-4 translate-y-4" />
+              <div className="relative w-full h-full rounded-full overflow-hidden border-8 border-white/20">
+                <div className="w-full h-full bg-slate-200 flex items-center justify-center">
+                  <User className="w-24 h-24 text-slate-400" />
+                </div>
+                <button className="absolute inset-0 flex items-center justify-center bg-black/20 group hover:bg-black/40 transition-colors">
+                  <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <ArrowRight className="w-8 h-8 text-[#00ca86]" />
+                  </div>
+                </button>
+              </div>
+              <div className="absolute top-10 -right-4 bg-yellow-400 text-slate-900 p-6 rounded-full w-48 h-48 flex flex-col items-center justify-center text-center shadow-xl rotate-12">
+                <div className="font-bold text-sm leading-tight">
+                  McKenzie, 45 <br />
+                  Achieved a healthy lifestyle with FastingPro.
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-6">
+              <h2 className="text-4xl md:text-6xl font-extrabold leading-tight">
+                Feel Younger, Live Better With <br className="hidden md:block" />
+                <span className="text-slate-900/40">Intermittent Fasting.</span>
+              </h2>
+              <p className="text-xl text-white/90 max-w-lg leading-relaxed">
+                "FastingPro changed my relationship with food. I have more energy for my three kids and I've never felt better!"
+              </p>
+              <div className="pt-4">
+                <Link
+                  href="/quiz"
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-[#00ca86] font-bold text-lg hover:scale-105 transition-transform shadow-xl"
+                >
+                  Start Your Journey
+                  <ArrowRight className="w-6 h-6" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
