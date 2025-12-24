@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan, Frown, Meh, Smile, Calculator, FileText, Cpu, BarChart3, Cookie, GlassWater, Moon, Pizza, Utensils, Wine, Hourglass, Users, HelpCircle, Apple, Salad, BookOpen, Scale, Fish, Leaf, Wheat, GraduationCap } from 'lucide-react';
+import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan, Frown, Meh, Smile, Calculator, FileText, Cpu, BarChart3, Cookie, GlassWater, Moon, Pizza, Utensils, Wine, Hourglass, Users, HelpCircle, Apple, Salad, BookOpen, Scale, Fish, Leaf, Wheat, GraduationCap, Shirt, Magnet, Ruler, Flower2, Infinity, Palmtree, CakeSlice, IceCream } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -20,8 +20,9 @@ interface Step {
     subtitle?: string;
     options?: Option[];
     theme?: 'green' | 'light';
-    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro';
+    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro' | 'date_picker' | 'goal_chart' | 'weight_comparison_bar' | 'statement_relation' | 'social_proof' | 'feature_highlight';
     placeholder?: string;
+    bg?: string;
     comparison?: {
         left: { title: string; subtitle: string; icon?: React.ReactNode; points?: string[]; value?: string };
         right: { title: string; subtitle: string; icon?: React.ReactNode | string; points?: string[]; value?: string };
@@ -573,6 +574,189 @@ const steps: Step[] = [
         subtitle: "It's scientifically proven that the right motivation drives long-term change. We just need a few more things from you to finalize your plan.",
         theme: 'light',
         type: 'motivation_intro',
+    },
+    {
+        id: 'primary_motivation',
+        question: 'What motivates you most?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'look', label: 'I want to change how I look', icon: <Search className="w-6 h-6 text-orange-400" /> },
+            { id: 'feel', label: 'I want to feel better about myself', icon: <Flower2 className="w-6 h-6 text-rose-400" /> },
+            {
+                id: 'health', label: 'I want to improve my health', icon: (
+                    <div className="relative">
+                        <Heart className="w-6 h-6 text-orange-500" />
+                        <Infinity className="w-3 h-3 text-blue-400 absolute -bottom-1 -right-1" />
+                    </div>
+                )
+            },
+        ]
+    },
+    {
+        id: 'appearance_focus',
+        question: "When it comes to changing how you look, what's most important to you?",
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'clothes', label: 'Looking better in my clothes', icon: <Shirt className="w-6 h-6 text-orange-300" /> },
+            { id: 'measurements', label: 'Changing my body measurements', icon: <Ruler className="w-6 h-6 text-blue-400" /> },
+            { id: 'attractive', label: 'Being more attractive', icon: <Magnet className="w-6 h-6 text-rose-400" /> },
+            { id: 'satisfied', label: 'Being more satisfied with how I look', icon: <Search className="w-6 h-6 text-orange-400" /> },
+        ]
+    },
+    {
+        id: 'special_occasion',
+        question: 'Is there a special occasion you want to lose weight for?',
+        subtitle: 'Having a goal in mind can help motivate you to stay on track.',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'vacation', label: 'Vacation', icon: <Palmtree className="w-6 h-6 text-emerald-400" /> },
+            { id: 'wedding', label: 'Wedding', icon: <CakeSlice className="w-6 h-6 text-rose-300" /> },
+            { id: 'birthday', label: 'Birthday', icon: <CakeSlice className="w-6 h-6 text-orange-400" /> },
+            { id: 'summer', label: 'Summer', icon: <IceCream className="w-6 h-6 text-pink-300" /> },
+            { id: 'reunion', label: 'School reunion', icon: <GraduationCap className="w-6 h-6 text-blue-500" /> },
+            { id: 'none', label: 'No special reason', icon: <XCircle className="w-6 h-6 text-slate-400" /> },
+        ]
+    },
+    {
+        id: 'special_occasion_date',
+        sectionTitle: 'Special Occasion',
+        question: 'When is your special occasion?',
+        theme: 'light',
+        type: 'date_picker',
+    },
+    {
+        id: 'goal_chart',
+        question: 'You have great potential to crush your goal',
+        theme: 'light',
+        type: 'goal_chart',
+    },
+    {
+        id: 'weight_satisfaction',
+        question: 'When was the last time you were happy with your weight?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'less_1_year', label: '< 1 year ago', icon: <ThumbsUp className="w-6 h-6 text-orange-200" /> },
+            { id: '1_2_years', label: '1 to 2 years ago', icon: <Timer className="w-6 h-6 text-orange-400" /> },
+            { id: 'more_3_years', label: '> 3 years ago', icon: <Hourglass className="w-6 h-6 text-orange-300" /> },
+            { id: 'happy_now', label: "I'm happy now", icon: <Check className="w-6 h-6 text-emerald-400" /> },
+            { id: 'never', label: 'Never', icon: <XCircle className="w-6 h-6 text-rose-400" /> },
+        ]
+    },
+    {
+        id: 'past_experience',
+        question: 'Have you had the same weightloss experience?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'none', label: 'None of these', icon: <XCircle className="w-6 h-6 text-orange-400" /> },
+            { id: 'motivation', label: 'Lack of motivation', icon: <ThumbsDown className="w-6 h-6 text-blue-400" /> },
+            { id: 'rebound', label: 'Weight rebound', icon: <Scale className="w-6 h-6 text-orange-300" /> },
+            { id: 'no_change', label: 'No significant change', icon: <Frown className="w-6 h-6 text-purple-400" /> },
+            { id: 'time', label: 'Not enough time', icon: <Timer className="w-6 h-6 text-orange-400" /> },
+        ]
+    },
+    {
+        id: 'weight_vs_own',
+        question: 'Lose twice as much weight with FastingPro vs trying on your own',
+        subtitle: '89% of user reported that the app helped them to achieve long-lasting weight loss goals.',
+        theme: 'light',
+        type: 'weight_comparison_bar',
+    },
+    {
+        id: 'confidence_statement',
+        question: 'Does this statement relate to what you think?',
+        subtitle: 'My current weight often makes me feel less confident.',
+        theme: 'light',
+        type: 'statement_relation',
+        bg: 'bg-blue-50',
+        options: [
+            { id: 'yes', label: 'Yes' },
+            { id: 'no', label: 'No' },
+        ]
+    },
+    {
+        id: 'plan_struggle_statement',
+        question: 'Does this statement relate to what you think?',
+        subtitle: 'I struggle to find the right plan to help me lose weight.',
+        theme: 'light',
+        type: 'statement_relation',
+        bg: 'bg-emerald-50',
+        options: [
+            { id: 'yes', label: 'Yes' },
+            { id: 'no', label: 'No' },
+        ]
+    },
+    {
+        id: 'junk_food_struggle_statement',
+        question: 'Does this statement relate to what you think?',
+        subtitle: "My attempts at dieting usually fail because I can't resist junk food.",
+        theme: 'light',
+        type: 'statement_relation',
+        bg: 'bg-yellow-50',
+        options: [
+            { id: 'yes', label: 'Yes' },
+            { id: 'no', label: 'No' },
+        ]
+    },
+    {
+        id: 'guilty_pleasure_statement',
+        question: 'Does this statement relate to what you think?',
+        subtitle: 'Junk food is my guilty pleasure. I always regret it after indulging.',
+        theme: 'light',
+        type: 'statement_relation',
+        bg: 'bg-purple-50',
+        options: [
+            { id: 'yes', label: 'Yes' },
+            { id: 'no', label: 'No' },
+        ]
+    },
+    {
+        id: 'social_proof_stats',
+        question: 'FastingPro was made for people just like you!',
+        subtitle: '93% of FastingPro users claim that the plan is easy to follow and makes it simple to stay on track',
+        theme: 'light',
+        type: 'social_proof',
+    },
+    {
+        id: 'stubborn_fat_highlight',
+        question: 'Shed your stubborn Fat with no exercise',
+        theme: 'light',
+        type: 'feature_highlight',
+        subtitle: 'Our AI-powered plan targets the right metabolic states to help you lose fat where it matters most.',
+    },
+    {
+        id: 'lose_more_weight_q',
+        question: 'Do you want to lose more weight and feel better?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'yes', label: 'Yes', icon: <ThumbsUp className="w-6 h-6 text-[#00ca86]" /> },
+            { id: 'no', label: 'No', icon: <XCircle className="w-6 h-6 text-slate-400" /> },
+        ]
+    },
+    {
+        id: 'diary_organization_q',
+        question: 'Do you want to get more organized with your diary?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'yes', label: 'Yes', icon: <Check className="w-6 h-6 text-[#00ca86]" /> },
+            { id: 'no', label: 'No', icon: <XCircle className="w-6 h-6 text-slate-400" /> },
+        ]
+    },
+    {
+        id: 'chronic_diseases_q',
+        question: 'Do you want to say goodbye to chronic diseases?',
+        theme: 'light',
+        type: 'select',
+        options: [
+            { id: 'yes', label: 'Yes', icon: <Heart className="w-6 h-6 text-red-500" /> },
+            { id: 'no', label: 'No', icon: <XCircle className="w-6 h-6 text-slate-400" /> },
+        ]
     }
 ];
 
@@ -643,15 +827,18 @@ export default function QuizPage() {
         }
     }, [view]);
 
+    const handleNext = () => {
+        if (currentStep < steps.length - 1) {
+            setCurrentStep(currentStep + 1);
+        } else {
+            router.push('/register');
+        }
+    };
+
     const handleOptionSelect = (optionId: string | number) => {
         const newAnswers = { ...answers, [currentStepData.id]: String(optionId) };
         setAnswers(newAnswers);
-
-        if (currentStep < steps.length - 1) {
-            setTimeout(() => setCurrentStep(currentStep + 1), 300);
-        } else {
-            setTimeout(() => router.push('/register'), 500);
-        }
+        handleNext();
     };
 
     if (view === 'intro') {
@@ -1381,13 +1568,7 @@ export default function QuizPage() {
 
                             <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
                                 <button
-                                    onClick={() => {
-                                        if (currentStep < steps.length - 1) {
-                                            setCurrentStep(currentStep + 1);
-                                        } else {
-                                            router.push('/register');
-                                        }
-                                    }}
+                                    onClick={handleNext}
                                     className="w-full py-5 rounded-2xl text-xl font-bold transition-all shadow-lg bg-[#07a372] text-white hover:bg-[#068e64] hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     Next
@@ -1532,28 +1713,326 @@ export default function QuizPage() {
                                 Next
                             </button>
                         </div>
-                    ) : currentStepData.type === 'motivation_intro' ? (
-                        <div className="flex flex-col items-center space-y-8 animate-fade-in py-8">
-                            <div className="relative w-64 h-64">
-                                <Image
-                                    src="/bear_with_flag.png"
-                                    alt="Motivation Bear"
-                                    fill
-                                    className="object-contain"
-                                />
-                            </div>
-                            <div className="text-center space-y-4 max-w-sm">
-                                <h3 className="text-3xl font-black text-[#ff8a00] leading-tight">
-                                    {currentStepData.question}
-                                </h3>
-                                <p className="text-slate-600 font-medium leading-relaxed">
-                                    {currentStepData.subtitle}
-                                </p>
+                    ) : currentStepData.type === 'date_picker' ? (
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="flex gap-4 justify-center">
+                                <div className="flex-1 max-w-[140px] relative">
+                                    <select
+                                        className="w-full p-4 bg-white border-2 border-slate-200 rounded-2xl font-bold text-slate-700 focus:border-[#00ca86] focus:ring-2 focus:ring-[#00ca86]/20 transition-all appearance-none outline-none pr-10"
+                                        defaultValue="July"
+                                    >
+                                        {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
+                                            <option key={m} value={m}>{m}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronLeft className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 -rotate-90 pointer-events-none" />
+                                </div>
+                                <div className="flex-1 max-w-[100px] relative">
+                                    <select
+                                        className="w-full p-4 bg-white border-2 border-slate-200 rounded-2xl font-bold text-slate-700 focus:border-[#00ca86] focus:ring-2 focus:ring-[#00ca86]/20 transition-all appearance-none outline-none pr-10"
+                                        defaultValue="25"
+                                    >
+                                        {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                                            <option key={d} value={d}>{d}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronLeft className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 -rotate-90 pointer-events-none" />
+                                </div>
+                                <div className="flex-1 max-w-[120px] relative">
+                                    <select
+                                        className="w-full p-4 bg-white border-2 border-slate-200 rounded-2xl font-bold text-slate-700 focus:border-[#00ca86] focus:ring-2 focus:ring-[#00ca86]/20 transition-all appearance-none outline-none pr-10"
+                                        defaultValue="2026"
+                                    >
+                                        {[2025, 2026, 2027].map(y => (
+                                            <option key={y} value={y}>{y}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronLeft className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 -rotate-90 pointer-events-none" />
+                                </div>
                             </div>
                             <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
                                 <button
                                     onClick={handleNext}
-                                    className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-bold text-xl shadow-lg shadow-emerald-200 hover:bg-[#00b578] transition-all active:scale-[1.02] active:shadow-md"
+                                    className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-bold text-xl shadow-lg shadow-emerald-200 hover:bg-[#00b578] transition-all active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'goal_chart' ? (
+                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+                            <div className="relative h-64 w-full mt-8">
+                                {/* Chart Axes */}
+                                <div className="absolute left-10 top-0 bottom-0 w-1 bg-slate-800 rounded-full" />
+                                <div className="absolute left-10 bottom-0 right-0 h-1 bg-slate-800 rounded-full" />
+
+                                <span className="absolute -left-4 top-20 -rotate-90 font-bold text-slate-600 text-sm whitespace-nowrap">Weight loss effect</span>
+
+                                {/* SVG Curve */}
+                                <svg viewBox="0 0 400 200" className="absolute left-10 top-0 right-0 bottom-0 w-[calc(100%-40px)] h-full overflow-visible">
+                                    <defs>
+                                        <linearGradient id="curveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stopColor="#ff7b54" />
+                                            <stop offset="30%" stopColor="#ff7b54" />
+                                            <stop offset="30%" stopColor="#ffb088" />
+                                            <stop offset="60%" stopColor="#ffb088" />
+                                            <stop offset="60%" stopColor="#22c55e" />
+                                            <stop offset="100%" stopColor="#22c55e" />
+                                        </linearGradient>
+                                        <filter id="glow">
+                                            <feGaussianBlur stdDeviation="3" result="blur" />
+                                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                        </filter>
+                                    </defs>
+
+                                    {/* Areas */}
+                                    <path d="M 0 150 Q 80 160 120 120 L 120 200 L 0 200 Z" fill="#ff7b54" fillOpacity="0.1" />
+                                    <path d="M 120 120 Q 160 80 240 100 L 240 200 L 120 200 Z" fill="#ffb088" fillOpacity="0.1" />
+                                    <path d="M 240 100 Q 320 120 380 20 L 380 200 L 240 200 Z" fill="#22c55e" fillOpacity="0.1" />
+
+                                    {/* The Path */}
+                                    <path
+                                        d="M 0 150 Q 80 160 120 120 Q 160 80 240 100 Q 320 120 380 20"
+                                        fill="none"
+                                        stroke="url(#curveGradient)"
+                                        strokeWidth="6"
+                                        strokeLinecap="round"
+                                        filter="url(#glow)"
+                                    />
+
+                                    {/* Control Points */}
+                                    <circle cx="0" cy="150" r="6" fill="white" stroke="#ff7b54" strokeWidth="3" />
+                                    <circle cx="120" cy="120" r="6" fill="white" stroke="#ffb088" strokeWidth="3" />
+                                    <circle cx="240" cy="100" r="6" fill="white" stroke="#ffb088" strokeWidth="3" />
+                                    <circle cx="380" cy="20" r="8" fill="white" stroke="#22c55e" strokeWidth="4" />
+
+                                    {/* Labels */}
+                                    <text x="380" y="-10" textAnchor="middle" className="font-black text-emerald-500 text-xs uppercase italic" fill="#10b981">GOAL</text>
+                                </svg>
+
+                                {/* Emojis */}
+                                <div className="absolute left-10 top-[110px] -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center shadow-md animate-bounce" style={{ animationDelay: '0s' }}>
+                                    <Frown className="w-8 h-8 text-indigo-400" />
+                                </div>
+                                <div className="absolute left-[35%] top-[80px] -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center shadow-md animate-bounce" style={{ animationDelay: '0.2s' }}>
+                                    <Meh className="w-10 h-10 text-blue-400" />
+                                </div>
+                                <div className="absolute left-[70%] top-[60px] -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDelay: '0.4s' }}>
+                                    <Smile className="w-14 h-14 text-yellow-500" />
+                                </div>
+
+                                {/* X-Axis Labels */}
+                                <div className="absolute left-10 right-0 bottom-[-30px] flex justify-between px-4 font-black text-sm">
+                                    <span className="text-orange-400">3 days</span>
+                                    <span className="text-orange-300">7 days</span>
+                                    <span className="text-emerald-500">30 days</span>
+                                </div>
+                            </div>
+
+                            <h3 className="text-2xl font-black text-slate-800 text-center px-4 leading-tight pt-10">
+                                {currentStepData.question}
+                            </h3>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-bold text-xl shadow-lg shadow-emerald-200 hover:bg-[#00b578] transition-all active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'weight_comparison_bar' ? (
+                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+                            <div className="text-center px-4">
+                                <h3 className="text-3xl font-black text-slate-800 leading-tight">
+                                    {currentStepData.question}
+                                </h3>
+                            </div>
+
+                            <div className="relative pt-24 pb-12">
+                                <div className="flex items-end justify-center gap-8 px-6">
+                                    {/* Without Bar */}
+                                    <div className="flex flex-col items-center gap-4 flex-1 max-w-[160px]">
+                                        <div className="w-full h-24 bg-gradient-to-t from-slate-600 to-slate-400 rounded-2xl flex items-center justify-center shadow-lg border-b-4 border-slate-700">
+                                            <span className="text-white font-black text-sm text-center px-2">Without FastingPro</span>
+                                        </div>
+                                    </div>
+
+                                    {/* With Bar */}
+                                    <div className="flex flex-col items-center gap-4 flex-1 max-w-[200px] relative">
+                                        {/* Bear on top */}
+                                        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-40 h-40 animate-bounce-slow">
+                                            <Image
+                                                src="/bear_with_flag.png"
+                                                alt="Success Bear"
+                                                fill
+                                                className="object-contain"
+                                            />
+                                        </div>
+                                        <div className="w-full h-48 bg-gradient-to-t from-[#ff8a00] to-[#ffc000] rounded-2xl flex items-center justify-center shadow-xl border-b-4 border-[#e67e00]">
+                                            <span className="text-white font-black text-lg text-center px-2">With FastingPro</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-50 p-6 rounded-3xl mx-4">
+                                <p className="text-slate-600 font-bold text-center leading-relaxed">
+                                    {currentStepData.subtitle}
+                                </p>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-bold text-xl shadow-lg shadow-emerald-200 hover:bg-[#00b578] transition-all active:scale-[0.98]"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'statement_relation' ? (
+                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="text-center px-4">
+                                <h3 className="text-3xl font-black text-slate-800 leading-tight">
+                                    {currentStepData.question}
+                                </h3>
+                            </div>
+
+                            <div className={`mx-4 p-8 rounded-[40px] relative mt-12 mb-20 ${currentStepData.bg || 'bg-blue-50'}`}>
+                                <div className="absolute -top-6 left-10">
+                                    <div className="flex gap-1">
+                                        <div className={`w-3 h-10 ${currentStepData.bg === 'bg-blue-50' ? 'bg-blue-500' : currentStepData.bg === 'bg-emerald-50' ? 'bg-[#00ca86]' : currentStepData.bg === 'bg-yellow-50' ? 'bg-orange-400' : 'bg-purple-500'} rounded-full opacity-80`} />
+                                        <div className={`w-3 h-10 ${currentStepData.bg === 'bg-blue-50' ? 'bg-blue-500' : currentStepData.bg === 'bg-emerald-50' ? 'bg-[#00ca86]' : currentStepData.bg === 'bg-yellow-50' ? 'bg-orange-400' : 'bg-purple-500'} rounded-full opacity-80`} />
+                                    </div>
+                                </div>
+
+                                <p className="text-2xl font-extrabold text-slate-800 text-center leading-relaxed">
+                                    {currentStepData.subtitle}
+                                </p>
+
+                                <div className="mt-8 flex justify-center">
+                                    {currentStepData.id === 'confidence_statement' && (
+                                        <div className="relative w-48 h-48">
+                                            <div className="absolute inset-0 bg-white/40 rounded-full blur-2xl" />
+                                            <div className="relative h-full flex items-center justify-center text-6xl">🔍</div>
+                                        </div>
+                                    )}
+                                    {currentStepData.id === 'plan_struggle_statement' && (
+                                        <div className="relative w-48 h-48">
+                                            <div className="absolute inset-0 bg-white/40 rounded-full blur-2xl" />
+                                            <div className="relative h-full flex items-center justify-center text-6xl">📋</div>
+                                        </div>
+                                    )}
+                                    {currentStepData.id === 'junk_food_struggle_statement' && (
+                                        <div className="relative w-48 h-48">
+                                            <div className="absolute inset-0 bg-white/40 rounded-full blur-2xl" />
+                                            <div className="relative h-full flex items-center justify-center text-6xl">🍩</div>
+                                        </div>
+                                    )}
+                                    {currentStepData.id === 'guilty_pleasure_statement' && (
+                                        <div className="relative w-48 h-48">
+                                            <div className="absolute inset-0 bg-white/40 rounded-full blur-2xl" />
+                                            <div className="relative h-full flex items-center justify-center text-6xl">🍝</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 px-4 pb-12">
+                                <button
+                                    onClick={handleNext}
+                                    className="py-5 bg-[#00ca86] text-white rounded-2xl font-black text-xl shadow-lg shadow-emerald-200"
+                                >
+                                    Yes
+                                </button>
+                                <button
+                                    onClick={handleNext}
+                                    className="py-5 bg-slate-200 text-slate-600 rounded-2xl font-black text-xl"
+                                >
+                                    No
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'social_proof' ? (
+                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 text-center">
+                            <h3 className="text-3xl font-black text-slate-800 px-4">
+                                {currentStepData.question}
+                            </h3>
+
+                            <div className="flex justify-center py-8">
+                                <div className="relative">
+                                    <div className="w-56 h-56 rounded-full bg-yellow-50 flex items-center justify-center">
+                                        <div className="w-44 h-44 rounded-full bg-yellow-100 flex items-center justify-center">
+                                            <div className="w-32 h-32 rounded-full bg-yellow-300 flex items-center justify-center flex-col shadow-inner">
+                                                <span className="text-xs font-bold text-yellow-800 uppercase tracking-wider">Join</span>
+                                                <span className="text-2xl font-black text-yellow-900">8M+</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Small floating avatars placeholder */}
+                                    <div className="absolute -top-2 -right-2 w-16 h-16 rounded-full border-4 border-white overflow-hidden bg-slate-200 shadow-lg">
+                                        <div className="w-full h-full flex items-center justify-center text-2xl">👩</div>
+                                    </div>
+                                    <div className="absolute top-1/2 -left-8 w-16 h-16 rounded-full border-4 border-white overflow-hidden bg-slate-200 shadow-lg">
+                                        <div className="w-full h-full flex items-center justify-center text-2xl">👨</div>
+                                    </div>
+                                    <div className="absolute -bottom-2 right-4 w-16 h-16 rounded-full border-4 border-white overflow-hidden bg-slate-200 shadow-lg">
+                                        <div className="w-full h-full flex items-center justify-center text-2xl">👧</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="px-6 space-y-2">
+                                <p className="text-3xl font-black text-slate-800">
+                                    <span className="text-[#ffc000]">93%</span> of Users
+                                </p>
+                                <p className="text-slate-500 font-bold leading-relaxed text-lg">
+                                    {currentStepData.subtitle}
+                                </p>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-bold text-xl shadow-lg"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'feature_highlight' ? (
+                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+                            <h3 className="text-3xl font-black text-slate-800 text-center px-4">
+                                {currentStepData.question}
+                            </h3>
+
+                            <div className="flex justify-center">
+                                <div className="relative w-full max-w-xs aspect-square p-4">
+                                    <div className="absolute inset-0 bg-emerald-50 rounded-[60px] transform rotate-3" />
+                                    <div className="relative w-full h-full bg-white rounded-[50px] shadow-xl flex items-center justify-center overflow-hidden border-2 border-emerald-100">
+                                        <div className="text-8xl animate-pulse">🔥</div>
+                                        {/* Symbolic Belly/Abs lines background */}
+                                        <div className="absolute inset-0 opacity-10 flex flex-col justify-center items-center gap-4">
+                                            <div className="w-32 h-2 bg-emerald-500 rounded-full" />
+                                            <div className="w-40 h-2 bg-emerald-500 rounded-full" />
+                                            <div className="w-32 h-2 bg-emerald-500 rounded-full" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="px-8 text-center">
+                                <p className="text-slate-600 font-bold leading-relaxed text-lg">
+                                    {currentStepData.subtitle}
+                                </p>
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-bold text-xl shadow-lg"
                                 >
                                     Next
                                 </button>
