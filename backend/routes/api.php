@@ -22,9 +22,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Weight Routes
     Route::apiResource('weights', \App\Http\Controllers\Api\WeightController::class);
-    
+
     // Plans
     Route::get('/plans', [\App\Http\Controllers\Api\PlanController::class, 'index']);
+
+    // Cycle Data
+    Route::get('/cycle-data', [\App\Http\Controllers\Api\CycleDataController::class, 'show']);
+    Route::post('/cycle-data', [\App\Http\Controllers\Api\CycleDataController::class, 'store']);
+
+    // Water Intake
+    Route::post('/water/intake', [\App\Http\Controllers\Api\WaterController::class, 'store']);
 });
 
 // Auth Routes

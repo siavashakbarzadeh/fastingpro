@@ -45,4 +45,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(WaterLog::class);
     }
+
+    public function cycleData()
+    {
+        return $this->hasOne(CycleData::class);
+    }
 }
