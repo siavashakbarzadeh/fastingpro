@@ -48,6 +48,7 @@ const steps: Step[] = [
       { id: 'enhance_sex_life', label: 'Enhance my sex life', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🔥</div> },
       { id: 'water_tracker', label: 'Track water intake', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">💧</div> },
       { id: 'decode_discharge', label: 'Decode my discharge', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🧪</div> },
+      { id: 'dental_health', label: 'Dental Health', icon: <div className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center text-3xl">🦷</div> },
       { id: 'none', label: 'None of the above', icon: <div className="w-16 h-16 rounded-full bg-pink-50 flex items-center justify-center text-3xl">❤️</div> },
     ]
   },
@@ -177,6 +178,11 @@ export default function Home() {
   const handleNext = () => {
     if (steps[currentStep].id === 'goal' && (answers['goal'] || []).includes('water_tracker')) {
       router.push('/water-tracker');
+      return;
+    }
+
+    if (steps[currentStep].id === 'goal' && (answers['goal'] || []).includes('dental_health')) {
+      router.push('/dental');
       return;
     }
 
