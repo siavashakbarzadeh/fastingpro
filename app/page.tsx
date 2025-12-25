@@ -1,583 +1,630 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { ChevronLeft, Check, Timer, Target, Brain, Heart, Zap, User, Loader2, GitBranch, Clock, RefreshCcw, Briefcase, Search, Calendar, Star, ThumbsUp, ThumbsDown, Hand, Activity, Droplets, Droplet, HeartPulse, Wind, UserCircle, Container, Ban, Dumbbell, Weight, Soup, Coffee, XCircle, Scan, Frown, Meh, Smile, Calculator, FileText, Cpu, BarChart3, Cookie, GlassWater, Moon, Pizza, Utensils, Wine, Hourglass, Users, HelpCircle, Apple, Salad, BookOpen, Scale, Fish, Leaf, Wheat, GraduationCap, Shirt, Magnet, Ruler, Flower2, Infinity, Palmtree, CakeSlice, IceCream, CreditCard } from 'lucide-react';
+import {
+  Menu,
+  X,
+  ChevronRight,
+  Timer,
+  Moon,
+  Pill,
+  Activity,
+  Heart,
+  Brain,
+  Stethoscope,
+  Smile,
+  Utensils,
+  Smartphone,
+  ShieldCheck,
+  Check,
+  Plus,
+  ArrowRight,
+  ExternalLink,
+  Flame,
+  Wind,
+  Zap,
+  Star,
+  Sparkles,
+  Droplets,
+  Flower2,
+  Users,
+  Info
+} from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 
-interface Option {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-}
+// --- Sub-components for better organization ---
 
-interface Step {
-  id: string;
-  question: string;
-  subtitle?: string;
-  options?: Option[];
-  theme?: 'green' | 'light';
-  type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro' | 'date_picker' | 'goal_chart' | 'weight_comparison_bar' | 'statement_relation' | 'social_proof' | 'feature_highlight' | 'processing_plan' | 'subscription_plan' | 'payment_method' | 'intro_card';
-  multiSelect?: boolean;
-  showNextButton?: boolean;
-  layout?: 'list' | 'grid';
-  placeholder?: string;
-  bg?: string;
-  comparison?: {
-    left: { label: string; image: string };
-    right: { label: string; image: string };
-  };
-}
+const Navbar = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-const steps: Step[] = [
-  {
-    id: 'goal',
-    question: 'What can we help you do?',
-    subtitle: 'Select all goals that apply.',
-    theme: 'light',
-    type: 'select',
-    multiSelect: true,
-    layout: 'grid',
-    options: [
-      { id: 'get_pregnant', label: 'Get pregnant', icon: <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center text-3xl">🤰</div> },
-      { id: 'track_pregnancy', label: 'Track my pregnancy', icon: <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center text-3xl">👶</div> },
-      { id: 'track_period', label: 'Track my period', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">📅</div> },
-      { id: 'understand_body', label: 'Understand my body', icon: <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-3xl">🧠</div> },
-      { id: 'fasting', label: 'Fasting', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">⚖️</div> },
-      { id: 'enhance_sex_life', label: 'Enhance my sex life', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🔥</div> },
-      { id: 'water_tracker', label: 'Track water intake', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">💧</div> },
-      { id: 'decode_discharge', label: 'Decode my discharge', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🧪</div> },
-      { id: 'dental_health', label: 'Dental Health', icon: <div className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center text-3xl">🦷</div> },
-      { id: 'none', label: 'None of the above', icon: <div className="w-16 h-16 rounded-full bg-pink-50 flex items-center justify-center text-3xl">❤️</div> },
-    ]
-  },
-  {
-    id: 'gender',
-    question: 'What is your gender?',
-    theme: 'green',
-    options: [
-      { id: 'female', label: 'Female', icon: <div className="w-6 h-6 text-pink-500">♀</div> },
-      { id: 'male', label: 'Male', icon: <div className="w-6 h-6 text-blue-500">♂</div> },
-      { id: 'other', label: 'Other', icon: <User className="w-6 h-6" /> },
-    ]
-  },
-  {
-    id: 'women_health_goals',
-    question: 'What are your health goals?',
-    theme: 'light',
-    options: [
-      { id: 'pregnant', label: 'Get pregnant', icon: <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-xl">🤰</div> },
-      { id: 'track_period', label: 'Track my period', icon: <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-xl">📅</div> },
-      { id: 'lose_weight', label: 'Lose weight', icon: <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-xl">⚖️</div> },
-      { id: 'feel_better', label: 'Feel better', icon: <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-xl">❤️</div> },
-    ]
-  },
-  {
-    id: 'get_pregnant_intro',
-    type: 'intro_card',
-    question: '',
-    theme: 'light',
-  },
-  {
-    id: 'get_pregnant_feeling',
-    question: 'How are you feeling about getting pregnant?',
-    subtitle: 'The journey to pregnancy is different for everyone — so we’re checking in.',
-    type: 'select',
-    theme: 'light',
-    layout: 'list',
-    showNextButton: true,
-    options: [
-      { id: 'excited', label: 'Excited!', icon: null },
-      { id: 'confident', label: 'Confident', icon: null },
-      { id: 'anxious', label: 'Anxious', icon: null },
-      { id: 'lonely', label: 'Lonely', icon: null },
-    ]
-  },
-  {
-    id: 'get_pregnant_previous',
-    question: 'Have you ever been pregnant before?',
-    type: 'select',
-    theme: 'light',
-    layout: 'list',
-    showNextButton: true,
-    options: [
-      { id: 'yes', label: 'Yes', icon: null },
-      { id: 'no', label: 'No', icon: null },
-      { id: 'prefer_not', label: 'Prefer not to answer', icon: null },
-    ]
-  },
-  {
-    id: 'get_pregnant_children_goal',
-    question: 'How many children do you ultimately want to have?',
-    type: 'select',
-    theme: 'light',
-    layout: 'list',
-    showNextButton: true,
-    options: [
-      { id: '1', label: '1', icon: null },
-      { id: '2', label: '2', icon: null },
-      { id: '3', label: '3', icon: null },
-      { id: 'more_3', label: 'More than 3', icon: null },
-    ]
-  },
-  {
-    id: 'tech_intro',
-    type: 'tech_intro',
-    question: 'Ready to start?',
-  },
-  {
-    id: 'age',
-    question: 'What is your age?',
-    type: 'input',
-    placeholder: 'Enter your age',
-  },
-  {
-    id: 'height',
-    question: 'What is your height?',
-    type: 'height',
-  },
-  {
-    id: 'weight_current',
-    question: 'What is your current weight?',
-    type: 'weight',
-  },
-  {
-    id: 'weight_goal',
-    question: 'What is your goal weight?',
-    type: 'weight',
-  },
-  {
-    id: 'bmi_summary',
-    type: 'bmi_summary',
-    question: 'Your BMI Analysis',
-  },
-  {
-    id: 'processing_plan',
-    type: 'processing_plan',
-    question: 'Analyzing your information...',
-  },
-  {
-    id: 'subscription_plan',
-    type: 'subscription_plan',
-    question: 'Your Personalized Fasting Plan',
-  },
-  {
-    id: 'payment_method',
-    type: 'payment_method',
-    question: 'Choose your payment method',
-  }
-];
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-export default function Home() {
-  const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
-  const [view, setView] = useState<'intro' | 'quiz'>('quiz'); // Direct to quiz
+  return (
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:rotate-12 transition-transform">
+            <Timer className="text-white" size={24} />
+          </div>
+          <span className="text-xl font-black text-slate-900 tracking-tight">ProFasting<span className="text-indigo-600">Health</span></span>
+        </Link>
 
-  const handleNext = () => {
-    if (steps[currentStep].id === 'goal' && (answers['goal'] || []).includes('water_tracker')) {
-      router.push('/water-tracker');
-      return;
-    }
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center gap-8">
+          <Link href="#features" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Features</Link>
+          <Link href="#modules" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Modules</Link>
+          <Link href="#pricing" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Pricing</Link>
+          <Link href="#faq" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">FAQ</Link>
+        </div>
 
-    if (steps[currentStep].id === 'goal' && (answers['goal'] || []).includes('dental_health')) {
-      router.push('/dental');
-      return;
-    }
+        <div className="hidden md:flex items-center gap-4">
+          <Link href="/dashboard" className="text-sm font-bold text-slate-600 hover:text-indigo-600 px-4">Log in</Link>
+          <Link href="/dashboard" className="bg-slate-900 text-white px-6 py-3 rounded-full text-sm font-black hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 hover:-translate-y-0.5">
+            Start for free
+          </Link>
+        </div>
 
-    // If user selected 'get_pregnant' in the goal step, redirect to /get-pregnant
-    if (steps[currentStep].id === 'goal' && (answers['goal'] || []).includes('get_pregnant')) {
-      router.push('/get-pregnant');
-      return;
-    }
+        {/* Mobile Menu Toggle */}
+        <button className="md:hidden p-2 text-slate-900" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          {isMenuOpen ? <X /> : <Menu />}
+        </button>
+      </div>
 
-    let nextStep = currentStep + 1;
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-100 p-6 flex flex-col gap-4 animate-in slide-in-from-top-2">
+          <Link href="#features" className="font-bold text-slate-600" onClick={() => setIsMenuOpen(false)}>Features</Link>
+          <Link href="#modules" className="font-bold text-slate-600" onClick={() => setIsMenuOpen(false)}>Modules</Link>
+          <Link href="#pricing" className="font-bold text-slate-600" onClick={() => setIsMenuOpen(false)}>Pricing</Link>
+          <Link href="/dashboard" className="bg-slate-900 text-white px-6 py-4 rounded-2xl text-center font-black">Start for free</Link>
+        </div>
+      )}
+    </nav>
+  );
+};
 
-    // Conditional Logic for Women's Health
-    if (steps[currentStep].id === 'gender') {
-      if (answers['gender'] !== 'female') {
-        nextStep = steps.findIndex(s => s.id === 'tech_intro');
-      }
-    }
+const HeroSection = () => {
+  return (
+    <section className="relative pt-32 pb-20 overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-3xl opacity-50 -z-10" />
+      <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[600px] h-[600px] bg-blue-50 rounded-full blur-3xl opacity-50 -z-10" />
 
-    if (steps[currentStep].id === 'women_health_goals') {
-      const isInterestedInPregnancy = answers['women_health_goals'] === 'pregnant' || (answers['goal'] || []).includes('get_pregnant');
-      if (!isInterestedInPregnancy) {
-        nextStep = steps.findIndex(s => s.id === 'tech_intro');
-      } else {
-        nextStep = steps.findIndex(s => s.id === 'get_pregnant_intro');
-      }
-    }
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="space-y-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-full border border-indigo-100">
+            <Sparkles size={16} className="text-indigo-600" />
+            <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">New: Support My Mind added</span>
+          </div>
 
-    if (steps[currentStep].id === 'get_pregnant_intro') {
-      nextStep = steps.findIndex(s => s.id === 'get_pregnant_feeling');
-    }
+          <h1 className="text-5xl md:text-7xl font-black text-slate-900 leading-[1.1] tracking-tight">
+            One app for your <span className="text-indigo-600">fasting</span> and everyday health.
+          </h1>
 
-    if (steps[currentStep].id === 'get_pregnant_feeling') {
-      nextStep = steps.findIndex(s => s.id === 'get_pregnant_previous');
-    }
+          <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-lg">
+            Track fasting, sleep, medications, dental health, women&apos;s health, and more in one simple, science-backed dashboard.
+          </p>
 
-    if (steps[currentStep].id === 'get_pregnant_previous') {
-      nextStep = steps.findIndex(s => s.id === 'get_pregnant_children_goal');
-    }
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <Link href="/dashboard" className="w-full sm:w-auto bg-indigo-600 text-white px-10 py-5 rounded-full text-lg font-black hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200 hover:-translate-y-1 flex items-center justify-center gap-2 group">
+              Start for free <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link href="/dashboard" className="w-full sm:w-auto bg-white text-slate-900 border border-slate-200 px-10 py-5 rounded-full text-lg font-black hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+              View live demo
+            </Link>
+          </div>
 
-    if (steps[currentStep].id === 'get_pregnant_children_goal') {
-      nextStep = steps.findIndex(s => s.id === 'tech_intro');
-    }
+          <div className="flex items-center gap-6 pt-4">
+            <div className="flex -space-x-3">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+                  <div className="w-full h-full bg-indigo-100 flex items-center justify-center text-[10px] font-black">{i}k+</div>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm font-bold text-slate-400">Join <span className="text-slate-900 underline decoration-indigo-300 decoration-2">12,000+</span> proactive adults</p>
+          </div>
+        </div>
 
-    if (nextStep < steps.length) {
-      setCurrentStep(nextStep);
-    } else {
-      router.push('/dashboard');
-    }
-  };
-
-  const handleBack = () => {
-    let prevStep = currentStep - 1;
-
-    // Skip back logic for gender
-    if (steps[currentStep].id === 'tech_intro' && answers['gender'] !== 'female') {
-      prevStep = steps.findIndex(s => s.id === 'gender');
-    }
-
-    if (steps[currentStep].id === 'tech_intro' && answers['gender'] === 'female') {
-      const isInterestedInPregnancy = answers['women_health_goals'] === 'pregnant' || (answers['goal'] || []).includes('get_pregnant');
-      if (!isInterestedInPregnancy) {
-        prevStep = steps.findIndex(s => s.id === 'women_health_goals');
-      } else {
-        prevStep = steps.findIndex(s => s.id === 'get_pregnant_children_goal');
-      }
-    }
-
-    if (steps[currentStep].id === 'get_pregnant_children_goal') {
-      prevStep = steps.findIndex(s => s.id === 'get_pregnant_previous');
-    }
-
-    if (steps[currentStep].id === 'get_pregnant_previous') {
-      prevStep = steps.findIndex(s => s.id === 'get_pregnant_feeling');
-    }
-
-    if (steps[currentStep].id === 'get_pregnant_feeling') {
-      prevStep = steps.findIndex(s => s.id === 'get_pregnant_intro');
-    }
-
-    if (steps[currentStep].id === 'get_pregnant_intro') {
-      prevStep = steps.findIndex(s => s.id === 'women_health_goals');
-    }
-
-    if (prevStep >= 0) {
-      setCurrentStep(prevStep);
-    } else {
-      setView('intro');
-    }
-  };
-
-  const handleOptionSelect = (optionId: string) => {
-    const step = steps[currentStep];
-    if (step.multiSelect) {
-      const currentAnswers = (answers[step.id] || []) as string[];
-      if (currentAnswers.includes(optionId)) {
-        setAnswers({
-          ...answers,
-          [step.id]: currentAnswers.filter((id: string) => id !== optionId)
-        });
-      } else {
-        setAnswers({
-          ...answers,
-          [step.id]: [...currentAnswers, optionId]
-        });
-      }
-    } else {
-      setAnswers({ ...answers, [step.id]: optionId });
-
-      // If user selects 'fasting' in the goal step, redirect to /fasting
-      if (step.id === 'goal' && optionId === 'fasting') {
-        const savedData = localStorage.getItem('fastingData');
-        if (savedData) {
-          try {
-            const data = JSON.parse(savedData);
-            if (data.answers && Object.keys(data.answers).length > 0) {
-              router.push('/dashboard');
-              return;
-            }
-          } catch (e: any) {
-            console.error(e);
-          }
-        }
-        router.push('/fasting');
-        return;
-      }
-
-      // If user selects 'get_pregnant' in the goal step, redirect to /get-pregnant
-      if (step.id === 'goal' && optionId === 'get_pregnant') {
-        router.push('/get-pregnant');
-        return;
-      }
-
-      if (!step.showNextButton) {
-        handleNext();
-      }
-    }
-  };
-
-  const currentStepData = steps[currentStep];
-  const Progress = ((currentStep + 1) / steps.length) * 100;
-
-  const renderStepContent = (
-    step: Step,
-    currentStep: number,
-    answers: Record<string, any>,
-    handleOptionSelect: (id: string) => void,
-    handleNext: () => void,
-    setCurrentStep: (step: number) => void
-  ) => {
-    const isSelected = (id: string) => {
-      if (step.multiSelect) {
-        return (answers[step.id] || []).includes(id);
-      }
-      return answers[step.id] === id;
-    };
-
-    switch (step.type) {
-      case 'intro_card':
-        return (
-          <div className="flex flex-col items-center text-center space-y-12 py-8 h-full">
-            <div className="relative w-full aspect-[4/3] flex items-center justify-center">
-              {/* Illustration Placeholder (Replacing with a modern SVG or CSS-based illustration) */}
-              <div className="relative w-full h-full">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative w-64 h-64">
-                    <div className="absolute inset-0 bg-pink-100 rounded-full opacity-50 blur-3xl animate-pulse" />
-                    <UserCircle className="w-full h-full text-pink-300" strokeWidth={0.5} />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center text-5xl">
-                      🤰
-                    </div>
+        <div className="relative">
+          <div className="relative z-10 bg-white rounded-[3rem] p-4 shadow-[0_32px_64px_-16px_rgba(30,41,59,0.15)] border border-slate-100 rotate-2 hover:rotate-0 transition-transform duration-500">
+            {/* Mockup Content */}
+            <div className="bg-slate-50 rounded-[2.5rem] overflow-hidden">
+              <div className="p-6 bg-white border-b border-slate-100">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900">Good Morning</h3>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Friday, Dec 26</p>
+                  </div>
+                  <div className="w-10 h-10 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400">
+                    <Users size={20} />
                   </div>
                 </div>
-                {/* Orbital elements based on the image */}
-                <div className="absolute top-[10%] right-[15%] w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center text-2xl animate-bounce">
-                  🧪
-                </div>
-                <div className="absolute bottom-[20%] right-[20%] w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center text-3xl animate-pulse delay-75">
-                  ⚖️
-                </div>
-                <div className="absolute top-[30%] left-[10%] w-14 h-14 bg-white rounded-xl shadow-lg flex items-center justify-center text-2xl">
-                  📅
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-indigo-600 rounded-3xl p-5 text-white">
+                    <Timer size={24} className="mb-4" />
+                    <p className="text-[10px] font-black uppercase opacity-60">Fasting</p>
+                    <p className="text-2xl font-black tracking-tighter">14:22:05</p>
+                  </div>
+                  <div className="bg-white border border-slate-100 rounded-3xl p-5">
+                    <Moon size={24} className="mb-4 text-blue-500" />
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-tight">Sleep Score</p>
+                    <p className="text-2xl font-black text-slate-800">84/100</p>
+                  </div>
+                  <div className="bg-rose-50 rounded-3xl p-5 border border-rose-100">
+                    <Heart size={24} className="mb-4 text-rose-500" />
+                    <p className="text-[10px] font-black uppercase text-rose-400 tracking-tight">My Mind</p>
+                    <p className="text-2xl font-black text-rose-900">Great</p>
+                  </div>
+                  <div className="bg-white border border-slate-100 rounded-3xl p-5">
+                    <Activity size={24} className="mb-4 text-emerald-500" />
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-tight">Steps</p>
+                    <p className="text-2xl font-black text-slate-800">6,420</p>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="w-full space-y-4">
-              <button
-                onClick={handleNext}
-                className="w-full py-5 rounded-full bg-pink-500 text-white font-black text-xl hover:bg-pink-600 transition-all shadow-xl shadow-pink-200 active:scale-[0.98]"
-              >
-                Yes, fine by me
-              </button>
-              <button
-                onClick={handleNext}
-                className="w-full py-3 text-slate-900 font-black text-lg hover:underline transition-all"
-              >
-                No, thanks
-              </button>
             </div>
           </div>
-        );
 
-      case 'tech_intro':
-        return (
-          <div className="text-center space-y-8 py-12">
-            <div className="relative w-48 h-48 mx-auto">
-              <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse" />
-              <div className="absolute inset-4 bg-blue-500/30 rounded-full animate-ping" />
-              <div className="relative w-full h-full flex items-center justify-center">
-                <Cpu className="w-24 h-24 text-blue-600" />
+          {/* Floating badge */}
+          <div className="absolute -bottom-6 -left-6 z-20 bg-white p-6 rounded-3xl shadow-xl border border-slate-100 animate-bounce transition-all">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                <ShieldCheck size={24} />
+              </div>
+              <div>
+                <p className="text-xs font-black text-slate-400 uppercase">Status</p>
+                <p className="text-sm font-black text-slate-900">Science-Backed</p>
               </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900">Calculating your biology...</h3>
-            <p className="text-gray-500">We're using our advanced core engine to create your personalized plan.</p>
-            <button
-              onClick={handleNext}
-              className="w-full py-4 rounded-full bg-blue-600 text-white font-bold text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200"
-            >
-              Next
-            </button>
           </div>
-        );
+        </div>
+      </div>
+    </section>
+  );
+};
 
-      case 'bmi_summary':
-        const weight = parseFloat(answers['weight_current'] || '70');
-        const height = parseFloat(answers['height'] || '170') / 100;
-        const bmi = (weight / (height * height)).toFixed(1);
-
-        return (
-          <div className="space-y-8 py-8 animate-fade-in">
-            <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/50 border border-slate-50">
-              <div className="text-center space-y-2 mb-8">
-                <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Your BMI is</p>
-                <h4 className="text-6xl font-black text-slate-800 tracking-tighter">{bmi}</h4>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 font-bold text-sm">
-                  <Activity className="w-4 h-4" /> Healthy Weight
-                </div>
-              </div>
-
-              <div className="relative h-4 bg-slate-100 rounded-full overflow-hidden mb-8">
-                <div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500 rounded-full transition-all duration-1000"
-                  style={{ width: `${(parseFloat(bmi) / 40) * 100}%` }}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100">
-                  <p className="text-slate-500 text-xs font-bold uppercase mb-1 tracking-wider">Metabolism</p>
-                  <p className="text-slate-800 font-black text-xl">Active</p>
-                </div>
-                <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100">
-                  <p className="text-slate-500 text-xs font-bold uppercase mb-1 tracking-wider">Potential</p>
-                  <p className="text-slate-800 font-black text-xl">High</p>
-                </div>
-              </div>
+const StatsStrip = () => {
+  return (
+    <div className="bg-slate-900 py-10">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-wrap justify-between items-center gap-8">
+          <p className="text-white font-black tracking-tight text-xl w-full lg:w-auto text-center lg:text-left">
+            Built for busy adults who want <span className="text-indigo-400 underline underline-offset-4">simple health tracking</span>.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 lg:gap-16 flex-1 max-w-3xl border-l border-white/10 lg:pl-16">
+            <div className="text-center lg:text-left">
+              <p className="text-indigo-400 text-3xl font-black mb-1">12+</p>
+              <p className="text-white/50 text-xs font-black uppercase tracking-widest">Health Areas</p>
             </div>
-
-            <button
-              onClick={handleNext}
-              className="w-full py-5 rounded-full bg-blue-600 text-white font-black text-xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 hover:-translate-y-1 active:scale-[0.98]"
-            >
-              Calculate My Plan
-            </button>
+            <div className="text-center lg:text-left">
+              <p className="text-indigo-400 text-3xl font-black mb-1">0%</p>
+              <p className="text-white/50 text-xs font-black uppercase tracking-widest">Ads / Data Selling</p>
+            </div>
+            <div className="text-center lg:text-left hidden md:block">
+              <p className="text-emerald-400 text-3xl font-black mb-1">24/7</p>
+              <p className="text-white/50 text-xs font-black uppercase tracking-widest">Health Partner</p>
+            </div>
           </div>
-        );
+        </div>
+      </div>
+    </div>
+  );
+};
 
-      case 'select':
-      default:
-        return (
-          <div className="flex flex-col h-full">
-            <div className="flex-1">
-              <div className={step.layout === 'grid' ? "grid grid-cols-2 gap-4" : "space-y-4"}>
-                {step.options?.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => handleOptionSelect(option.id)}
-                    className={`relative p-6 rounded-2xl border-2 transition-all hover:scale-[1.02] flex flex-col items-center justify-center text-center gap-4 ${isSelected(option.id)
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-100 bg-white hover:border-gray-200'
-                      } ${step.layout === 'grid' ? 'aspect-square' : 'w-full flex-row text-left'}`}
-                  >
-                    <div className={`absolute top-4 right-4 w-5 h-5 rounded-full border-2 ${isSelected(option.id) ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
-                      }`}>
-                      {isSelected(option.id) && (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                      )}
+const BenefitsSection = () => {
+  const benefits = [
+    {
+      title: "Stay on track with fasting",
+      icon: Timer,
+      color: "bg-blue-50 text-blue-600",
+      points: ["Smart fasting timer", "Mood & weight logs", "Fasting history & streaks"]
+    },
+    {
+      title: "Look after your daily health",
+      icon: Activity,
+      color: "bg-indigo-50 text-indigo-600",
+      points: ["Sleep diary & quality tracking", "Medication manager", "Activity & symptom tracking"]
+    },
+    {
+      title: "Support women's health",
+      icon: Heart,
+      color: "bg-rose-50 text-rose-600",
+      points: ["Period & ovulation tracker", "Pregnancy tracking", "Body literacy guides"]
+    },
+    {
+      title: "Learn as you go",
+      icon: BookOpen,
+      color: "bg-amber-50 text-amber-600",
+      points: ["Short daily insights", "Evidence-based health tips", "Simplified medical reports"]
+    }
+  ];
+
+  return (
+    <section id="features" className="py-32 bg-white">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center max-w-3xl mx-auto mb-20 space-y-6">
+          <h2 className="text-sm font-black text-indigo-600 uppercase tracking-[0.2em]">Why ProFasting Health?</h2>
+          <p className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Your entire health context in one single place.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {benefits.map((b, i) => (
+            <div key={i} className="group bg-slate-50 p-10 rounded-[2.5rem] hover:bg-white hover:shadow-2xl hover:shadow-slate-200 transition-all duration-300 border border-transparent hover:border-slate-100">
+              <div className={`w-14 h-14 ${b.color} rounded-2xl flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform`}>
+                <b.icon size={28} />
+              </div>
+              <h3 className="text-2xl font-black mb-6 text-slate-900 tracking-tight">{b.title}</h3>
+              <ul className="space-y-4">
+                {b.points.map((p, j) => (
+                  <li key={j} className="flex items-center gap-3 text-slate-500 font-bold group-hover:text-slate-600">
+                    <Check size={18} className="text-emerald-500" />
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const ModulesSection = () => {
+  const categories = [
+    {
+      name: "Fasting & Food",
+      items: [
+        { label: "Fasting", icon: "⚖️", sub: "Timer & logs" },
+        { label: "Recipes", icon: "🥗", sub: "Healthy meals" },
+        { label: "Diet plans", icon: "📋", sub: "Structured eating" }
+      ]
+    },
+    {
+      name: "Daily Health",
+      items: [
+        { label: "Sleep", icon: "😴", sub: "Diary & score" },
+        { label: "Activity", icon: "🏃", sub: "Daily movement" },
+        { label: "Medications", icon: "💊", sub: "Reminder & logs" },
+        { label: "Symptoms", icon: "🤒", sub: "Track patterns" },
+        { label: "Dental Health", icon: "🦷", sub: "Checkup logs" }
+      ]
+    },
+    {
+      name: "Women's Health",
+      items: [
+        { label: "Track my period", icon: "📅", sub: "Cycle insights" },
+        { label: "Track my pregnancy", icon: "👶", sub: "Baby growth" },
+        { label: "Get pregnant", icon: "🤰", sub: "Fertility support" },
+        { label: "Decode discharge", icon: "🧪", sub: "Cervical mucus" },
+        { label: "Understand my body", icon: "🧠", sub: "Hormone literacy" }
+      ]
+    },
+    {
+      name: "Mind & Relationships",
+      items: [
+        { label: "Mental Health", icon: "🧘", sub: "Mood & self-care" },
+        { label: "Enhance my sex life", icon: "🔥", sub: "Intimacy tracking" }
+      ]
+    }
+  ];
+
+  return (
+    <section id="modules" className="py-32 bg-slate-50 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-20">
+          <div className="space-y-6">
+            <h2 className="text-sm font-black text-indigo-600 uppercase tracking-[0.2em]">The Modules</h2>
+            <p className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">All your health modules<br />in one place.</p>
+          </div>
+          <p className="text-lg font-bold text-slate-400 max-w-md">Enable only the modules you need and hide the rest. Your dashboard, your rules.</p>
+        </div>
+
+        <div className="space-y-16">
+          {categories.map((cat, i) => (
+            <div key={i} className="space-y-8">
+              <h3 className="text-xl font-black text-slate-900 flex items-center gap-4">
+                {cat.name}
+                <div className="h-px bg-slate-200 flex-1" />
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                {cat.items.map((item, j) => (
+                  <div key={j} className="bg-white p-6 rounded-[2rem] border border-slate-100 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all group cursor-default">
+                    <div className="text-3xl mb-4 group-hover:scale-125 transition-transform duration-300">
+                      {item.icon}
                     </div>
-
-                    <div className="flex-shrink-0">{option.icon}</div>
-                    <span className={`text-base font-semibold leading-tight text-gray-900 ${step.layout === 'grid' ? 'max-w-[120px]' : ''}`}>
-                      {option.label}
-                    </span>
-                  </button>
+                    <p className="font-black text-slate-900 text-sm mb-1 leading-tight tracking-tight">{item.label}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.sub}</p>
+                  </div>
                 ))}
               </div>
             </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
-            {(step.multiSelect || step.showNextButton) && (
-              <div className="mt-8 pb-8">
-                <button
-                  onClick={handleNext}
-                  disabled={step.multiSelect ? !(answers[step.id]?.length > 0) : !answers[step.id]}
-                  className={`w-full py-5 rounded-full text-xl font-black transition-all ${(step.multiSelect ? (answers[step.id]?.length > 0) : !!answers[step.id])
-                    ? 'bg-pink-500 text-white shadow-lg shadow-pink-200'
-                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                    }`}
-                >
-                  Next
-                </button>
-              </div>
-            )}
+const ScreenshotsSection = () => {
+  const screenshots = [
+    {
+      title: "Fasting & Streaks",
+      tag: "Fasting",
+      color: "from-blue-500 to-indigo-600",
+      content: (
+        <div className="flex flex-col items-center justify-center gap-6 p-8">
+          <div className="w-32 h-32 rounded-full border-8 border-white/20 flex items-center justify-center relative">
+            <Timer size={48} className="text-white" />
+            <div className="absolute inset-0 rounded-full border-t-8 border-white animate-spin" />
           </div>
-        );
+          <p className="text-3xl font-black text-white">16 : 08 : 42</p>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white text-xs font-black">🔥</div>
+            ))}
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Sleep Diary",
+      tag: "Sleep",
+      color: "from-indigo-600 to-purple-700",
+      content: (
+        <div className="p-8 space-y-6">
+          <div className="flex justify-between items-center text-white">
+            <p className="font-black text-sm uppercase opacity-60">Last Night</p>
+            <Moon size={20} />
+          </div>
+          <div className="space-y-4 text-white">
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full w-3/4 bg-white rounded-full" />
+            </div>
+            <p className="text-4xl font-black">7h 45m</p>
+            <div className="p-4 bg-white/10 rounded-2xl flex items-center gap-3">
+              <Star size={16} className="text-amber-400" />
+              <p className="text-xs font-bold leading-relaxed">Deep sleep was 20% higher than your average.</p>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Meds Manager",
+      tag: "Health",
+      color: "from-emerald-500 to-teal-600",
+      content: (
+        <div className="p-8 space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className={`p-4 rounded-2xl bg-white flex items-center justify-between shadow-lg`}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-teal-600">
+                  <Pill size={20} />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-slate-900">Vitamin D3</p>
+                  <p className="text-[10px] font-black text-slate-400 tracking-tight">08:00 AM • Daily</p>
+                </div>
+              </div>
+              {i === 1 ? <Check size={20} className="text-emerald-500" /> : <div className="w-5 h-5 rounded-full border-2 border-slate-100" />}
+            </div>
+          ))}
+        </div>
+      )
     }
-  };
+  ];
 
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-lg bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white flex flex-col min-h-[600px]">
-        {/* Progress Bar */}
-        <div className="px-8 pt-8 pb-4">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={handleBack}
-              className="p-2 rounded-full hover:bg-slate-50 transition-colors"
-            >
-              <ChevronLeft className="w-6 h-6 text-slate-400" />
-            </button>
-            <div className="flex items-center gap-1">
-              <Timer className="w-5 h-5 text-blue-600" />
-              <span className="font-bold text-slate-900">FastingPro</span>
+    <section className="py-32 bg-white px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-20 space-y-6">
+          <h2 className="text-sm font-black text-indigo-600 uppercase tracking-[0.2em]">Sneak Peek</h2>
+          <p className="text-4xl md:text-5xl font-black text-slate-900">Simple UI, Powerful Tracking.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {screenshots.map((s, i) => (
+            <div key={i} className="group">
+              <div className={`aspect-[4/5] rounded-[2.5rem] bg-gradient-to-br ${s.color} mb-6 overflow-hidden shadow-2xl shadow-slate-200 flex flex-col group-hover:-translate-y-2 transition-transform duration-500`}>
+                <div className="p-6 flex justify-between items-center text-white/50">
+                  <Smartphone size={20} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{s.tag}</span>
+                </div>
+                <div className="flex-1 flex flex-col justify-center">
+                  {s.content}
+                </div>
+              </div>
+              <h4 className="text-lg font-black text-slate-900 px-2">{s.title}</h4>
             </div>
-            <div className="w-6 h-6" /> {/* Spacer */}
-          </div>
-          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-blue-600 transition-all duration-500 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"
-              style={{ width: `${Progress}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="flex-1 px-8 pb-8 overflow-y-auto">
-          {currentStep === 0 && (
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="w-full mb-8 flex items-center justify-center gap-3 bg-white px-6 py-4 rounded-2xl shadow-lg shadow-blue-500/5 text-slate-600 font-bold hover:bg-slate-50 transition-all hover:scale-[1.02] active:scale-[0.98] border border-slate-100"
-            >
-              <svg className="w-6 h-6" viewBox="0 0 24 24">
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  fill="#EA4335"
-                />
-              </svg>
-              Continue with Google
-            </button>
-          )}
-
-          <div className="mb-8">
-            <h2 className="text-4xl font-extrabold text-gray-900 mb-2 leading-tight">
-              {currentStepData.question}
-            </h2>
-            {currentStepData.subtitle && (
-              <p className="text-xl text-gray-500 font-medium">
-                {currentStepData.subtitle}
-              </p>
-            )}
-          </div>
-
-          {renderStepContent(currentStepData, currentStep, answers, handleOptionSelect, handleNext, setCurrentStep)}
+          ))}
         </div>
       </div>
+    </section>
+  );
+};
 
-      {/* Security Badge */}
-      <div className="mt-6 flex items-center gap-2 text-slate-400 text-sm font-medium">
-        <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+const PricingSection = () => {
+  return (
+    <section id="pricing" className="py-32 bg-slate-900 text-white overflow-hidden relative">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[120px] -z-0" />
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="text-center mb-20 space-y-6">
+          <h2 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]">Simple Pricing</h2>
+          <p className="text-4xl md:text-6xl font-black text-white leading-tight">Start free, upgrade for mastery.</p>
         </div>
-        Your data is safe and encrypted
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Free Tier */}
+          <div className="bg-white/5 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/10 flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-black uppercase text-indigo-400 tracking-widest mb-4">Core Tracker</p>
+              <p className="text-5xl font-black mb-10">$0</p>
+              <ul className="space-y-6 mb-12">
+                {["Fasting tracking", "Sleep & Activity diary", "Basic Women's health", "Medication logs"].map((li, i) => (
+                  <li key={i} className="flex items-center gap-3 text-white/70 font-bold">
+                    <Check size={20} className="text-emerald-500" />
+                    {li}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Link href="/dashboard" className="w-full bg-white/10 hover:bg-white/20 text-white rounded-2xl py-4 flex items-center justify-center font-black transition-all">
+              Start now
+            </Link>
+          </div>
+
+          {/* Pro Tier */}
+          <div className="bg-indigo-600 rounded-[2.5rem] p-10 shadow-2xl shadow-indigo-500/20 relative overflow-hidden flex flex-col justify-between">
+            <div className="absolute top-0 right-0 p-8 rotate-12 opacity-10">
+              <Briefcase size={120} />
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase text-white/60 tracking-widest mb-4">The Complete Experience</p>
+              <div className="flex items-baseline gap-2 mb-10">
+                <p className="text-5xl font-black">$5</p>
+                <p className="text-white/60 font-bold text-sm">/ month billed annually</p>
+              </div>
+              <ul className="space-y-6 mb-12">
+                {[
+                  "All modules included",
+                  "Personalized diet plans",
+                  "Advanced health insights",
+                  "Custom reminders & symptoms",
+                  "Support our small team ❤️"
+                ].map((li, i) => (
+                  <li key={i} className="flex items-center gap-3 text-white font-bold">
+                    <Check size={20} className="text-white bg-white/20 p-0.5 rounded-full" />
+                    {li}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Link href="/dashboard" className="w-full bg-white text-indigo-600 rounded-2xl py-4 flex items-center justify-center font-black hover:shadow-xl transition-all">
+              Go Pro
+            </Link>
+          </div>
+        </div>
       </div>
+    </section>
+  );
+};
+
+const FaqSection = () => {
+  const faqs = [
+    {
+      q: "Is this a medical app?",
+      a: "No. ProFasting Health is a self-tracking and educational tool. We help you organize your data, but we don't provide diagnosis or clinical treatment."
+    },
+    {
+      q: "Does it replace my doctor?",
+      a: "Absolutely not. This app is designed to compliment your medical care by providing better data for your next appointment."
+    },
+    {
+      q: "How is my data stored?",
+      a: "We prioritize privacy. Your data is encrypted and stored securely. We never sell your personal health data to third parties."
+    },
+    {
+      q: "Can I use it offline?",
+      a: "Core tracking features like the fasting timer work offline, but syncing logs and receiving insights require an internet connection."
+    }
+  ];
+
+  return (
+    <section id="faq" className="py-32 bg-white">
+      <div className="max-w-4xl mx-auto px-6">
+        <h2 className="text-4xl font-black text-slate-900 mb-16 text-center">Frequently Asked Questions</h2>
+        <div className="space-y-6">
+          {faqs.map((faq, i) => (
+            <div key={i} className="bg-slate-50 p-8 rounded-3xl border border-slate-100">
+              <p className="text-lg font-black text-slate-900 mb-4">{faq.q}</p>
+              <p className="font-medium text-slate-500 leading-relaxed">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Footer = () => {
+  return (
+    <footer className="bg-slate-50 border-t border-slate-100 pt-20 pb-10">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+          <div className="col-span-1 md:col-span-2 space-y-8">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+                <Timer className="text-white" size={18} />
+              </div>
+              <span className="text-lg font-black text-slate-900 tracking-tight">ProFasting<span className="text-indigo-600">Health</span></span>
+            </Link>
+            <p className="text-slate-400 font-medium leading-relaxed max-w-sm">
+              Supporting your journey towards holistic health tracking, from intermittent fasting to mental wellbeing.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-black text-slate-900 mb-6 tracking-tight uppercase text-xs">Product</h4>
+            <ul className="space-y-4 text-slate-500 font-bold text-sm">
+              <li><Link href="#features" className="hover:text-indigo-600">Features</Link></li>
+              <li><Link href="#modules" className="hover:text-indigo-600">Modules</Link></li>
+              <li><Link href="#pricing" className="hover:text-indigo-600">Pricing</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-black text-slate-900 mb-6 tracking-tight uppercase text-xs">Legal</h4>
+            <ul className="space-y-4 text-slate-500 font-bold text-sm">
+              <li className="hover:text-indigo-600 cursor-pointer">Privacy Policy</li>
+              <li className="hover:text-indigo-600 cursor-pointer">Terms of Service</li>
+              <li className="hover:text-indigo-600 cursor-pointer">Cookie Policy</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="bg-slate-900 rounded-[2rem] p-8 md:p-12 mb-12 text-white relative overflow-hidden group">
+          <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+            <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-rose-400 shrink-0">
+              <Info size={32} />
+            </div>
+            <p className="text-sm md:text-base font-bold text-slate-300 leading-relaxed text-center md:text-left">
+              <span className="text-white font-black uppercase text-xs tracking-widest block mb-1">Medical Disclaimer:</span>
+              This app is for self-tracking and education only. It does not diagnose, treat, or provide medical advice.
+              Always talk to your healthcare provider about your health, especially before starting any fasting regimen
+              or making significant changes to your medical care or medications.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-slate-400 text-xs font-bold font-mono tracking-widest uppercase">
+          <p>© 2025 ProFasting Health. All rights reserved.</p>
+          <p>Handcrafted for Holistic Health</p>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default function LandingPage() {
+  return (
+    <main className="min-h-screen selection:bg-indigo-100 selection:text-indigo-600">
+      <Navbar />
+      <HeroSection />
+      <StatsStrip />
+      <BenefitsSection />
+      <ModulesSection />
+      <ScreenshotsSection />
+      <PricingSection />
+      <FaqSection />
+      <Footer />
     </main>
   );
 }

@@ -6,7 +6,6 @@ import {
     Frown,
     Meh,
     SmilePlus,
-    FrownPlus,
     Wind,
     Moon,
     MessageSquare,
@@ -19,7 +18,8 @@ import {
     Footprints,
     Users,
     Zap,
-    Info
+    Info,
+    CloudRain
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -47,7 +47,7 @@ interface SelfCareAction {
 // --- Helpers & Consts ---
 
 const MOOD_CONFIG: Record<Mood, { label: string; icon: React.ElementType; color: string; bg: string }> = {
-    very_low: { label: 'Very Low', icon: FrownPlus, color: 'text-rose-600', bg: 'bg-rose-50' },
+    very_low: { label: 'Very Low', icon: CloudRain, color: 'text-rose-600', bg: 'bg-rose-50' },
     low: { label: 'Low', icon: Frown, color: 'text-orange-600', bg: 'bg-orange-50' },
     okay: { label: 'Okay', icon: Meh, color: 'text-amber-600', bg: 'bg-amber-50' },
     good: { label: 'Good', icon: Smile, color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -234,7 +234,7 @@ export default function MentalHealthPage() {
                                     <label className="text-sm font-black text-slate-400 uppercase tracking-wider mb-3 block">What&apos;s on your mind?</label>
                                     <textarea
                                         value={currentNote}
-                                        onChange={(e) => setCurrentNote(e.target.value)}
+                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCurrentNote(e.target.value)}
                                         placeholder="Short note about your day..."
                                         className="w-full bg-slate-50 border-none rounded-2xl p-4 text-slate-600 font-medium h-24 placeholder:text-slate-300 focus:ring-2 focus:ring-indigo-100 transition-all outline-none resize-none"
                                     />
@@ -418,7 +418,7 @@ export default function MentalHealthPage() {
 
 // --- Subcomponents ---
 
-function ExerciseCard({ title, detail, sub, icon: Icon, color }: { title: string; detail: string; sub: string; icon: any; color: string }) {
+function ExerciseCard({ title, detail, sub, icon: Icon, color }: { title: string; detail: string; sub: string; icon: React.ElementType; color: string }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
