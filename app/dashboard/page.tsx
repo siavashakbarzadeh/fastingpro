@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import FastingTimer from '@/components/fasting/timer';
+import FastingSummary from '@/components/fasting/summary';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import Link from 'next/link';
@@ -16,6 +17,8 @@ export default function DashboardPage() {
     const [waterIntake, setWaterIntake] = useState(0);
     const [fastingData, setFastingData] = useState<any>(null);
     const [cycleData, setCycleData] = useState<any>(null);
+    const [showSummary, setShowSummary] = useState(false);
+    const [summaryData, setSummaryData] = useState<any>(null);
 
     const fetchFast = async () => {
         try {
@@ -125,6 +128,30 @@ export default function DashboardPage() {
         }
     };
 
+    const handleSaveFast = async (data: { startTime: Date; endTime: Date; weight: number }) => {
+        try {
+            await api.post('/fasts/end', {
+                end_time: data.endTime.toISOString(),
+                // Start time might have been edited in the summary
+                start_time: data.startTime.toISOString(),
+            });
+            // Update weight if needed (placeholder)
+            localStorage.setItem('currentWeight', data.weight.toString());
+        } catch (error: any) {
+            console.error('API Error ending fast:', error);
+        } finally {
+            localStorage.removeItem('activeFast');
+            setShowSummary(false);
+            fetchFast();
+        }
+    };
+
+    const handleDiscardFast = () => {
+        localStorage.removeItem('activeFast');
+        setShowSummary(false);
+        setActiveFast(null);
+    };
+
     // Calculate water progress
     const waterGoal = 2500;
     const waterPercentage = Math.min(waterIntake / waterGoal, 1);
@@ -160,14 +187,27 @@ export default function DashboardPage() {
                         initialFast={activeFast}
                         fastingData={fastingData}
                         onRefresh={fetchFast}
-                        onStop={() => setActiveFast(null)}
+                        onStop={(data) => {
+                            setSummaryData(data);
+                            setShowSummary(true);
+                        }}
                     />
                 </div>
             ) : (
                 <FastingScheduleWidget fastingData={fastingData} onStart={handleStart} />
             )}
 
-            {!activeFast && (
+            {showSummary && summaryData && (
+                <FastingSummary
+                    startTime={new Date(summaryData.start_time)}
+                    endTime={new Date(summaryData.end_time)}
+                    onSave={handleSaveFast}
+                    onDiscard={handleDiscardFast}
+                    onBack={() => setShowSummary(false)}
+                />
+            )}
+
+            {!activeFast && !showSummary && (
                 <div className="space-y-6">
                     <div className="flex justify-between items-end px-2">
                         <h3 className="text-xl font-black text-slate-800">Ready to start?</h3>
