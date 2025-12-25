@@ -59,14 +59,16 @@ class FastingController extends Controller
             return response()->json(['message' => 'No active fast'], 404);
         }
 
-        $endTime = Carbon::now();
-        $startTime = Carbon::parse($fast->start_time);
+        $endTime = $request->has('end_time') ? Carbon::parse($request->end_time) : Carbon::now();
+        $startTime = $request->has('start_time') ? Carbon::parse($request->start_time) : Carbon::parse($fast->start_time);
+        
         $duration = $endTime->diffInMinutes($startTime);
 
         $fast->update([
+            'start_time' => $startTime,
             'end_time' => $endTime,
             'actual_duration_minutes' => $duration,
-            'status' => 'completed', // simplified logic
+            'status' => 'completed',
         ]);
 
         return response()->json($fast);

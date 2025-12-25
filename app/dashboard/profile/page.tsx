@@ -23,8 +23,9 @@ export default function ProfilePage() {
 
     const fetchHistory = async () => {
         try {
-            const res = await api.get('/fasts/history');
-            const historyData = res.data || [];
+            // Read from localStorage instead of API
+            const savedHistory = localStorage.getItem('fastingHistory');
+            const historyData = savedHistory ? JSON.parse(savedHistory) : [];
             setHistory(historyData);
 
             // Calculate stats
@@ -59,7 +60,7 @@ export default function ProfilePage() {
                 return Math.floor(dayMs / (1000 * 60));
             });
 
-            // Weight from localStorage (as it's logged in summary)
+            // Weight from localStorage
             const weight = localStorage.getItem('currentWeight') || '93.1';
 
             setStats({
@@ -72,7 +73,7 @@ export default function ProfilePage() {
             setChartData(dailyMinutes);
 
         } catch (error) {
-            console.error('Error fetching history:', error);
+            console.error('Error loading local history:', error);
         } finally {
             setLoading(false);
         }

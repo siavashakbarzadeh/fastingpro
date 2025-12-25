@@ -23,29 +23,14 @@ export default function DashboardPage() {
     const router = useRouter();
 
     const fetchFast = async () => {
-        try {
-            // Check localStorage first for immediate UI update
-            const localFast = localStorage.getItem('activeFast');
-            if (localFast) {
-                setActiveFast(JSON.parse(localFast));
-            }
-
-            const res = await api.get('/fasts/current');
-            if (res.data) {
-                setActiveFast(res.data);
-                localStorage.setItem('activeFast', JSON.stringify(res.data));
-            } else {
-                // If API returns null, and we don't have local anymore, clear state
-                if (!localStorage.getItem('activeFast')) {
-                    setActiveFast(null);
-                }
-            }
-        } catch (error: any) {
-            console.error('API Error:', error);
-            // On error, we still have the local state if it exists
-        } finally {
-            setLoading(false);
+        // Only use localStorage for persistence for now
+        const localFast = localStorage.getItem('activeFast');
+        if (localFast) {
+            setActiveFast(JSON.parse(localFast));
+        } else {
+            setActiveFast(null);
         }
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -114,44 +99,32 @@ export default function DashboardPage() {
             status: 'active'
         };
 
-        // Aggressively update local state for immediate feedback
         setActiveFast(newFast);
         localStorage.setItem('activeFast', JSON.stringify(newFast));
-
-        try {
-            await api.post('/fasts/start', {
-                plan_id: planId,
-                start_time: newFast.start_time,
-                planned_duration_minutes: plannedDuration,
-            });
-        } catch (error: any) {
-            console.error('API Error starting fast:', error);
-            // We keep the local state so the user can still use the timer
-        }
     };
 
     const handleSaveFast = async (data: { startTime: Date; endTime: Date; weight: number }) => {
-        try {
-            await api.post('/fasts/end', {
-                end_time: data.endTime.toISOString(),
-                start_time: data.startTime.toISOString(),
-            });
+        // 1. Save weight
+        localStorage.setItem('currentWeight', data.weight.toString());
 
-            // Update weight in localStorage for Profile usage
-            localStorage.setItem('currentWeight', data.weight.toString());
+        // 2. Add to history
+        const history = JSON.parse(localStorage.getItem('fastingHistory') || '[]');
+        const newSession = {
+            id: Date.now(),
+            start_time: data.startTime.toISOString(),
+            end_time: data.endTime.toISOString(),
+            status: 'completed'
+        };
+        history.push(newSession);
+        localStorage.setItem('fastingHistory', JSON.stringify(history));
 
-            // Clear active fast both in state and storage
-            localStorage.removeItem('activeFast');
-            setActiveFast(null);
-            setShowSummary(false);
+        // 3. Clear active fast
+        localStorage.removeItem('activeFast');
+        setActiveFast(null);
+        setShowSummary(false);
 
-            // Redirect to profile to see updated stats
-            router.push('/dashboard/profile');
-        } catch (error: any) {
-            console.error('API Error ending fast:', error);
-        } finally {
-            fetchFast();
-        }
+        // 4. Redirect
+        router.push('/dashboard/profile');
     };
 
     const handleDiscardFast = () => {
