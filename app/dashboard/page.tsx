@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain, Pencil, ChevronRight as LucideChevronRight } from 'lucide-react';
+import CycleHistoryWidget from '@/components/dashboard/cycle-history';
+import ConceptionGauge from '@/components/dashboard/conception-gauge';
+import ConceptionLikelihoodChart from '@/components/dashboard/conception-likelihood-chart';
 
 export default function DashboardPage() {
     const [activeFast, setActiveFast] = useState<any>(null);
@@ -184,6 +187,13 @@ export default function DashboardPage() {
                 <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center text-indigo-500 shadow-sm group-hover:scale-110 transition-transform">
                     <ChevronRight size={24} strokeWidth={3} />
                 </div>
+            </div>
+
+            <CycleHistoryWidget />
+
+            <div className="space-y-4">
+                <ConceptionGauge />
+                <ConceptionLikelihoodChart />
             </div>
 
             {fastingData && (
