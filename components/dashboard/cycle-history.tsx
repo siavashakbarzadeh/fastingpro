@@ -15,14 +15,17 @@ export default function CycleHistoryWidget({ cycleData }: { cycleData?: any }) {
     const cycleLen = cycleData?.cycleLength || 28;
     const currentDay = ((diffDays - 1) % cycleLen) + 1;
 
-    const days = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    // Generate days for the full cycle
+    const ovulationDay = Math.floor(cycleLen / 2);
+    const daysVisible = Math.max(cycleLen, 15);
+    const dayNumbers = Array.from({ length: Math.ceil(daysVisible / 2) }, (_, i) => i * 2 + 1);
 
     const symptoms = [
-        { label: 'Period cramps', color: 'bg-blue-600', activeDays: [1, 2, 3, 4, 6] },
-        { label: 'Trouble falling asleep', color: 'bg-orange-500', activeDays: [7, 9, 12] },
-        { label: 'Running', color: 'bg-teal-500', activeDays: [6, 8, 12] },
-        { label: 'Moderate Hot flashes', color: 'bg-blue-400', activeDays: [14] },
-        { label: 'Sweet Cravings', color: 'bg-orange-400', activeDays: [2, 3] },
+        { label: 'Period cramps', color: 'bg-blue-600', activeDays: Array.from({ length: periodLen }, (_, i) => i + 1) },
+        { label: 'Trouble falling asleep', color: 'bg-orange-500', activeDays: [ovulationDay - 1, ovulationDay, ovulationDay + 1] },
+        { label: 'Running', color: 'bg-teal-500', activeDays: [6, 8, 12, 18, 22] },
+        { label: 'Moderate Hot flashes', color: 'bg-blue-400', activeDays: [ovulationDay + 2] },
+        { label: 'Sweet Cravings', color: 'bg-orange-400', activeDays: [cycleLen - 2, cycleLen - 1] },
     ];
 
     return (
@@ -66,7 +69,7 @@ export default function CycleHistoryWidget({ cycleData }: { cycleData?: any }) {
 
             {/* Year and Toggle */}
             <div className="flex justify-between items-center mb-8">
-                <span className="text-2xl font-black text-slate-800">2023</span>
+                <span className="text-2xl font-black text-slate-800">{new Date().getFullYear()}</span>
                 <div className="flex items-center gap-3">
                     <span className="text-sm font-bold text-slate-800">Show data</span>
                     <button
@@ -83,11 +86,11 @@ export default function CycleHistoryWidget({ cycleData }: { cycleData?: any }) {
                 <div className="flex items-baseline gap-2">
                     <span className="text-lg font-black text-slate-800">Current cycle</span>
                     <span className="text-sm font-bold text-slate-400">
-                        {new Date(cycleData?.lastPeriodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {cycleData?.lastPeriodStart ? new Date(cycleData.lastPeriodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Aug 3'}
                     </span>
                 </div>
                 <button className="text-slate-400 hover:text-slate-600">
-                    <MoreHorizontal size={20} />
+                    < MoreHorizontal size={20} />
                 </button>
             </div>
 
@@ -95,7 +98,7 @@ export default function CycleHistoryWidget({ cycleData }: { cycleData?: any }) {
             <div className="h-4 w-full rounded-full bg-slate-100 mb-6 overflow-hidden flex">
                 <div
                     className="h-full bg-red-800/80 rounded-l-full"
-                    style={{ width: `${(cycleData?.periodDuration / cycleData?.cycleLength) * 100}%` }}
+                    style={{ width: `${(periodLen / cycleLen) * 100}%` }}
                 />
                 <div className="h-full bg-red-400" style={{ width: '4%' }} />
                 <div className="flex-1" />
@@ -106,38 +109,48 @@ export default function CycleHistoryWidget({ cycleData }: { cycleData?: any }) {
             </div>
 
             {/* Symptom Grid */}
-            <div className="flex flex-col gap-4">
-                {/* Numbers Row */}
-                <div className="flex">
-                    <div className="flex flex-1 justify-between pr-4">
-                        {[1, 3, 5, 7, 9, 11, 13, 15].map(num => (
-                            <span key={num} className={`text-[10px] font-black w-4 text-center ${num === 1 || num === 3 || num === 5 ? 'text-red-500' : num === 15 ? 'text-teal-500' : 'text-slate-300'}`}>
-                                {num}
-                            </span>
-                        ))}
-                    </div>
-                    <div className="w-24" /> {/* Label alignment spacer */}
-                </div>
-
-                {/* Symptom Rows */}
-                {symptoms.map((symptom) => (
-                    <div key={symptom.label} className="flex items-center">
+            <div className="flex flex-col gap-4 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-none">
+                <div className="min-w-[400px]">
+                    {/* Numbers Row */}
+                    <div className="flex mb-4">
                         <div className="flex flex-1 justify-between pr-4">
-                            {[1, 3, 5, 7, 9, 11, 13, 15].map(day => (
-                                <div key={day} className="w-4 flex justify-center">
-                                    {symptom.activeDays.includes(day) ? (
-                                        <div className={`w-2 h-2 rounded-full ${symptom.color}`} />
-                                    ) : (
-                                        <div className="w-1 h-1 rounded-full bg-slate-100" />
-                                    )}
-                                </div>
+                            {dayNumbers.map(num => (
+                                <span
+                                    key={num}
+                                    className={`text-[10px] font-black w-4 text-center transition-colors ${num === currentDay ? 'text-indigo-600 underline' :
+                                        num <= periodLen ? 'text-red-500' :
+                                            num >= ovulationDay - 5 && num <= ovulationDay + 1 ? 'text-teal-500' :
+                                                'text-slate-300'
+                                        }`}
+                                >
+                                    {num}
+                                </span>
                             ))}
                         </div>
-                        <span className="w-32 text-[10px] font-bold text-slate-400 whitespace-nowrap">
-                            {symptom.label}
-                        </span>
+                        <div className="w-32" />
                     </div>
-                ))}
+
+                    {/* Symptom Rows */}
+                    {symptoms.map((symptom) => (
+                        <div key={symptom.label} className="flex items-center mb-3">
+                            <div className="flex flex-1 justify-between pr-4">
+                                {dayNumbers.map(day => (
+                                    <div key={day} className="w-4 flex justify-center relative">
+                                        {day === currentDay && <div className="absolute inset-x-0 -top-1 -bottom-1 border border-indigo-200 bg-indigo-50/30 rounded-full -z-10" />}
+                                        {symptom.activeDays.includes(day) || (day - 1 === currentDay - 1 && symptom.activeDays.includes(day - 1)) ? (
+                                            <div className={`w-2 h-2 rounded-full ${symptom.color} shadow-sm`} />
+                                        ) : (
+                                            <div className="w-1 h-1 rounded-full bg-slate-100" />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            <span className="w-32 text-[10px] font-bold text-slate-400 whitespace-nowrap pl-2">
+                                {symptom.label}
+                            </span>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
