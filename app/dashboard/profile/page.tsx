@@ -118,21 +118,6 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                {/* Upgrade Card */}
-                <div className="bg-gradient-to-r from-orange-50 to-orange-100/50 rounded-[2rem] p-6 relative overflow-hidden border border-orange-100 flex items-center justify-between">
-                    <div className="relative z-10">
-                        <h3 className="text-xl font-black text-[#002855]">GoFasting PRO</h3>
-                        <p className="text-orange-900/40 font-bold text-sm">Faster reach your goals</p>
-                    </div>
-                    <button className="bg-orange-500 text-white font-black px-6 py-3 rounded-full shadow-lg shadow-orange-500/20 hover:scale-105 transition-transform relative z-10">
-                        Upgrade
-                    </button>
-                    {/* Star Pattern Mockup */}
-                    <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-1/4 -translate-y-1/4">
-                        <Hexagon size={120} fill="currentColor" />
-                    </div>
-                </div>
-
                 {/* Achievements */}
                 <section className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-50">
                     <div className="flex justify-between items-center mb-6">
