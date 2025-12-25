@@ -112,7 +112,7 @@ export default function DashboardPage() {
 
             {activeFast ? (
                 <div className="bg-white rounded-[2.5rem] p-1 shadow-2xl shadow-emerald-500/10 border border-slate-50">
-                    <FastingTimer initialFast={activeFast} onRefresh={fetchFast} />
+                    <FastingTimer initialFast={activeFast} fastingData={fastingData} onRefresh={fetchFast} />
                 </div>
             ) : (
                 <FastingScheduleWidget fastingData={fastingData} onStart={handleStart} />
