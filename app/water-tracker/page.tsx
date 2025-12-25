@@ -119,7 +119,7 @@ export default function WaterTrackerPage() {
                 </div>
 
                 {/* Cup Capacity Selection */}
-                <div className="w-full">
+                <div className="w-full mb-12">
                     <h3 className="font-bold text-slate-900 text-lg mb-4">Cup Capacity</h3>
                     <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide">
                         {capacities.map((cap) => {
@@ -144,6 +144,78 @@ export default function WaterTrackerPage() {
                                 </button>
                             );
                         })}
+                    </div>
+                </div>
+
+                {/* Statistics Card */}
+                <div className="w-full bg-white rounded-[32px] p-6 shadow-sm mb-12 border border-slate-100">
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-xl font-bold text-slate-900">Water intake</h3>
+                        <ChevronLeft className="w-5 h-5 text-slate-400 rotate-180" />
+                    </div>
+
+                    <div className="flex justify-between items-end mb-6">
+                        <p className="text-slate-500 font-medium text-sm">Average: <span className="text-slate-900 font-bold text-lg">375ml</span></p>
+                        <p className="text-slate-500 font-medium text-sm">19/12 - 25/12</p>
+                    </div>
+
+                    <div className="bg-slate-50 p-1 rounded-full flex mb-8">
+                        <button className="flex-1 py-1.5 rounded-full bg-white shadow-sm text-slate-900 font-bold text-sm">Day</button>
+                        <button className="flex-1 py-1.5 rounded-full text-slate-400 font-medium text-sm hover:text-slate-600">Week</button>
+                        <button className="flex-1 py-1.5 rounded-full text-slate-400 font-medium text-sm hover:text-slate-600">Month</button>
+                    </div>
+
+                    <div className="relative h-64 w-full">
+                        {/* Y Axis Labels */}
+                        <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-xs text-slate-400 font-medium text-right pr-3">
+                            <span>3,000</span>
+                            <span>2,250</span>
+                            <span>1,500</span>
+                            <span>750</span>
+                            <span>0</span>
+                        </div>
+
+                        {/* Chart Area */}
+                        <div className="absolute left-14 right-0 top-0 bottom-0">
+                            {/* Goal Line (approx 2500/3000 = 83% from bottom, so 17% from top) */}
+                            <div className="absolute left-0 right-0 top-[17%] border-t border-dashed border-red-300 z-10"></div>
+
+                            {/* Bars */}
+                            <div className="flex justify-between items-end h-full pb-8">
+                                {[
+                                    { day: '19', value: 0 },
+                                    { day: '20', value: 0 },
+                                    { day: '21', value: 0 },
+                                    { day: '22', value: 0 },
+                                    { day: '23', value: 750 },
+                                    { day: '24', value: 0 },
+                                    { day: '25', value: 0, isToday: true, labelVal: '0ml' },
+                                ].map((d, i) => (
+                                    <div key={i} className="flex flex-col items-center justify-end h-full w-full gap-2 relative group">
+                                        {/* Bar container */}
+                                        <div className="relative w-3 rounded-full bg-blue-50 h-full overflow-hidden">
+                                            {d.value > 0 && (
+                                                <div
+                                                    className="absolute bottom-0 left-0 right-0 bg-blue-400 rounded-full w-full transition-all group-hover:bg-blue-500"
+                                                    style={{ height: `${(d.value / 3000) * 100}%` }}
+                                                />
+                                            )}
+                                        </div>
+                                        {/* X Label */}
+                                        <span className={`text-xs font-medium absolute -bottom-0 ${d.isToday ? 'text-slate-900' : 'text-slate-400'}`}>{d.day}</span>
+
+                                        {/* Today Marker / Tooltip */}
+                                        {d.isToday && (
+                                            <div className="absolute bottom-[20px] flex flex-col items-center animate-bounce">
+                                                <span className="text-[10px] font-bold text-blue-400 mb-0.5 whitespace-nowrap">{d.labelVal}</span>
+                                                <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-blue-400"></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="absolute right-0 bottom-0 text-xs text-slate-400 font-medium">Goal: 2500ml</div>
                     </div>
                 </div>
 

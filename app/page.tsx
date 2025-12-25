@@ -46,6 +46,7 @@ const steps: Step[] = [
       { id: 'understand_body', label: 'Understand my body', icon: <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-3xl">🧠</div> },
       { id: 'fasting', label: 'Fasting', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">⚖️</div> },
       { id: 'enhance_sex_life', label: 'Enhance my sex life', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🔥</div> },
+      { id: 'water_tracker', label: 'Track water intake', icon: <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl">💧</div> },
       { id: 'decode_discharge', label: 'Decode my discharge', icon: <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-3xl">🧪</div> },
       { id: 'none', label: 'None of the above', icon: <div className="w-16 h-16 rounded-full bg-pink-50 flex items-center justify-center text-3xl">❤️</div> },
     ]
@@ -174,6 +175,11 @@ export default function Home() {
   const [view, setView] = useState<'intro' | 'quiz'>('quiz'); // Direct to quiz
 
   const handleNext = () => {
+    if (steps[currentStep].id === 'goal' && (answers['goal'] || []).includes('water_tracker')) {
+      router.push('/water-tracker');
+      return;
+    }
+
     // If user selected 'get_pregnant' in the goal step, redirect to /get-pregnant
     if (steps[currentStep].id === 'goal' && (answers['goal'] || []).includes('get_pregnant')) {
       router.push('/get-pregnant');
