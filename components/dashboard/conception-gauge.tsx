@@ -39,47 +39,33 @@ export default function ConceptionGauge({ cycleData }: { cycleData?: any }) {
                     {/* Period Segment (Red) */}
                     <circle
                         cx="120" cy="120" r={normalizedRadius}
-                        stroke="#b91c1c" strokeWidth={stroke} fill="none"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={circumference * 0.85}
-                        strokeLinecap="round"
-                        transform="rotate(0 120 120)"
-                        className="opacity-80"
-                    />
-                    <circle
-                        cx="120" cy="120" r={normalizedRadius}
                         stroke="#ef4444" strokeWidth={stroke} fill="none"
                         strokeDasharray={circumference}
-                        strokeDashoffset={circumference * 0.9}
+                        strokeDashoffset={circumference * (1 - (cycleData?.periodDuration / cycleLen))}
                         strokeLinecap="round"
-                        transform="rotate(30 120 120)"
+                        transform="rotate(0 120 120)"
                     />
 
-                    {/* Fertile Window (Light Blue) */}
+                    {/* Fertile Window (Light Blue) - Approximate */}
                     <circle
                         cx="120" cy="120" r={normalizedRadius}
                         stroke="#93c5fd" strokeWidth={stroke} fill="none"
                         strokeDasharray={circumference}
                         strokeDashoffset={circumference * 0.8}
                         strokeLinecap="round"
-                        transform="rotate(120 120 120)"
-                    />
-
-                    {/* Peak Window (Dark Blue) */}
-                    <circle
-                        cx="120" cy="120" r={normalizedRadius}
-                        stroke="#1e293b" strokeWidth={stroke} fill="none"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={circumference * 0.9}
-                        strokeLinecap="round"
-                        transform="rotate(190 120 120)"
+                        transform={`rotate(${(fertileStart / cycleLen) * 360} 120 120)`}
                     />
                 </svg>
 
                 {/* Day indicator dot */}
-                <div className="absolute w-12 h-12 bg-white rounded-full shadow-xl border-4 border-slate-800 flex flex-col items-center justify-center z-20" style={{ transform: 'translate(45px, 95px)' }}>
+                <div
+                    className="absolute w-12 h-12 bg-white rounded-full shadow-xl border-4 border-slate-800 flex flex-col items-center justify-center z-20 transition-all duration-1000"
+                    style={{
+                        transform: `rotate(${(currentDay / cycleLen) * 360 - 90}deg) translate(${normalizedRadius}px) rotate(${-((currentDay / cycleLen) * 360 - 90)}deg)`
+                    }}
+                >
                     <span className="text-[8px] font-black text-slate-400 uppercase leading-none">Day</span>
-                    <span className="text-xl font-black text-slate-800 leading-none">13</span>
+                    <span className="text-xl font-black text-slate-800 leading-none">{currentDay}</span>
                 </div>
 
                 {/* Drop icon at the top */}
@@ -91,10 +77,10 @@ export default function ConceptionGauge({ cycleData }: { cycleData?: any }) {
 
                 <div className="flex flex-col items-center z-10 text-center px-8">
                     <p className="text-slate-900 font-bold mb-4">
-                        Today, <span className="text-slate-400">19. Jul</span>
+                        Today, <span className="text-slate-400">{todayDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}</span>
                     </p>
                     <h3 className="text-[28px] font-black text-slate-800 leading-tight mb-6">
-                        It's ideal timing to try to conceive
+                        {isIdeal ? "It's ideal timing to try to conceive" : "It's currently a lower chance to conceive"}
                     </h3>
                     <div className="flex flex-col items-center gap-1 cursor-pointer group">
                         <span className="text-blue-500 font-bold text-sm">Here's what you can do</span>

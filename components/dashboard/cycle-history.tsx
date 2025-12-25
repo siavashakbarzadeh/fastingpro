@@ -82,7 +82,9 @@ export default function CycleHistoryWidget({ cycleData }: { cycleData?: any }) {
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-baseline gap-2">
                     <span className="text-lg font-black text-slate-800">Current cycle</span>
-                    <span className="text-sm font-bold text-slate-400">Aug 3</span>
+                    <span className="text-sm font-bold text-slate-400">
+                        {new Date(cycleData?.lastPeriodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
                 </div>
                 <button className="text-slate-400 hover:text-slate-600">
                     <MoreHorizontal size={20} />
@@ -91,10 +93,16 @@ export default function CycleHistoryWidget({ cycleData }: { cycleData?: any }) {
 
             {/* Progress Bar */}
             <div className="h-4 w-full rounded-full bg-slate-100 mb-6 overflow-hidden flex">
-                <div className="h-full w-1/4 bg-red-800/80 rounded-l-full" />
-                <div className="h-full w-1/6 bg-red-400" />
+                <div
+                    className="h-full bg-red-800/80 rounded-l-full"
+                    style={{ width: `${(cycleData?.periodDuration / cycleData?.cycleLength) * 100}%` }}
+                />
+                <div className="h-full bg-red-400" style={{ width: '4%' }} />
                 <div className="flex-1" />
-                <div className="h-full w-1/4 bg-gradient-to-r from-teal-500 to-blue-200 rounded-r-full" />
+                <div
+                    className="h-full bg-gradient-to-r from-teal-500 to-blue-200 rounded-r-full"
+                    style={{ width: '25%' }}
+                />
             </div>
 
             {/* Symptom Grid */}
