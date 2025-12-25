@@ -280,7 +280,7 @@ export default function DashboardPage() {
             {showSummary && summaryData && (
                 <FastingSummary
                     startTime={new Date(summaryData.start_time)}
-                    endTime={new Date(summaryData.end_time)}
+                    endTime={summaryData.end_time ? new Date(summaryData.end_time) : new Date()}
                     onSave={handleSaveFast}
                     onDiscard={handleDiscardFast}
                     onBack={() => setShowSummary(false)}
