@@ -1,106 +1,199 @@
 'use client';
 
-import React from 'react';
-import { User, Settings, Bell, Shield, HelpCircle, ChevronRight, LogOut, Flame, Target, Award, Calendar, Share2, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+    User, Settings, ChevronRight, Flame, Target, Award,
+    Calendar, Share2, Zap, Scale, Clock, TrendingUp, Camera, Pencil, Hexagon
+} from 'lucide-react';
+import Link from 'next/link';
 
 export default function ProfilePage() {
+    const [stats, setStats] = useState({
+        weight: '93.1',
+        weightChange: '+13.1',
+        fastingDays: '2',
+        fastingHours: '14.6',
+        longestFast: '14.1',
+    });
+
+    useEffect(() => {
+        // Load stats from localStorage
+        const weight = localStorage.getItem('currentWeight') || '93.1';
+        const fastingDays = localStorage.getItem('fastingDays') || '2';
+        const fastingHours = localStorage.getItem('fastingHours') || '14.6';
+
+        setStats(prev => ({
+            ...prev,
+            weight,
+            fastingDays,
+            fastingHours
+        }));
+    }, []);
+
+    const achievements = [
+        { id: 1, label: '1', active: true },
+        { id: 5, label: '5', active: false },
+        { id: 10, label: '10', active: false },
+        { id: 20, label: '20', active: false },
+        { id: 50, label: '50', active: false },
+    ];
+
     return (
-        <div className="bg-[#fcfdfe] min-h-screen animate-fade-in pb-20">
-            {/* Profile Header */}
-            <div className="bg-white px-6 pt-16 pb-10 rounded-b-[3rem] shadow-sm border-b border-slate-50 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-6">
-                    <button className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-600 transition-colors">
-                        <Settings size={22} />
+        <div className="bg-[#f8fbff] min-h-screen pb-32">
+            {/* Header */}
+            <header className="flex justify-end p-6">
+                <div className="relative">
+                    <Settings className="text-slate-400" size={24} />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-[#f8fbff]" />
+                </div>
+            </header>
+
+            <div className="px-6 space-y-6">
+                {/* Profile Info */}
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="w-24 h-24 rounded-full bg-[#f0f7ff] border-4 border-white shadow-sm flex items-center justify-center relative">
+                        <User size={48} className="text-slate-200" />
+                        <div className="absolute top-0 right-0 w-8 h-8 bg-white rounded-full shadow-sm flex items-center justify-center">
+                            <span className="text-slate-300 text-xl font-bold">+</span>
+                        </div>
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                            <h1 className="text-2xl font-black text-[#002855]">Beginner</h1>
+                            <Share2 className="text-slate-300" size={20} />
+                        </div>
+                        <p className="text-slate-400 font-bold text-sm">Share your thoughts here</p>
+                    </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                    {/* Fasting Days */}
+                    <div className="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-50 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+                            <Calendar size={24} fill="currentColor" fillOpacity={0.2} />
+                        </div>
+                        <div>
+                            <div className="text-[#002855]/40 text-[10px] font-black uppercase tracking-widest leading-none mb-1">Fasting days</div>
+                            <div className="text-xl font-black text-[#002855]">{stats.fastingDays}</div>
+                        </div>
+                    </div>
+
+                    {/* Weight */}
+                    <div className="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-50 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-400">
+                            <Scale size={24} />
+                        </div>
+                        <div className="flex-1">
+                            <div className="text-[#002855]/40 text-[10px] font-black uppercase tracking-widest leading-none mb-1">Weight</div>
+                            <div className="flex items-center gap-1">
+                                <span className="text-xl font-black text-[#002855]">{stats.weight}kg</span>
+                                <span className="bg-orange-50 text-orange-500 text-[9px] font-black px-1.5 py-0.5 rounded-full flex items-center">
+                                    ↑ {stats.weightChange.replace('+', '')}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Fasting Hours */}
+                    <div className="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-50 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-100/50 flex items-center justify-center text-emerald-500">
+                            <Clock size={24} />
+                        </div>
+                        <div>
+                            <div className="text-[#002855]/40 text-[10px] font-black uppercase tracking-widest leading-none mb-1">Fasting hours</div>
+                            <div className="text-xl font-black text-[#002855]">{stats.fastingHours} h</div>
+                        </div>
+                    </div>
+
+                    {/* Longest Fast */}
+                    <div className="bg-white rounded-[2rem] p-5 shadow-sm border border-slate-50 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-400">
+                            <Zap size={24} fill="currentColor" />
+                        </div>
+                        <div>
+                            <div className="text-[#002855]/40 text-[10px] font-black uppercase tracking-widest leading-none mb-1">Longest fasting</div>
+                            <div className="text-xl font-black text-[#002855]">{stats.longestFast} h</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Upgrade Card */}
+                <div className="bg-gradient-to-r from-orange-50 to-orange-100/50 rounded-[2rem] p-6 relative overflow-hidden border border-orange-100 flex items-center justify-between">
+                    <div className="relative z-10">
+                        <h3 className="text-xl font-black text-[#002855]">GoFasting PRO</h3>
+                        <p className="text-orange-900/40 font-bold text-sm">Faster reach your goals</p>
+                    </div>
+                    <button className="bg-orange-500 text-white font-black px-6 py-3 rounded-full shadow-lg shadow-orange-500/20 hover:scale-105 transition-transform relative z-10">
+                        Upgrade
                     </button>
-                </div>
-
-                <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="w-32 h-32 rounded-[3rem] bg-gradient-to-tr from-[#00ca86] to-emerald-300 flex items-center justify-center text-white relative shadow-2xl shadow-emerald-500/20 group">
-                        <User size={64} strokeWidth={2.5} className="group-hover:scale-110 transition-transform duration-500" />
-                        <div className="absolute -bottom-2 -right-2 bg-white p-2 rounded-2xl shadow-lg border-4 border-slate-50">
-                            <div className="bg-orange-500 w-6 h-6 rounded-xl flex items-center justify-center">
-                                <Zap size={14} className="text-white" fill="white" />
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Siavash Akbarzadeh</h1>
-                        <p className="text-[#00ca86] font-black uppercase text-xs tracking-[0.2em] mt-1">Pro Member • Level 12</p>
+                    {/* Star Pattern Mockup */}
+                    <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-1/4 -translate-y-1/4">
+                        <Hexagon size={120} fill="currentColor" />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mt-10">
-                    <div className="bg-orange-50/50 p-5 rounded-[2rem] text-center space-y-1.5 border border-orange-100/50 group hover:bg-orange-50 transition-colors">
-                        <Flame className="mx-auto text-orange-500 group-hover:scale-110 transition-transform" size={26} fill="currentColor" />
-                        <div className="text-xl font-black text-slate-800">12d</div>
-                        <div className="text-[10px] font-black text-orange-600/60 uppercase tracking-widest">Streak</div>
+                {/* Achievements */}
+                <section className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-50">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-black text-[#002855]">Achievements</h3>
+                        <span className="text-slate-400 font-bold">1<span className="text-slate-200">/34</span></span>
                     </div>
-                    <div className="bg-emerald-50/50 p-5 rounded-[2rem] text-center space-y-1.5 border border-emerald-100/50 group hover:bg-emerald-50 transition-colors">
-                        <Target className="mx-auto text-emerald-500 group-hover:scale-110 transition-transform" size={26} />
-                        <div className="text-xl font-black text-slate-800">85%</div>
-                        <div className="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest">Success</div>
-                    </div>
-                    <div className="bg-indigo-50/50 p-5 rounded-[2rem] text-center space-y-1.5 border border-indigo-100/50 group hover:bg-indigo-50 transition-colors">
-                        <Award className="mx-auto text-indigo-500 group-hover:scale-110 transition-transform" size={26} />
-                        <div className="text-xl font-black text-slate-800">18</div>
-                        <div className="text-[10px] font-black text-indigo-600/60 uppercase tracking-widest">Awards</div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="p-6 space-y-8">
-                {/* Stats Section */}
-                <section className="space-y-4">
-                    <div className="flex justify-between items-center px-2">
-                        <h3 className="text-slate-400 font-black text-[11px] uppercase tracking-[0.2em]">Summary</h3>
-                        <button className="text-[#00ca86] font-black text-xs flex items-center">
-                            Detail <ChevronRight size={14} />
-                        </button>
-                    </div>
-                    <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-50 flex items-center justify-between group cursor-pointer hover:shadow-md transition-all">
-                        <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
-                                <Calendar size={28} />
-                            </div>
-                            <div>
-                                <h4 className="font-black text-slate-800 text-lg">Weekly Report</h4>
-                                <p className="text-slate-400 font-bold text-sm">Dec 18 - Dec 24, 2025</p>
-                            </div>
-                        </div>
-                        <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-300">
-                            <ChevronRight size={20} strokeWidth={3} />
-                        </div>
-                    </div>
-                </section>
-
-                {/* Settings & Info */}
-                <section className="space-y-4">
-                    <h3 className="text-slate-400 font-black text-[11px] uppercase tracking-[0.2em] px-2">Lifestyle</h3>
-                    <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-50">
-                        {[
-                            { icon: Bell, label: 'Reminders', color: 'text-orange-400', bg: 'bg-orange-50' },
-                            { icon: Share2, label: 'Share with Friends', color: 'text-indigo-400', bg: 'bg-indigo-50' },
-                            { icon: HelpCircle, label: 'Fasting Guide', color: 'text-emerald-400', bg: 'bg-emerald-50' },
-                        ].map((item, i) => (
-                            <button key={i} className={`w-full flex items-center gap-5 p-6 hover:bg-slate-50 transition-colors ${i !== 2 ? 'border-b border-slate-50' : ''}`}>
-                                <div className={`w-10 h-10 ${item.bg} ${item.color} rounded-xl flex items-center justify-center`}>
-                                    <item.icon size={20} strokeWidth={2.5} />
+                    <div className="flex justify-between gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                        {achievements.map((item) => (
+                            <div key={item.id} className="flex flex-col items-center gap-2 flex-shrink-0">
+                                <div className={`w-14 h-14 rounded-2xl border-4 ${item.active ? 'bg-indigo-50 border-indigo-100 text-indigo-500 shadow-lg shadow-indigo-100' : 'bg-slate-50 border-white text-slate-200'} flex items-center justify-center overflow-hidden relative`}>
+                                    <Hexagon size={48} className="absolute inset-0 m-auto opacity-20" />
+                                    <span className="relative z-10 font-black text-lg">{item.label}</span>
+                                    {item.active && (
+                                        <div className="absolute top-1 left-1.5">
+                                            <Award size={10} fill="currentColor" />
+                                        </div>
+                                    )}
                                 </div>
-                                <span className="flex-1 text-left font-extrabold text-slate-700">{item.label}</span>
-                                <ChevronRight className="text-slate-200" size={18} strokeWidth={3} />
-                            </button>
+                            </div>
                         ))}
                     </div>
                 </section>
 
-                <button className="w-full flex items-center justify-center gap-3 p-6 text-rose-500 font-black text-lg bg-white rounded-[2.5rem] shadow-sm border border-slate-50 hover:bg-rose-50 transition-colors mt-4">
-                    <LogOut size={22} strokeWidth={3} />
-                    Sign Out
-                </button>
-            </div>
+                {/* Recent Fasts Chart */}
+                <section className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-50">
+                    <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-xl font-black text-[#002855]">Recent fasts</h3>
+                        <div className="flex gap-2">
+                            <Share2 className="text-slate-300" size={20} />
+                            <Pencil className="text-emerald-500" size={20} />
+                        </div>
+                    </div>
 
-            <div className="text-center py-10 opacity-30">
-                <p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.3em]">FastingPro Premium v1.0.0</p>
+                    <div className="flex justify-between items-end mb-8">
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-black text-sm uppercase">Average:</span>
+                            <span className="text-[#002855] font-black text-xl">7.5 h</span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <ChevronRight size={18} className="text-slate-300 rotate-180" />
+                            <span className="text-slate-400 font-black text-xs uppercase tracking-widest">19/12 - 25/12</span>
+                            <ChevronRight size={18} className="text-slate-300" />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-end h-40 gap-3">
+                        {[0, 0, 0, 0, 0, 0, 15].map((h, i) => (
+                            <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                                <div className="w-full bg-emerald-50 rounded-full h-32 relative overflow-hidden">
+                                    {h > 0 && (
+                                        <div
+                                            className="absolute bottom-0 left-0 right-0 bg-[#00ca86] rounded-full transition-all duration-1000"
+                                            style={{ height: `${(h / 16) * 100}%` }}
+                                        />
+                                    )}
+                                </div>
+                                {h > 0 && <span className="text-emerald-500 font-black text-[10px]">{h}h</span>}
+                            </div>
+                        ))}
+                    </div>
+                </section>
             </div>
         </div>
     );

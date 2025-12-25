@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import FastingTimer from '@/components/fasting/timer';
 import FastingSummary from '@/components/fasting/summary';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ export default function DashboardPage() {
     const [cycleData, setCycleData] = useState<any>(null);
     const [showSummary, setShowSummary] = useState(false);
     const [summaryData, setSummaryData] = useState<any>(null);
+    const router = useRouter();
 
     const fetchFast = async () => {
         try {
@@ -132,17 +134,29 @@ export default function DashboardPage() {
         try {
             await api.post('/fasts/end', {
                 end_time: data.endTime.toISOString(),
-                // Start time might have been edited in the summary
                 start_time: data.startTime.toISOString(),
             });
-            // Update weight if needed (placeholder)
+
+            // Update stats in localStorage for physical representation on Profile
             localStorage.setItem('currentWeight', data.weight.toString());
+
+            // Increment fasting days (simple mock logic for now)
+            const days = parseInt(localStorage.getItem('fastingDays') || '2');
+            localStorage.setItem('fastingDays', (days + 1).toString());
+
+            // Update total hours
+            const hours = parseFloat(localStorage.getItem('fastingHours') || '14.6');
+            const newSessionHours = (data.endTime.getTime() - data.startTime.getTime()) / (1000 * 60 * 60);
+            localStorage.setItem('fastingHours', (hours + newSessionHours).toFixed(1));
+
         } catch (error: any) {
             console.error('API Error ending fast:', error);
         } finally {
             localStorage.removeItem('activeFast');
             setShowSummary(false);
             fetchFast();
+            // Redirect to profile to see updated stats
+            router.push('/dashboard/profile');
         }
     };
 
