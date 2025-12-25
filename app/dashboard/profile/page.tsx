@@ -35,28 +35,28 @@ export default function ProfilePage() {
                 format(new Date(f.start_time), 'yyyy-MM-dd')
             ));
 
-            // Total Hours
+            // Total Minutes
             const totalMs = completedFasts.reduce((acc: number, f: any) => {
                 const duration = new Date(f.end_time).getTime() - new Date(f.start_time).getTime();
                 return acc + duration;
             }, 0);
-            const totalHours = (totalMs / (1000 * 60 * 60)).toFixed(1);
+            const totalMinutes = Math.floor(totalMs / (1000 * 60));
 
             // Longest Fast
             const longestMs = completedFasts.reduce((max: number, f: any) => {
                 const duration = new Date(f.end_time).getTime() - new Date(f.start_time).getTime();
                 return Math.max(max, duration);
             }, 0);
-            const longestHours = (longestMs / (1000 * 60 * 60)).toFixed(1);
+            const longestMinutes = Math.floor(longestMs / (1000 * 60));
 
-            // Chart Data (Last 7 days)
+            // Chart Data (Last 7 days in minutes)
             const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
-            const dailyHours = last7Days.map(date => {
+            const dailyMinutes = last7Days.map(date => {
                 const dayFasts = completedFasts.filter((f: any) => isSameDay(new Date(f.start_time), date));
                 const dayMs = dayFasts.reduce((acc: number, f: any) => {
                     return acc + (new Date(f.end_time).getTime() - new Date(f.start_time).getTime());
                 }, 0);
-                return Number((dayMs / (1000 * 60 * 60)).toFixed(1));
+                return Math.floor(dayMs / (1000 * 60));
             });
 
             // Weight from localStorage (as it's logged in summary)
@@ -66,10 +66,10 @@ export default function ProfilePage() {
                 weight,
                 weightChange: '+13.1',
                 fastingDays: uniqueDays.size.toString(),
-                fastingHours: totalHours,
-                longestFast: longestHours,
+                fastingHours: totalMinutes.toString(),
+                longestFast: longestMinutes.toString(),
             });
-            setChartData(dailyHours);
+            setChartData(dailyMinutes);
 
         } catch (error) {
             console.error('Error fetching history:', error);
@@ -161,8 +161,8 @@ export default function ProfilePage() {
                             <Clock size={24} />
                         </div>
                         <div>
-                            <div className="text-[#002855]/40 text-[10px] font-black uppercase tracking-widest leading-none mb-1">Fasting hours</div>
-                            <div className="text-xl font-black text-[#002855]">{stats.fastingHours} h</div>
+                            <div className="text-[#002855]/40 text-[10px] font-black uppercase tracking-widest leading-none mb-1">Fasting minutes</div>
+                            <div className="text-xl font-black text-[#002855]">{stats.fastingHours} m</div>
                         </div>
                     </div>
 
@@ -173,7 +173,7 @@ export default function ProfilePage() {
                         </div>
                         <div>
                             <div className="text-[#002855]/40 text-[10px] font-black uppercase tracking-widest leading-none mb-1">Longest fasting</div>
-                            <div className="text-xl font-black text-[#002855]">{stats.longestFast} h</div>
+                            <div className="text-xl font-black text-[#002855]">{stats.longestFast} m</div>
                         </div>
                     </div>
                 </div>
@@ -215,7 +215,7 @@ export default function ProfilePage() {
                         <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-black text-sm uppercase">Average:</span>
                             <span className="text-[#002855] font-black text-xl">
-                                {(chartData.reduce((a, b) => a + b, 0) / (chartData.filter(h => h > 0).length || 1)).toFixed(1)} h
+                                {Math.floor(chartData.reduce((a, b) => a + b, 0) / (chartData.filter(h => h > 0).length || 1))} m
                             </span>
                         </div>
                         <div className="flex items-center gap-4">
@@ -234,11 +234,11 @@ export default function ProfilePage() {
                                     {h > 0 && (
                                         <div
                                             className="absolute bottom-0 left-0 right-0 bg-[#00ca86] rounded-full transition-all duration-1000"
-                                            style={{ height: `${Math.min((h / 16) * 100, 100)}%` }}
+                                            style={{ height: `${Math.min((h / 1440) * 100, 100)}%` }}
                                         />
                                     )}
                                 </div>
-                                <span className={`font-black text-[10px] ${h > 0 ? 'text-emerald-500' : 'text-slate-200'}`}>{h}h</span>
+                                <span className={`font-black text-[10px] ${h > 0 ? 'text-emerald-500' : 'text-slate-200'}`}>{h}m</span>
                             </div>
                         ))}
                     </div>
