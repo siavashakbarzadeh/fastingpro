@@ -133,9 +133,9 @@ export default function SymptomsPage() {
             setSelectedSymptoms(['none']);
             return;
         }
-        setSelectedSymptoms(prev => {
-            const clean = prev.filter(x => x !== 'none');
-            if (clean.includes(s)) return clean.filter(x => x !== s);
+        setSelectedSymptoms((prev: Symptom[]) => {
+            const clean = prev.filter((x: Symptom) => x !== 'none');
+            if (clean.includes(s)) return clean.filter((x: Symptom) => x !== s);
             return [...clean, s];
         });
     };
@@ -213,11 +213,11 @@ export default function SymptomsPage() {
                                         key={r}
                                         onClick={() => setRating(r)}
                                         className={`flex-1 flex flex-col items-center gap-2 py-3 rounded-xl border-2 transition-all ${rating === r
-                                                ? 'bg-rose-50 border-rose-400 text-rose-700 transform scale-105'
-                                                : 'bg-white border-slate-50 text-slate-300 hover:border-rose-100'
+                                            ? 'bg-rose-50 border-rose-400 text-rose-700 transform scale-105'
+                                            : 'bg-white border-slate-50 text-slate-300 hover:border-rose-100'
                                             }`}
                                     >
-                                        {r === 'excellent' ? <Smile size={24} /> :
+                                        {r === 'great' ? <Zap size={24} /> :
                                             r === 'good' ? <Smile size={24} /> :
                                                 r === 'okay' ? <Meh size={24} /> :
                                                     <Frown size={24} />
@@ -256,8 +256,8 @@ export default function SymptomsPage() {
                                         key={key}
                                         onClick={() => handleSymptomToggle(key as Symptom)}
                                         className={`px-4 py-2.5 rounded-xl text-xs font-bold border-2 transition-all ${selectedSymptoms.includes(key as Symptom)
-                                                ? 'bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-200'
-                                                : 'bg-white text-slate-500 border-slate-100 hover:border-rose-200'
+                                            ? 'bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-200'
+                                            : 'bg-white text-slate-500 border-slate-100 hover:border-rose-200'
                                             }`}
                                     >
                                         {label}
