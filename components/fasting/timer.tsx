@@ -39,9 +39,11 @@ export default function FastingTimer({ initialFast, fastingData, onRefresh }: Fa
     const handleStop = async () => {
         try {
             await api.post('/fasts/end');
-            onRefresh();
         } catch (error: any) {
-            console.error(error);
+            console.error('API Error ending fast:', error);
+        } finally {
+            localStorage.removeItem('activeFast');
+            onRefresh();
         }
     };
 

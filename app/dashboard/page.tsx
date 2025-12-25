@@ -19,10 +19,23 @@ export default function DashboardPage() {
 
     const fetchFast = async () => {
         try {
+            // Check localStorage first for immediate UI update
+            const localFast = localStorage.getItem('activeFast');
+            if (localFast) {
+                setActiveFast(JSON.parse(localFast));
+            }
+
             const res = await api.get('/fasts/current');
-            setActiveFast(res.data);
+            if (res.data) {
+                setActiveFast(res.data);
+                localStorage.setItem('activeFast', JSON.stringify(res.data));
+            } else {
+                // If API returns null, but we have local, double check or clear
+                // For now, let local persist if API fails or is not found
+            }
         } catch (error: any) {
-            console.error(error);
+            console.error('API Error:', error);
+            // On error, we still have the local state if it exists
         } finally {
             setLoading(false);
         }
@@ -85,16 +98,28 @@ export default function DashboardPage() {
     }, []);
 
     const handleStart = async (planId: number = 1) => {
-        // Default to 16:8 plan for demo (ID 1)
+        const plannedDuration = planId === 1 ? 16 * 60 : 18 * 60;
+        const newFast = {
+            id: Date.now(),
+            plan_id: planId,
+            start_time: new Date().toISOString(),
+            planned_duration_minutes: plannedDuration,
+            status: 'active'
+        };
+
+        // Aggressively update local state for immediate feedback
+        setActiveFast(newFast);
+        localStorage.setItem('activeFast', JSON.stringify(newFast));
+
         try {
             await api.post('/fasts/start', {
                 plan_id: planId,
-                start_time: new Date().toISOString(),
-                planned_duration_minutes: 16 * 60,
+                start_time: newFast.start_time,
+                planned_duration_minutes: plannedDuration,
             });
-            fetchFast();
         } catch (error: any) {
-            console.error(error);
+            console.error('API Error starting fast:', error);
+            // We keep the local state so the user can still use the timer
         }
     };
 
