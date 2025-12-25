@@ -7,7 +7,7 @@ import FastingSummary from '@/components/fasting/summary';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import Link from 'next/link';
-import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain, Pencil, ChevronRight as LucideChevronRight } from 'lucide-react';
+import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain, Pencil, ChevronRight as LucideChevronRight, Smile } from 'lucide-react';
 import CycleHistoryWidget from '@/components/dashboard/cycle-history';
 import ConceptionGauge from '@/components/dashboard/conception-gauge';
 import ConceptionLikelihoodChart from '@/components/dashboard/conception-likelihood-chart';
@@ -341,6 +341,24 @@ export default function DashboardPage() {
                     <div className="text-center z-10">
                         <span className="text-4xl font-black text-slate-800 block mb-1">{waterIntake}</span>
                         <span className="text-slate-400 font-bold text-lg">/ {waterGoal} ml</span>
+                    </div>
+                </div>
+            </Link>
+
+            {/* Dental Health Widget */}
+            <Link href="/dental" className="block">
+                <div className="bg-white border-2 border-slate-50 shadow-xl shadow-blue-500/5 rounded-[2.5rem] p-6 flex items-center justify-between gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center gap-4 z-10">
+                        <div className="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-500 shadow-sm group-hover:scale-110 transition-transform">
+                            <Smile size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h4 className="text-slate-800 font-black text-lg">Dental Health</h4>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Daily Tracker</p>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-teal-500 group-hover:bg-teal-50 transition-colors">
+                        <ChevronRight size={20} strokeWidth={3} />
                     </div>
                 </div>
             </Link>
