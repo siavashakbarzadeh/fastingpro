@@ -149,6 +149,4 @@ export default function FastingTimer({ initialFast, fastingData, onRefresh }: Fa
             </div>
         </div>
     );
-}        </div >
-    );
 }
