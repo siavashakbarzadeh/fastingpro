@@ -20,7 +20,7 @@ interface Step {
     subtitle?: string;
     options?: Option[];
     theme?: 'green' | 'light';
-    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro' | 'date_picker' | 'goal_chart' | 'weight_comparison_bar' | 'statement_relation' | 'social_proof' | 'feature_highlight' | 'processing_plan' | 'subscription_plan' | 'payment_method';
+    type?: 'select' | 'input' | 'height' | 'weight' | 'summary' | 'testimonial' | 'bmi_summary' | 'feature_intro' | 'scanner_comparison' | 'tech_intro' | 'transformation' | 'diet_comparison' | 'food_comparison' | 'exercise_comparison' | 'meal_comparison' | 'nutrition_report' | 'motivation_intro' | 'date_picker' | 'goal_chart' | 'weight_comparison_bar' | 'statement_relation' | 'social_proof' | 'feature_highlight' | 'processing_plan' | 'subscription_plan' | 'payment_method' | 'meal_time';
     multiSelect?: boolean;
     layout?: 'list' | 'grid';
     placeholder?: string;
@@ -750,16 +750,17 @@ const steps: Step[] = [
         ]
     },
     {
+        id: 'meal_time',
+        sectionTitle: 'Eating habits',
+        question: 'What is your Meal Time?',
+        theme: 'light',
+        type: 'meal_time',
+    },
+    {
         id: 'processing_plan',
         question: 'We are processing your personal plan...',
         theme: 'light',
         type: 'processing_plan',
-    },
-    {
-        id: 'subscription_plan',
-        question: 'Get Your Personal Fasting Plan',
-        theme: 'light',
-        type: 'subscription_plan',
     }
 ];
 
@@ -776,6 +777,75 @@ function SignalBars({ level }: { level: number }) {
         </div>
     );
 }
+
+function TimePicker({ value, onChange }: { value: string, onChange: (val: string) => void }) {
+    // value format: "08:00 AM"
+    const [time, period] = value.split(' ');
+    const [hours, minutes] = time.split(':');
+
+    const updateHour = (h: string) => onChange(`${h}:${minutes} ${period}`);
+    const updateMinute = (m: string) => onChange(`${hours}:${m} ${period}`);
+    const updatePeriod = (p: string) => onChange(`${hours}:${minutes} ${p}`);
+
+    const hNum = parseInt(hours);
+    const mNum = parseInt(minutes);
+
+    const prevH = (hNum === 1 ? 12 : hNum - 1).toString().padStart(2, '0');
+    const nextH = (hNum === 12 ? 1 : hNum + 1).toString().padStart(2, '0');
+
+    const prevM = (mNum === 0 ? 59 : mNum - 1).toString().padStart(2, '0');
+    const nextM = (mNum === 59 ? 0 : mNum + 1).toString().padStart(2, '0');
+
+    return (
+        <div className="flex flex-col items-center gap-2 max-w-sm mx-auto w-full">
+            <div className="flex items-center gap-4 bg-emerald-50/50 p-6 rounded-[2.5rem] border-2 border-[#00ca86] w-full justify-center shadow-inner">
+                <div className="flex flex-col items-center">
+                    <button onClick={() => updateHour(prevH)} className="text-slate-300 text-lg font-bold hover:text-slate-400 transition-colors">{prevH}</button>
+                    <select
+                        value={hours}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateHour(e.target.value)}
+                        className="bg-transparent text-4xl font-black text-slate-800 focus:outline-none appearance-none cursor-pointer text-center"
+                    >
+                        {Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')).map(h => (
+                            <option key={h} value={h}>{h}</option>
+                        ))}
+                    </select>
+                    <button onClick={() => updateHour(nextH)} className="text-slate-300 text-lg font-bold hover:text-slate-400 transition-colors">{nextH}</button>
+                </div>
+
+                <span className="text-4xl font-black text-slate-800 self-center mt-[-4px]">:</span>
+
+                <div className="flex flex-col items-center">
+                    <button onClick={() => updateMinute(prevM)} className="text-slate-300 text-lg font-bold hover:text-slate-400 transition-colors">{prevM}</button>
+                    <select
+                        value={minutes}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateMinute(e.target.value)}
+                        className="bg-transparent text-4xl font-black text-slate-800 focus:outline-none appearance-none cursor-pointer text-center"
+                    >
+                        {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
+                            <option key={m} value={m}>{m}</option>
+                        ))}
+                    </select>
+                    <button onClick={() => updateMinute(nextM)} className="text-slate-300 text-lg font-bold hover:text-slate-400 transition-colors">{nextM}</button>
+                </div>
+
+                <div className="flex flex-col items-center ml-4">
+                    <div className="h-6" />
+                    <select
+                        value={period}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updatePeriod(e.target.value)}
+                        className="bg-transparent text-3xl font-black text-slate-800 focus:outline-none appearance-none cursor-pointer"
+                    >
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
+                    <div className="h-6" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 
 export default function FastingSetupPage() {
     const router = useRouter();
@@ -798,14 +868,18 @@ export default function FastingSetupPage() {
                 if (data.answers) setAnswers(data.answers);
                 if (data.weightUnit) setWeightUnit(data.weightUnit);
                 if (data.heightUnit) setHeightUnit(data.heightUnit);
-                // We keep currentStep as is to not confuse users if they just refreshed, 
-                // but we could also restore it. For now let's just restore answers.
-            } catch (e) {
+
+                // If user has answers, redirect to dashboard directly
+                if (data.answers && Object.keys(data.answers).length > 0) {
+                    router.push('/dashboard');
+                    return;
+                }
+            } catch (e: any) {
                 console.error('Failed to parse fastingData', e);
             }
         }
         setIsLoaded(true);
-    }, []);
+    }, [router]);
 
     // Save data whenever it changes
     useEffect(() => {
@@ -2279,6 +2353,37 @@ export default function FastingSetupPage() {
                                 <button
                                     onClick={handleNext}
                                     className="w-full py-5 bg-[#00ca86] text-white rounded-2xl font-bold text-xl shadow-lg"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    ) : currentStepData.type === 'meal_time' ? (
+                        <div className="space-y-12 animate-fade-in py-8">
+                            <div className="space-y-8">
+                                <h3 className="text-2xl font-bold text-slate-800 flex items-center justify-center gap-2">
+                                    First meal <span className="text-[#00ca86] font-black underline decoration-2 underline-offset-8">starts at</span>
+                                </h3>
+                                <TimePicker
+                                    value={answers['meal_start_time'] as string || '08:00 AM'}
+                                    onChange={(val) => setAnswers({ ...answers, 'meal_start_time': val, [currentStepData.id]: 'selected' })}
+                                />
+                            </div>
+
+                            <div className="space-y-8">
+                                <h3 className="text-2xl font-bold text-slate-800 flex items-center justify-center gap-2">
+                                    Last meal <span className="text-[#00ca86] font-black underline decoration-2 underline-offset-8">ends at</span>
+                                </h3>
+                                <TimePicker
+                                    value={answers['meal_end_time'] as string || '08:00 PM'}
+                                    onChange={(val) => setAnswers({ ...answers, 'meal_end_time': val })}
+                                />
+                            </div>
+
+                            <div className="fixed bottom-12 left-0 right-0 px-6 max-w-xl mx-auto">
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full py-5 bg-[#00ca86] text-white rounded-[2rem] font-black text-2xl shadow-xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                 >
                                     Next
                                 </button>

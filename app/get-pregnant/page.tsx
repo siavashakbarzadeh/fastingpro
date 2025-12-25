@@ -229,10 +229,10 @@ export default function GetPregnantPage() {
                 : [...currentSelected, optionId];
 
             setSelectedOption(newSelected);
-            setAnswers(prev => ({ ...prev, [currentStepData.id]: newSelected }));
+            setAnswers((prev: Record<string, string | string[]>) => ({ ...prev, [currentStepData.id]: newSelected }));
         } else {
             setSelectedOption(optionId);
-            setAnswers(prev => ({ ...prev, [currentStepData.id]: optionId }));
+            setAnswers((prev: Record<string, string | string[]>) => ({ ...prev, [currentStepData.id]: optionId }));
         }
     };
 
@@ -245,14 +245,14 @@ export default function GetPregnantPage() {
         // Update answers directly
         if (unitSystem === 'metric') {
             if (newValues.height && newValues.weight) {
-                setAnswers(prev => ({ ...prev, [currentStepData.id]: JSON.stringify({ unit: 'metric', height: newValues.height, weight: newValues.weight }) }));
+                setAnswers((prev: Record<string, string | string[]>) => ({ ...prev, [currentStepData.id]: JSON.stringify({ unit: 'metric', height: newValues.height, weight: newValues.weight }) }));
             } else {
                 const { [currentStepData.id]: _, ...rest } = answers;
                 setAnswers(rest);
             }
         } else {
             if (newValues.heightFt && newValues.heightIn && newValues.weight) {
-                setAnswers(prev => ({ ...prev, [currentStepData.id]: JSON.stringify({ unit: 'imperial', heightFt: newValues.heightFt, heightIn: newValues.heightIn, weight: newValues.weight }) }));
+                setAnswers((prev: Record<string, string | string[]>) => ({ ...prev, [currentStepData.id]: JSON.stringify({ unit: 'imperial', heightFt: newValues.heightFt, heightIn: newValues.heightIn, weight: newValues.weight }) }));
             } else {
                 const { [currentStepData.id]: _, ...rest } = answers;
                 setAnswers(rest);
@@ -550,7 +550,7 @@ export default function GetPregnantPage() {
                                                 type="text"
                                                 inputMode="decimal"
                                                 value={heightWeight.height}
-                                                onChange={(e) => handleHeightWeightChange('height', e.target.value)}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleHeightWeightChange('height', e.target.value)}
                                                 className="w-full p-4 pr-12 rounded-2xl bg-slate-100 text-lg font-bold border-2 border-transparent focus:border-pink-400 focus:bg-white focus:outline-none transition-all"
                                                 placeholder="0"
                                             />
@@ -561,7 +561,7 @@ export default function GetPregnantPage() {
                                                 type="text"
                                                 inputMode="decimal"
                                                 value={heightWeight.weight}
-                                                onChange={(e) => handleHeightWeightChange('weight', e.target.value)}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleHeightWeightChange('weight', e.target.value)}
                                                 className="w-full p-4 pr-12 rounded-2xl bg-slate-100 text-lg font-bold border-2 border-transparent focus:border-pink-400 focus:bg-white focus:outline-none transition-all"
                                                 placeholder="0"
                                             />
@@ -576,7 +576,7 @@ export default function GetPregnantPage() {
                                                     type="text"
                                                     inputMode="decimal"
                                                     value={heightWeight.heightFt}
-                                                    onChange={(e) => handleHeightWeightChange('heightFt', e.target.value)}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleHeightWeightChange('heightFt', e.target.value)}
                                                     className="w-full p-4 pr-12 rounded-2xl bg-slate-100 text-lg font-bold border-2 border-transparent focus:border-pink-400 focus:bg-white focus:outline-none transition-all"
                                                     placeholder="0"
                                                 />
@@ -587,7 +587,7 @@ export default function GetPregnantPage() {
                                                     type="text"
                                                     inputMode="decimal"
                                                     value={heightWeight.heightIn}
-                                                    onChange={(e) => handleHeightWeightChange('heightIn', e.target.value)}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleHeightWeightChange('heightIn', e.target.value)}
                                                     className="w-full p-4 pr-12 rounded-2xl bg-slate-100 text-lg font-bold border-2 border-transparent focus:border-pink-400 focus:bg-white focus:outline-none transition-all"
                                                     placeholder="0"
                                                 />
@@ -599,7 +599,7 @@ export default function GetPregnantPage() {
                                                 type="text"
                                                 inputMode="decimal"
                                                 value={heightWeight.weight}
-                                                onChange={(e) => handleHeightWeightChange('weight', e.target.value)}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleHeightWeightChange('weight', e.target.value)}
                                                 className="w-full p-4 pr-12 rounded-2xl bg-slate-100 text-lg font-bold border-2 border-transparent focus:border-pink-400 focus:bg-white focus:outline-none transition-all"
                                                 placeholder="0"
                                             />

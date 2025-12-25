@@ -287,6 +287,18 @@ export default function Home() {
 
       // If user selects 'fasting' in the goal step, redirect to /fasting
       if (step.id === 'goal' && optionId === 'fasting') {
+        const savedData = localStorage.getItem('fastingData');
+        if (savedData) {
+          try {
+            const data = JSON.parse(savedData);
+            if (data.answers && Object.keys(data.answers).length > 0) {
+              router.push('/dashboard');
+              return;
+            }
+          } catch (e: any) {
+            console.error(e);
+          }
+        }
         router.push('/fasting');
         return;
       }

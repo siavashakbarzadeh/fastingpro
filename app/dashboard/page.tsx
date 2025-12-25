@@ -5,7 +5,7 @@ import FastingTimer from '@/components/fasting/timer';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import Link from 'next/link';
-import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain } from 'lucide-react';
+import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain, Pencil, ChevronRight as LucideChevronRight } from 'lucide-react';
 
 export default function DashboardPage() {
     const [activeFast, setActiveFast] = useState<any>(null);
@@ -17,7 +17,7 @@ export default function DashboardPage() {
         try {
             const res = await api.get('/fasts/current');
             setActiveFast(res.data);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
         } finally {
             setLoading(false);
@@ -39,7 +39,7 @@ export default function DashboardPage() {
                     } else {
                         setWaterIntake(0);
                     }
-                } catch (e) {
+                } catch (e: any) {
                     console.error(e);
                 }
             }
@@ -50,7 +50,7 @@ export default function DashboardPage() {
             if (saved) {
                 try {
                     setFastingData(JSON.parse(saved));
-                } catch (e) {
+                } catch (e: any) {
                     console.error(e);
                 }
             }
@@ -76,7 +76,7 @@ export default function DashboardPage() {
                 planned_duration_minutes: 16 * 60,
             });
             fetchFast();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
         }
     };
@@ -110,9 +110,13 @@ export default function DashboardPage() {
                 </div>
             </header>
 
-            <div className="bg-white rounded-[2.5rem] p-1 shadow-2xl shadow-emerald-500/10 border border-slate-50">
-                <FastingTimer initialFast={activeFast} onRefresh={fetchFast} />
-            </div>
+            {activeFast ? (
+                <div className="bg-white rounded-[2.5rem] p-1 shadow-2xl shadow-emerald-500/10 border border-slate-50">
+                    <FastingTimer initialFast={activeFast} onRefresh={fetchFast} />
+                </div>
+            ) : (
+                <FastingScheduleWidget fastingData={fastingData} onStart={handleStart} />
+            )}
 
             {!activeFast && (
                 <div className="space-y-6">
@@ -219,6 +223,79 @@ export default function DashboardPage() {
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+function FastingScheduleWidget({ fastingData, onStart }: { fastingData: any, onStart: (planId?: number) => void }) {
+    if (!fastingData) return (
+        <div className="bg-white rounded-[3rem] p-8 shadow-2xl shadow-emerald-500/10 border border-slate-50 flex flex-col items-center justify-center min-h-[400px]">
+            <p className="text-slate-400 font-bold mb-4">Complete your setup to see your plan</p>
+            <Link href="/fasting">
+                <Button className="bg-[#00ca86] hover:bg-[#00b075] text-white font-black rounded-2xl px-8 shadow-lg">Start Quiz</Button>
+            </Link>
+        </div>
+    );
+
+    const startTime = fastingData.answers?.meal_end_time || '08:00 PM';
+    const endTime = fastingData.answers?.meal_start_time || '08:00 AM';
+
+    // Simplified protocol calculation
+    // In a real app we'd parse the hours
+    const protocol = "16:8"; // Default or calculated
+
+    return (
+        <div className="bg-white rounded-[3rem] p-8 shadow-2xl shadow-emerald-500/10 border border-slate-50 flex flex-col items-center">
+            <h2 className="text-2xl font-black text-[#002855] mb-12 flex items-center gap-2">
+                Make a difference now <span className="text-3xl">💪</span>
+            </h2>
+
+            <div className="relative w-64 h-64 flex items-center justify-center">
+                {/* Gauge Background */}
+                <svg className="absolute w-full h-full transform -rotate-[135deg]">
+                    <circle
+                        cx="128" cy="128" r="110"
+                        stroke="#eff6ff" strokeWidth="16" strokeLinecap="round" strokeDasharray="518 691"
+                        fill="none"
+                    />
+                    <circle
+                        cx="128" cy="128" r="110"
+                        stroke="#dbeafe" strokeWidth="16" strokeLinecap="round" strokeDasharray="380 691"
+                        fill="none"
+                    />
+                </svg>
+
+                <div className="flex flex-col items-center z-10">
+                    <div className="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full font-black text-sm mb-4 flex items-center gap-1 shadow-sm">
+                        {protocol} <LucideChevronRight size={14} strokeWidth={4} />
+                    </div>
+                    <p className="text-[#002855]/60 font-black mb-2 uppercase tracking-tight">Next fasting starts at</p>
+                    <span className="text-5xl font-black text-[#002855] tracking-tighter">{startTime}</span>
+                </div>
+            </div>
+
+            <button
+                onClick={() => onStart()}
+                className="w-full py-5 bg-[#8e97fe] text-white rounded-3xl font-black text-2xl mt-12 shadow-xl shadow-indigo-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+                Start Fasting
+            </button>
+
+            <div className="flex justify-between w-full mt-12 bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100/50">
+                <div className="space-y-1">
+                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Start time</p>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[#002855] font-black text-sm">Today, {startTime}</span>
+                        <div className="w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center">
+                            <Pencil size={12} className="text-indigo-400" />
+                        </div>
+                    </div>
+                </div>
+                <div className="space-y-1 text-right">
+                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">End time</p>
+                    <span className="text-[#002855] font-black text-sm">Tomorrow, {endTime}</span>
+                </div>
+            </div>
         </div>
     );
 }
