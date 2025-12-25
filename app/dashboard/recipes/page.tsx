@@ -1,241 +1,541 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { Search, History, ChevronRight, Play, Heart, Clock, Utensils, Zap } from 'lucide-react';
+import {
+    Search,
+    Clock,
+    Flame,
+    X,
+    Leaf,
+    Heart,
+    Zap,
+    Filter,
+    ArrowLeft
+} from 'lucide-react';
+import Link from 'next/link';
+
+// --- Types ---
+
+type RecipeCategory = "vegetarian" | "vegan" | "heart_healthy" | "low_carb";
 
 interface Recipe {
     id: string;
     title: string;
+    categories: RecipeCategory[];
+    summary: string;
+    prepMinutes: number;
+    calories: number;
+    highlights: string[];
+    ingredients: string[];
+    steps: string[];
+    whyItFits: string;
     image: string;
-    isPro: boolean;
-    duration?: string;
-    kcal?: string;
 }
 
-interface Section {
-    title: string;
-    recipes: Recipe[];
-}
+// --- Mock Data ---
 
-const sections: Section[] = [
+const RECIPES: Recipe[] = [
     {
-        title: 'Salad',
-        recipes: [
-            { id: '1', title: 'Curry and Tuna Salad Roll', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80', isPro: true },
-            { id: '2', title: 'Grilled Chicken Caesar Salad', image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=400&q=80', isPro: true },
-        ]
+        id: '1',
+        title: 'Roasted Chickpea & Avocado Bowl',
+        categories: ['vegetarian', 'vegan', 'heart_healthy'],
+        summary: 'A nutrient-dense bowl packed with fiber and healthy fats, perfect for a quick lunch.',
+        prepMinutes: 15,
+        calories: 420,
+        highlights: [
+            'High in fiber',
+            'Rich in healthy fats',
+            'Plant-based protein'
+        ],
+        ingredients: [
+            '1 can chickpeas, drained and roasted',
+            '1 ripe avocado, sliced',
+            '2 cups mixed greens',
+            '1 lemon (juice)',
+            '1 tbsp olive oil'
+        ],
+        steps: [
+            'Preheat oven to 400°F (200°C). Toss chickpeas with seasonings and roast for 20 mins.',
+            'Wash and dry the mixed greens.',
+            'Slice the avocado.',
+            'Assemble the bowl with greens base, chickpeas, and avocado.',
+            'Drizzle with olive oil and fresh lemon juice.'
+        ],
+        whyItFits: 'Loaded with monounsaturated fats from avocado (heart healthy) and entirely plant-based.',
+        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80'
     },
     {
-        title: 'Soup',
-        recipes: [
-            { id: '3', title: 'Tuscan Kale & Bean Soup', image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80', isPro: true },
-            { id: '4', title: 'Creamy Pumpkin Soup', image: 'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=400&q=80', isPro: true },
-        ]
+        id: '2',
+        title: 'Grilled Salmon with Asparagus',
+        categories: ['heart_healthy', 'low_carb'],
+        summary: 'Omega-3 rich salmon paired with crisp roasted asparagus. Simple, elegant, and low carb.',
+        prepMinutes: 25,
+        calories: 380,
+        highlights: [
+            'Excellent source of Omega-3',
+            'High protein',
+            'Low net carbs'
+        ],
+        ingredients: [
+            '2 salmon fillets',
+            '1 bunch nutritious asparagus',
+            '2 cloves garlic, minced',
+            '1 lemon',
+            'Salt & pepper to taste'
+        ],
+        steps: [
+            'Season salmon fillets with salt, pepper, and garlic.',
+            'Sear salmon in a hot pan for 4-5 mins per side.',
+            'Simultaneously, steam or grill asparagus until tender-crisp.',
+            'Serve salmon over asparagus with a lemon wedge.'
+        ],
+        whyItFits: 'Prioritizes lean protein and minimizes starchy carbohydrates for stable blood sugar.',
+        image: 'https://images.unsplash.com/photo-1467003909585-2f8a7270028d?w=500&q=80'
     },
     {
-        title: 'Breakfast',
-        recipes: [
-            { id: '5', title: 'Soft-Scrambled Eggs', image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&q=80', isPro: true },
-            { id: '6', title: 'Spinach and Egg Sandwiches', image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&q=80', isPro: true },
-        ]
+        id: '3',
+        title: 'Zucchini Noodle Stir-Fry',
+        categories: ['vegan', 'low_carb', 'vegetarian'],
+        summary: 'Craving pasta without the carbs? Try these zoodles tossed with colorful veggies.',
+        prepMinutes: 15,
+        calories: 210,
+        highlights: [
+            'Very low calorie',
+            'Keto-friendly',
+            'Vitamin-rich'
+        ],
+        ingredients: [
+            '2 large zucchinis, spiralized',
+            '1 red bell pepper, sliced',
+            '1/2 cup mushrooms',
+            '1 tbsp sesame oil',
+            'Soy sauce or tamari'
+        ],
+        steps: [
+            'Spiralize zucchini into noodles.',
+            'Sauté peppers and mushrooms in sesame oil until soft.',
+            'Add zucchini noodles and toss for just 2-3 minutes (do not overcook).',
+            'Season with soy sauce and serve hot.'
+        ],
+        whyItFits: 'Replaces refined wheat pasta with vegetable noodles to drastically lower carb count.',
+        image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=500&q=80'
     },
     {
-        title: 'Smoothie',
-        recipes: [
-            { id: '7', title: 'Cucumber Smoothie', image: 'https://images.unsplash.com/photo-1505252585441-df537f1e403d?w=400&q=80', isPro: true },
-            { id: '8', title: 'Blueberry Matcha Shake', image: 'https://images.unsplash.com/photo-1502741221712-4299b4226d40?w=400&q=80', isPro: true },
-        ]
+        id: '4',
+        title: 'Quinoa & Black Bean Taco Salad',
+        categories: ['vegetarian', 'heart_healthy'],
+        summary: 'A hearty salad that satisfies like a main meal, featuring protein-packed quinoa and beans.',
+        prepMinutes: 20,
+        calories: 450,
+        highlights: [
+            'Complete protein source',
+            'High fiber',
+            'Gluten-free'
+        ],
+        ingredients: [
+            '1 cup cooked quinoa',
+            '1/2 cup black beans, rinsed',
+            '1/2 cup corn kernels',
+            '1/4 cup salsa',
+            'Cilantro for garnish'
+        ],
+        steps: [
+            'Cook quinoa according to package instructions and let cool.',
+            'Mix quinoa with black beans and corn.',
+            'Stir in salsa as a dressing.',
+            'Top with fresh cilantro.'
+        ],
+        whyItFits: 'Beans and quinoa provide fiber specifically known to help lower cholesterol.',
+        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80'
     },
     {
-        title: 'Main course',
-        recipes: [
-            { id: '9', title: 'Grilled Pork with Fresh Coconut Milk', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80', isPro: true },
-            { id: '10', title: 'Thai rice porridge with pork meatballs', image: 'https://images.unsplash.com/photo-1512058560366-cd242d4532be?w=400&q=80', isPro: true },
-        ]
+        id: '5',
+        title: 'Egg White Veggie Omelet',
+        categories: ['low_carb', 'vegetarian', 'heart_healthy'],
+        summary: 'Start your day with a protein boost that keeps you full until lunch.',
+        prepMinutes: 10,
+        calories: 180,
+        highlights: [
+            'High protein',
+            'Low fat',
+            'Quick breakfast'
+        ],
+        ingredients: [
+            '4 egg whites',
+            '1 cup spinach',
+            '1/4 onion, diced',
+            'Cooking spray',
+            'Salt and pepper'
+        ],
+        steps: [
+            'Sauté onions and spinach in a non-stick pan until wilted.',
+            'Whisk egg whites with salt and pepper.',
+            'Pour eggs over veggies and cook until set.',
+            'Fold and serve immediately.'
+        ],
+        whyItFits: 'Uses egg whites to eliminate cholesterol while maximizing protein intake.',
+        image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=500&q=80'
+    },
+    {
+        id: '6',
+        title: 'Berry Chia Seed Pudding',
+        categories: ['vegan', 'heart_healthy', 'vegetarian'],
+        summary: 'A delightful make-ahead breakfast or dessert rich in antioxidants.',
+        prepMinutes: 5,
+        calories: 250,
+        highlights: [
+            'No added sugar',
+            'Omega-3 rich',
+            'Gut health support'
+        ],
+        ingredients: [
+            '3 tbsp chia seeds',
+            '1 cup almond milk',
+            '1/2 tsp vanilla extract',
+            '1/2 cup mixed berries'
+        ],
+        steps: [
+            'Whisk chia seeds, almond milk, and vanilla vigorously in a jar.',
+            'Let sit for 5 minutes, then whisk again to prevent clumps.',
+            'Refrigerate for at least 2 hours or overnight.',
+            'Top with fresh berries before eating.'
+        ],
+        whyItFits: 'Chia seeds are a powerhouse of fiber and heart-healthy omega-3 fatty acids.',
+        image: 'https://images.unsplash.com/photo-1502741221712-4299b4226d40?w=500&q=80'
     }
 ];
 
-const filters = [
-    { label: 'Vegetarian', icon: '🥕' },
-    { label: 'Vegan', icon: '🥦' },
-    { label: 'Heart Healthy', icon: '🥗' },
-    { label: 'Low Carb', icon: '🥩' },
+const CATEGORIES: { id: RecipeCategory; label: string; icon: string }[] = [
+    { id: 'vegetarian', label: 'Vegetarian', icon: '🥕' },
+    { id: 'vegan', label: 'Vegan', icon: '🥦' },
+    { id: 'heart_healthy', label: 'Heart Healthy', icon: '❤️' },
+    { id: 'low_carb', label: 'Low Carb', icon: '🥩' },
 ];
 
 export default function RecipesPage() {
-    const [activeTab, setActiveTab] = useState<'recipes' | 'plans'>('recipes');
+    const [selectedCategory, setSelectedCategory] = useState<RecipeCategory | "all">("all");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [quickOnly, setQuickOnly] = useState(false);
+    const [openRecipeId, setOpenRecipeId] = useState<string | null>(null);
+
+    // --- Filter Logic ---
+
+    const filteredRecipes = useMemo(() => {
+        return RECIPES.filter(recipe => {
+            // Category Filter
+            if (selectedCategory !== "all" && !recipe.categories.includes(selectedCategory)) {
+                return false;
+            }
+
+            // Search Filter
+            const query = searchQuery.toLowerCase();
+            const matchesSearch = recipe.title.toLowerCase().includes(query) ||
+                recipe.summary.toLowerCase().includes(query);
+            if (!matchesSearch) return false;
+
+            // Quick Filter
+            if (quickOnly && recipe.prepMinutes > 20) {
+                return false;
+            }
+
+            return true;
+        });
+    }, [selectedCategory, searchQuery, quickOnly]);
+
+    const activeRecipe = useMemo(() => {
+        return RECIPES.find(r => r.id === openRecipeId);
+    }, [openRecipeId]);
+
+    // --- Badge Helper ---
+    const getBadgeStyle = (cat: RecipeCategory) => {
+        switch (cat) {
+            case 'vegetarian': return 'bg-orange-100 text-orange-700';
+            case 'vegan': return 'bg-green-100 text-green-700';
+            case 'heart_healthy': return 'bg-rose-100 text-rose-700';
+            case 'low_carb': return 'bg-blue-100 text-blue-700';
+            default: return 'bg-slate-100 text-slate-700';
+        }
+    };
+
+    const getCategoryLabel = (cat: RecipeCategory) => {
+        return CATEGORIES.find(c => c.id === cat)?.label || cat;
+    };
 
     return (
-        <div className="min-h-screen bg-[#fcfdfe]">
+        <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-800 relative">
+
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-50 px-6 py-4">
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex gap-6">
+            <header className="bg-white sticky top-0 z-20 shadow-sm border-b border-slate-100">
+                <div className="max-w-xl mx-auto px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Link href="/dashboard" className="p-2 -ml-2 rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors">
+                            <ArrowLeft size={24} strokeWidth={2.5} />
+                        </Link>
+                        <h1 className="text-xl font-black text-slate-800">Healthy Recipes</h1>
+                    </div>
+                </div>
+
+                {/* Filters & Search */}
+                <div className="max-w-xl mx-auto px-6 pb-4 space-y-4">
+
+                    {/* Search */}
+                    <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                        <input
+                            type="text"
+                            placeholder="Find a recipe..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-slate-50 border-none rounded-2xl pl-12 pr-4 py-3 text-slate-700 font-bold placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-100 outline-none"
+                        />
+                    </div>
+
+                    {/* Chips */}
+                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                         <button
-                            onClick={() => setActiveTab('recipes')}
-                            className={`text-2xl font-black transition-all ${activeTab === 'recipes' ? 'text-[#00ca86]' : 'text-slate-300'}`}
+                            onClick={() => setSelectedCategory("all")}
+                            className={`px-4 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all border ${selectedCategory === "all"
+                                ? 'bg-slate-800 text-white border-slate-800'
+                                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                                }`}
                         >
-                            Recipes
+                            All
                         </button>
+                        {CATEGORIES.map(cat => (
+                            <button
+                                key={cat.id}
+                                onClick={() => setSelectedCategory(cat.id)}
+                                className={`px-4 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all border flex items-center gap-1.5 ${selectedCategory === cat.id
+                                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
+                                    : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-200'
+                                    }`}
+                            >
+                                <span>{cat.icon}</span>
+                                {cat.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Quick Filter Toggle */}
+                    <div className="flex items-center gap-2">
                         <button
-                            onClick={() => setActiveTab('plans')}
-                            className={`text-2xl font-black transition-all ${activeTab === 'plans' ? 'text-[#00ca86]' : 'text-slate-300'}`}
+                            onClick={() => setQuickOnly(!quickOnly)}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${quickOnly ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-400 hover:text-slate-600'}`}
                         >
-                            Diet plans
+                            <Zap size={14} fill={quickOnly ? "currentColor" : "none"} />
+                            Only quick recipes (≤ 20 min)
                         </button>
                     </div>
-                    <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                        <History size={24} />
-                    </button>
-                </div>
-
-                {/* Search Bar */}
-                <div className="relative mb-4">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                    <input
-                        type="text"
-                        placeholder="Search recipes..."
-                        className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 font-bold text-slate-600 focus:ring-2 focus:ring-emerald-500/20 placeholder:text-slate-300"
-                    />
-                </div>
-
-                {/* Filters */}
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide no-scrollbar">
-                    {filters.map((filter) => (
-                        <button
-                            key={filter.label}
-                            className="flex items-center gap-2 bg-white border border-slate-100 px-4 py-2.5 rounded-full whitespace-nowrap shadow-sm hover:border-emerald-200 transition-all font-bold text-sm text-slate-700"
-                        >
-                            <span>{filter.icon}</span>
-                            {filter.label}
-                        </button>
-                    ))}
                 </div>
             </header>
 
-            <div className="px-6 py-8 space-y-10">
-                {/* Hero Banner */}
-                <div className="relative h-48 rounded-[2.5rem] bg-[#ffba8c] overflow-hidden group shadow-xl">
-                    <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-transparent z-10" />
-                    <div className="relative z-20 p-8 flex flex-col justify-center h-full max-w-[60%]">
-                        <h2 className="text-white text-3xl font-black leading-tight drop-shadow-sm">
-                            Tire of Cooking? <br /> Give This a Try!
-                        </h2>
-                    </div>
-                    {/* Floating elements */}
-                    <div className="absolute right-[-20px] bottom-[-20px] w-56 h-56 bg-white/20 rounded-full blur-3xl" />
-                    <div className="absolute right-0 top-0 h-full w-1/2 flex items-center justify-center p-4">
-                        <div className="relative w-full h-full">
-                            <Image
-                                src="https://images.unsplash.com/photo-1543353071-873f17a7a088?w=500&q=80"
-                                alt="Featured"
-                                fill
-                                className="object-cover rounded-3xl rotate-3 scale-110 shadow-2xl border-4 border-white"
-                            />
-                        </div>
-                    </div>
+            <main className="max-w-xl mx-auto px-6 py-6">
+
+                <div className="flex items-center justify-between mb-4 px-1">
+                    <h2 className="text-lg font-black text-slate-800">
+                        {filteredRecipes.length} {filteredRecipes.length === 1 ? 'Result' : 'Results'}
+                    </h2>
                 </div>
 
-                {/* Sections */}
-                {sections.map((section) => (
-                    <div key={section.title} className="space-y-4">
-                        <div className="flex justify-between items-end">
-                            <h3 className="text-2xl font-black text-slate-800">{section.title}</h3>
-                            <button className="flex items-center text-emerald-500 font-black text-sm hover:mr-1 transition-all">
-                                See all <ChevronRight size={18} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {filteredRecipes.length > 0 ? (
+                        filteredRecipes.map(recipe => (
+                            <div
+                                key={recipe.id}
+                                className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col h-full group"
+                            >
+                                <div className="relative h-48 w-full bg-slate-200">
+                                    <Image
+                                        src={recipe.image}
+                                        alt={recipe.title}
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                    {/* Prep Time Badge */}
+                                    <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1">
+                                        <Clock size={10} /> {recipe.prepMinutes} min
+                                    </div>
+                                    {/* Quick Badge if applicable */}
+                                    {recipe.prepMinutes <= 15 && (
+                                        <div className="absolute top-3 right-3 bg-amber-400 text-white p-1.5 rounded-full shadow-lg">
+                                            <Zap size={12} fill="currentColor" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="p-5 flex flex-col flex-1">
+                                    <div className="flex flex-wrap gap-1.5 mb-2">
+                                        {recipe.categories.slice(0, 3).map(cat => (
+                                            <span key={cat} className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${getBadgeStyle(cat)}`}>
+                                                {getCategoryLabel(cat)}
+                                            </span>
+                                        ))}
+                                    </div>
+
+                                    <h3 className="text-lg font-black text-slate-800 leading-tight mb-2">
+                                        {recipe.title}
+                                    </h3>
+
+                                    {/* Quick Stats */}
+                                    <div className="flex items-center gap-3 text-xs font-bold text-slate-400 mb-4">
+                                        <span className="flex items-center gap-1"><Flame size={12} /> {recipe.calories} kcal</span>
+                                    </div>
+
+                                    {/* Highlights */}
+                                    <ul className="space-y-1 mb-6 flex-1">
+                                        {recipe.highlights.slice(0, 2).map((highlight, idx) => (
+                                            <li key={idx} className="text-xs text-slate-500 font-medium flex items-center gap-2">
+                                                <Check size={12} className="text-emerald-500" />
+                                                {highlight}
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                    <button
+                                        onClick={() => setOpenRecipeId(recipe.id)}
+                                        className="w-full bg-slate-50 text-slate-600 font-bold py-3 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-colors text-xs uppercase tracking-wide"
+                                    >
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-full py-20 text-center text-slate-400">
+                            <Filter className="mx-auto w-12 h-12 mb-4 opacity-20" />
+                            <p className="font-bold">No recipes found.</p>
+                            <button
+                                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setQuickOnly(false); }}
+                                className="text-emerald-500 text-sm font-bold mt-2"
+                            >
+                                Clear all filters
                             </button>
                         </div>
+                    )}
+                </div>
+            </main>
 
-                        <div className="flex gap-4 overflow-x-auto pb-6 -mx-6 px-6 scrollbar-hide no-scrollbar">
-                            {section.recipes.map((recipe) => (
-                                <div
-                                    key={recipe.id}
-                                    className="flex-shrink-0 w-64 group cursor-pointer"
-                                >
-                                    <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden mb-3 shadow-md group-hover:shadow-xl transition-all duration-500 group-hover:scale-[1.02]">
-                                        <Image
-                                            src={recipe.image}
-                                            alt={recipe.title}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                        {recipe.isPro && (
-                                            <div className="absolute top-4 right-4 bg-[#ffba83] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg">
-                                                PRO
-                                            </div>
-                                        )}
-                                        {/* Overlay gradient */}
-                                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                    </div>
-                                    <h4 className="font-extrabold text-slate-800 leading-tight px-1 group-hover:text-emerald-600 transition-colors line-clamp-2">
-                                        {recipe.title}
-                                    </h4>
+            {/* Recipe Modal / Drawer */}
+            {activeRecipe && (
+                <div className="fixed inset-0 z-50 flex justify-end sm:items-center sm:justify-center bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200 p-0 sm:p-4">
+                    <div
+                        className="bg-white w-full h-full sm:h-[90vh] sm:max-w-2xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 duration-300"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header Image */}
+                        <div className="relative h-48 sm:h-64 w-full shrink-0">
+                            <Image
+                                src={activeRecipe.image}
+                                alt={activeRecipe.title}
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <button
+                                onClick={() => setOpenRecipeId(null)}
+                                className="absolute top-4 right-4 bg-black/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-black/40 transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                            <div className="absolute bottom-6 left-6 right-6">
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {activeRecipe.categories.map(cat => (
+                                        <span key={cat} className="bg-white/20 backdrop-blur-md text-white px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                                            {getCategoryLabel(cat)}
+                                        </span>
+                                    ))}
                                 </div>
-                            ))}
+                                <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight shadow-sm">
+                                    {activeRecipe.title}
+                                </h2>
+                            </div>
                         </div>
-                    </div>
-                ))}
 
-                {/* Feedback Section */}
-                <div className="bg-emerald-50 rounded-[2.5rem] p-10 text-center space-y-6 mt-12 mb-10 border border-emerald-100">
-                    <p className="text-slate-800 font-bold text-lg px-4">
-                        Tell us the recipes you are interested in.
-                    </p>
-                    <button className="bg-[#00ca86] text-white px-8 py-4 rounded-2xl font-black text-lg shadow-lg shadow-emerald-200 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 mx-auto">
-                        <span className="text-xl">✍️</span> Feedback
-                    </button>
-                </div>
-            </div>
+                        {/* Modal Content */}
+                        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 bg-white">
 
-            {/* Merry Christmas Banner (Mockup from screenshot) */}
-            <div className="mx-6 mb-10 relative">
-                <div className="bg-[#a81c07] rounded-3xl p-6 flex items-center justify-between text-white overflow-hidden shadow-2xl shadow-red-500/20">
-                    <div className="absolute top-[-20%] left-[-10%] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                    <div className="space-y-1 relative z-10">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="bg-white/20 p-1.5 rounded-lg">🎄</span>
-                            <h5 className="italic font-black text-lg tracking-tight">Merry Christmas</h5>
+                            {/* Summary & Stats */}
+                            <div>
+                                <p className="text-slate-600 font-medium leading-relaxed mb-6">
+                                    {activeRecipe.summary}
+                                </p>
+                                <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="text-slate-400" size={18} />
+                                        <div>
+                                            <div className="text-[10px] font-bold text-slate-400 uppercase">Prep Time</div>
+                                            <div className="text-sm font-black text-slate-800">{activeRecipe.prepMinutes} min</div>
+                                        </div>
+                                    </div>
+                                    <div className="w-px h-8 bg-slate-200" />
+                                    <div className="flex items-center gap-2">
+                                        <Flame className="text-rose-400" size={18} />
+                                        <div>
+                                            <div className="text-[10px] font-bold text-slate-400 uppercase">Calories</div>
+                                            <div className="text-sm font-black text-slate-800">{activeRecipe.calories}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Why It Fits */}
+                            <div>
+                                <h3 className="flex items-center gap-2 text-sm font-black text-slate-800 uppercase tracking-wide mb-3">
+                                    <Leaf size={16} className="text-emerald-500" />
+                                    Why this fits your goal
+                                </h3>
+                                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-sm font-medium text-emerald-900 leading-relaxed">
+                                    {activeRecipe.whyItFits}
+                                </div>
+                            </div>
+
+                            {/* Ingredients */}
+                            <div>
+                                <h3 className="text-lg font-black text-slate-800 mb-4">Ingredients</h3>
+                                <ul className="space-y-3">
+                                    {activeRecipe.ingredients.map((ing, idx) => (
+                                        <li key={idx} className="flex items-start gap-3 text-sm font-medium text-slate-600">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                                            {ing}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* Steps */}
+                            <div>
+                                <h3 className="text-lg font-black text-slate-800 mb-4">Instructions</h3>
+                                <div className="space-y-6">
+                                    {activeRecipe.steps.map((step, idx) => (
+                                        <div key={idx} className="flex gap-4">
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-black shrink-0">
+                                                    {idx + 1}
+                                                </div>
+                                                {idx !== activeRecipe.steps.length - 1 && (
+                                                    <div className="w-px h-full bg-slate-100 my-1" />
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-slate-600 font-medium leading-relaxed pb-4">
+                                                {step}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Disclaimer */}
+                            <div className="pt-8 border-t border-slate-100 text-center">
+                                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">
+                                    Nutrition information is approximate and for general education only, not a medical or dietary prescription.
+                                </p>
+                            </div>
                         </div>
-                        <p className="font-black text-2xl">Last sale in 2025</p>
+
                     </div>
-                    <div className="flex flex-col items-center gap-2 relative z-10">
-                        <div className="bg-white rounded-full p-3 shadow-lg group hover:bg-[#ffba8c] transition-colors">
-                            <ChevronRight className="text-[#a81c07] stroke-[4]" />
-                        </div>
-                        <div className="bg-[#ffba8c] text-[#a81c07] font-black px-2 py-1 rounded-lg text-sm border-2 border-white shadow-xl">
-                            75% OFF
-                        </div>
-                    </div>
-                    {/* Snowflake decorations */}
-                    <div className="absolute top-2 right-1/2 opacity-20 text-3xl">❄️</div>
-                    <div className="absolute bottom-4 left-1/2 opacity-20 text-2xl">❄️</div>
                 </div>
-                <button className="absolute -top-2 -right-2 bg-slate-900 text-white rounded-full p-1 border-2 border-white shadow-lg">
-                    <XCircle size={14} className="opacity-50" />
-                </button>
-            </div>
+            )}
         </div>
     );
-}
-
-function XCircle({ size, className }: { size: number, className: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-        >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="15" y1="9" x2="9" y2="15" />
-            <line x1="9" y1="9" x2="15" y2="15" />
-        </svg>
-    )
 }
