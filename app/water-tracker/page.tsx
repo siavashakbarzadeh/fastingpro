@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Minus, Plus, Settings, Pencil } from 'lucide-react';
 
@@ -37,9 +35,56 @@ const MugIcon = ({ className }: { className?: string }) => (
 
 export default function WaterTrackerPage() {
     const router = useRouter();
-    const [intake, setIntake] = useState(0); // Start at 0 as per screenshot
+    const [intake, setIntake] = useState(0);
     const [goal, setGoal] = useState(2500);
     const [selectedCapacity, setSelectedCapacity] = useState(250);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    const getTodayKey = () => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    // Load data
+    useEffect(() => {
+        const saved = localStorage.getItem('waterIntake');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                const today = getTodayKey();
+                if (typeof data[today] === 'number') {
+                    setIntake(data[today]);
+                }
+                // If no entry for today, it remains 0 (default state)
+            } catch (e) {
+                console.error("Failed to parse water intake data", e);
+            }
+        }
+        setIsLoaded(true);
+    }, []);
+
+    // Save data
+    useEffect(() => {
+        if (!isLoaded) return;
+
+        const today = getTodayKey();
+        const saved = localStorage.getItem('waterIntake');
+        let data: Record<string, number> = {};
+
+        if (saved) {
+            try {
+                data = JSON.parse(saved);
+            } catch (e) {
+                console.error("Failed to parse existing data", e);
+            }
+        }
+
+        data[today] = intake;
+        localStorage.setItem('waterIntake', JSON.stringify(data));
+
+        // Dispatch storage event to notify other components/tabs
+        window.dispatchEvent(new Event('storage'));
+    }, [intake, isLoaded]);
 
     const percentage = Math.min((intake / goal) * 100, 100);
 

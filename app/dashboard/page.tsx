@@ -10,6 +10,7 @@ import { Flame, Info, Bell, Settings, Droplet } from 'lucide-react';
 export default function DashboardPage() {
     const [activeFast, setActiveFast] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [waterIntake, setWaterIntake] = useState(0);
 
     const fetchFast = async () => {
         try {
@@ -24,6 +25,29 @@ export default function DashboardPage() {
 
     useEffect(() => {
         fetchFast();
+
+        const loadWaterIntake = () => {
+            const saved = localStorage.getItem('waterIntake');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    const d = new Date();
+                    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    if (typeof data[today] === 'number') {
+                        setWaterIntake(data[today]);
+                    } else {
+                        setWaterIntake(0);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        };
+
+        loadWaterIntake();
+        // Optional: listen for storage changes
+        window.addEventListener('storage', loadWaterIntake);
+        return () => window.removeEventListener('storage', loadWaterIntake);
     }, []);
 
     const handleStart = async (planId: number = 1) => {
@@ -39,6 +63,12 @@ export default function DashboardPage() {
             console.error(error);
         }
     };
+
+    // Calculate water progress
+    const waterGoal = 2500;
+    const waterPercentage = Math.min(waterIntake / waterGoal, 1);
+    const circumference = 339.29;
+    const offset = circumference * (1 - waterPercentage);
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-white">
@@ -111,7 +141,7 @@ export default function DashboardPage() {
                         {/* Background Circle */}
                         <svg className="w-full h-full transform -rotate-90">
                             <circle cx="64" cy="64" r="54" stroke="#eff6ff" strokeWidth="12" fill="none" />
-                            <circle cx="64" cy="64" r="54" stroke="#3b82f6" strokeWidth="12" fill="none" strokeDasharray="339.29" strokeDashoffset="305.3" strokeLinecap="round" />
+                            <circle cx="64" cy="64" r="54" stroke="#3b82f6" strokeWidth="12" fill="none" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
                         </svg>
                         <div className="absolute inset-0 flex items-center justify-center text-blue-500">
                             <Droplet fill="currentColor" size={32} />
@@ -119,8 +149,8 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="text-center z-10">
-                        <span className="text-4xl font-black text-slate-800 block mb-1">250</span>
-                        <span className="text-slate-400 font-bold text-lg">/ 2500 ml</span>
+                        <span className="text-4xl font-black text-slate-800 block mb-1">{waterIntake}</span>
+                        <span className="text-slate-400 font-bold text-lg">/ {waterGoal} ml</span>
                     </div>
                 </div>
             </Link>
