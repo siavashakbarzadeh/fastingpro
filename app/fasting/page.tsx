@@ -760,12 +760,6 @@ const steps: Step[] = [
         question: 'Get Your Personal Fasting Plan',
         theme: 'light',
         type: 'subscription_plan',
-    },
-    {
-        id: 'payment_method',
-        question: 'Choose your payment method',
-        theme: 'light',
-        type: 'payment_method',
     }
 ];
 
