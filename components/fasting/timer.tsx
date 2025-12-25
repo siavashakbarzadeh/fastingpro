@@ -9,7 +9,7 @@ interface FastingTimerProps {
     initialFast: any;
     fastingData: any;
     onRefresh: () => void;
-    onStop?: () => void;
+    onStop?: (data: any) => void;
 }
 
 export default function FastingTimer({ initialFast, fastingData, onRefresh, onStop }: FastingTimerProps) {
