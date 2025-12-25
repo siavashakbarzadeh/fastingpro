@@ -9,9 +9,24 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { format, subDays, isSameDay } from 'date-fns';
 
+interface Stats {
+    weight: string;
+    weightChange: string;
+    fastingDays: string;
+    fastingMinutes: string;
+    longestFast: string;
+}
+
+interface FastHistoryItem {
+    id: number;
+    start_time: string;
+    end_time: string;
+    status: string;
+}
+
 export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({
+    const [stats, setStats] = useState<Stats>({
         weight: '93.1',
         weightChange: '+13.1',
         fastingDays: '0',
@@ -19,7 +34,7 @@ export default function ProfilePage() {
         longestFast: '0',
     });
     const [chartData, setChartData] = useState<number[]>([]);
-    const [history, setHistory] = useState<any[]>([]);
+    const [history, setHistory] = useState<FastHistoryItem[]>([]);
 
     const fetchHistory = async () => {
         try {
@@ -29,22 +44,22 @@ export default function ProfilePage() {
             setHistory(historyData);
 
             // Calculate stats
-            const completedFasts = historyData.filter((f: any) => f.end_time);
+            const completedFasts = historyData.filter((f: FastHistoryItem) => f.end_time);
 
             // Fasting Days (Unique days with completed fasts)
-            const uniqueDays = new Set(completedFasts.map((f: any) =>
+            const uniqueDays = new Set(completedFasts.map((f: FastHistoryItem) =>
                 format(new Date(f.start_time), 'yyyy-MM-dd')
             ));
 
             // Total Minutes
-            const totalMs = completedFasts.reduce((acc: number, f: any) => {
+            const totalMs = completedFasts.reduce((acc: number, f: FastHistoryItem) => {
                 const duration = new Date(f.end_time).getTime() - new Date(f.start_time).getTime();
                 return acc + duration;
             }, 0);
             const totalMinutes = Math.floor(totalMs / (1000 * 60));
 
             // Longest Fast
-            const longestMs = completedFasts.reduce((max: number, f: any) => {
+            const longestMs = completedFasts.reduce((max: number, f: FastHistoryItem) => {
                 const duration = new Date(f.end_time).getTime() - new Date(f.start_time).getTime();
                 return Math.max(max, duration);
             }, 0);
@@ -53,8 +68,8 @@ export default function ProfilePage() {
             // Chart Data (Last 7 days in minutes)
             const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
             const dailyMinutes = last7Days.map(date => {
-                const dayFasts = completedFasts.filter((f: any) => isSameDay(new Date(f.start_time), date));
-                const dayMs = dayFasts.reduce((acc: number, f: any) => {
+                const dayFasts = completedFasts.filter((f: FastHistoryItem) => isSameDay(new Date(f.start_time), date));
+                const dayMs = dayFasts.reduce((acc: number, f: FastHistoryItem) => {
                     return acc + (new Date(f.end_time).getTime() - new Date(f.start_time).getTime());
                 }, 0);
                 return Math.floor(dayMs / (1000 * 60));

@@ -21,12 +21,29 @@ export default function RegisterPage() {
             setError('Passwords do not match');
             return;
         }
+
+        // Get onboarding data
+        let onboardingData: { gender?: string; goal_weight?: number } = {};
+        const savedData = localStorage.getItem('fastingData');
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                onboardingData = {
+                    gender: parsed.answers?.gender,
+                    goal_weight: parsed.answers?.goal_weight
+                };
+            } catch (e) {
+                console.error('Failed to parse fastingData', e);
+            }
+        }
+
         try {
             const res = await api.post('/register', {
                 name,
                 email,
                 password,
-                password_confirmation: passwordConfirmation
+                password_confirmation: passwordConfirmation,
+                ...onboardingData
             });
             localStorage.setItem('token', res.data.access_token);
             router.push('/dashboard');

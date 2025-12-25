@@ -16,12 +16,16 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'gender' => ['nullable', 'string', 'max:20'],
+            'goal_weight' => ['nullable', 'numeric'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'gender' => $request->gender,
+            'goal_weight' => $request->goal_weight,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;

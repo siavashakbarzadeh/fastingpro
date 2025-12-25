@@ -31,6 +31,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/cycle-data', [\App\Http\Controllers\Api\CycleDataController::class, 'store']);
 
     // Water Intake
+    Route::get('/water/logs', [\App\Http\Controllers\Api\WaterController::class, 'index']);
     Route::post('/water/intake', [\App\Http\Controllers\Api\WaterController::class, 'store']);
 });
 

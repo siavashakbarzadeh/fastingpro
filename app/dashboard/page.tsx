@@ -12,44 +12,104 @@ import CycleHistoryWidget from '@/components/dashboard/cycle-history';
 import ConceptionGauge from '@/components/dashboard/conception-gauge';
 import ConceptionLikelihoodChart from '@/components/dashboard/conception-likelihood-chart';
 
+interface FastingPlan {
+    id: number;
+    name: string;
+    fasting_hours: number;
+    eating_hours: number;
+    description?: string;
+}
+
+interface Fast {
+    id: number;
+    plan_id?: number;
+    start_time: string;
+    end_time?: string;
+    status: 'active' | 'completed' | 'aborted';
+    planned_duration_minutes: number;
+    actual_duration_minutes?: number;
+}
+
+interface UserFastingData {
+    bmiValue?: string;
+    weightUnit: string;
+    answers?: {
+        goal_weight?: string;
+        experience?: string;
+        meal_end_time?: string;
+        meal_start_time?: string;
+    };
+}
+
+interface CycleData {
+    last_period_start: string;
+    cycle_length: number;
+    period_duration: number;
+}
+
 export default function DashboardPage() {
-    const [activeFast, setActiveFast] = useState<any>(null);
+    const [activeFast, setActiveFast] = useState<Fast | null>(null);
     const [loading, setLoading] = useState(true);
     const [waterIntake, setWaterIntake] = useState(0);
-    const [fastingData, setFastingData] = useState<any>(null);
-    const [cycleData, setCycleData] = useState<any>(null);
+    const [fastingData, setFastingData] = useState<UserFastingData | null>(null);
+    const [cycleData, setCycleData] = useState<CycleData | null>(null);
     const [showSummary, setShowSummary] = useState(false);
-    const [summaryData, setSummaryData] = useState<any>(null);
+    const [summaryData, setSummaryData] = useState<Fast | null>(null);
     const router = useRouter();
 
     const fetchFast = async () => {
-        // Only use localStorage for persistence for now
-        const localFast = localStorage.getItem('activeFast');
-        if (localFast) {
-            setActiveFast(JSON.parse(localFast));
-        } else {
-            setActiveFast(null);
+        try {
+            const res = await api.get('/fasts/current');
+            if (res.data) {
+                setActiveFast(res.data);
+            } else {
+                setActiveFast(null);
+            }
+        } catch (error) {
+            console.error('Error fetching fast:', error);
+            // Fallback to local for dev if server is down, but let's be strict
+            const localFast = localStorage.getItem('activeFast');
+            if (localFast) {
+                setActiveFast(JSON.parse(localFast));
+            } else {
+                setActiveFast(null);
+            }
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     useEffect(() => {
         fetchFast();
 
-        const loadWaterIntake = () => {
-            const saved = localStorage.getItem('waterIntake');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    const d = new Date();
-                    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                    if (typeof data[today] === 'number') {
-                        setWaterIntake(data[today]);
-                    } else {
-                        setWaterIntake(0);
+        const loadWaterIntake = async () => {
+            try {
+                const res = await api.get('/water/logs');
+                const logs = res.data;
+                const d = new Date();
+                const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+                const todayTotal = logs
+                    .filter((log: any) => log.logged_at.startsWith(today))
+                    .reduce((sum: number, log: any) => sum + log.amount_ml, 0);
+
+                setWaterIntake(todayTotal);
+                localStorage.setItem('waterIntake_total_today', todayTotal.toString());
+            } catch (e) {
+                console.error('Failed to fetch water logs', e);
+                // Fallback to local
+                const saved = localStorage.getItem('waterIntake');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        const d = new Date();
+                        const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        if (typeof data[today] === 'number') {
+                            setWaterIntake(data[today]);
+                        }
+                    } catch (err) {
+                        console.error(err);
                     }
-                } catch (e: any) {
-                    console.error(e);
                 }
             }
         };
@@ -65,13 +125,20 @@ export default function DashboardPage() {
             }
         };
 
-        const loadCycleData = () => {
-            const saved = localStorage.getItem('cycleData');
-            if (saved) {
-                try {
-                    setCycleData(JSON.parse(saved));
-                } catch (e: any) {
-                    console.error(e);
+        const loadCycleData = async () => {
+            try {
+                const res = await api.get('/cycle-data');
+                setCycleData(res.data);
+                localStorage.setItem('cycleData', JSON.stringify(res.data));
+            } catch (e) {
+                console.error('Failed to fetch cycle data', e);
+                const saved = localStorage.getItem('cycleData');
+                if (saved) {
+                    try {
+                        setCycleData(JSON.parse(saved));
+                    } catch (err) {
+                        console.error(err);
+                    }
                 }
             }
         };
@@ -91,40 +158,72 @@ export default function DashboardPage() {
 
     const handleStart = async (planId: number = 1) => {
         const plannedDuration = planId === 1 ? 16 * 60 : 18 * 60;
-        const newFast = {
-            id: Date.now(),
-            plan_id: planId,
-            start_time: new Date().toISOString(),
-            planned_duration_minutes: plannedDuration,
-            status: 'active'
-        };
+        const startTime = new Date().toISOString();
 
-        setActiveFast(newFast);
-        localStorage.setItem('activeFast', JSON.stringify(newFast));
+        try {
+            const res = await api.post('/fasts/start', {
+                plan_id: planId,
+                start_time: startTime,
+                planned_duration_minutes: plannedDuration
+            });
+            setActiveFast(res.data);
+            localStorage.setItem('activeFast', JSON.stringify(res.data));
+        } catch (error) {
+            console.error('Error starting fast:', error);
+            // Fallback
+            const newFast: Fast = {
+                id: Date.now(),
+                plan_id: planId,
+                start_time: startTime,
+                planned_duration_minutes: plannedDuration,
+                status: 'active'
+            };
+            setActiveFast(newFast);
+            localStorage.setItem('activeFast', JSON.stringify(newFast));
+        }
     };
 
     const handleSaveFast = async (data: { startTime: Date; endTime: Date; weight: number }) => {
-        // 1. Save weight
-        localStorage.setItem('currentWeight', data.weight.toString());
+        try {
+            // 1. Save weight to API
+            await api.post('/weights', {
+                weight: data.weight,
+                date: new Date().toISOString().split('T')[0]
+            });
+            localStorage.setItem('currentWeight', data.weight.toString());
 
-        // 2. Add to history
-        const history = JSON.parse(localStorage.getItem('fastingHistory') || '[]');
-        const newSession = {
-            id: Date.now(),
-            start_time: data.startTime.toISOString(),
-            end_time: data.endTime.toISOString(),
-            status: 'completed'
-        };
-        history.push(newSession);
-        localStorage.setItem('fastingHistory', JSON.stringify(history));
+            // 2. End fast in API
+            await api.post('/fasts/end', {
+                start_time: data.startTime.toISOString(),
+                end_time: data.endTime.toISOString()
+            });
 
-        // 3. Clear active fast
-        localStorage.removeItem('activeFast');
-        setActiveFast(null);
-        setShowSummary(false);
+            // 3. Clear local state
+            localStorage.removeItem('activeFast');
+            setActiveFast(null);
+            setShowSummary(false);
 
-        // 4. Redirect
-        router.push('/dashboard/profile');
+            // 4. Redirect
+            router.push('/dashboard/profile');
+        } catch (error) {
+            console.error('Error saving fast:', error);
+            // Fallback to local if API fails
+            localStorage.setItem('currentWeight', data.weight.toString());
+            const history = JSON.parse(localStorage.getItem('fastingHistory') || '[]');
+            const newSession = {
+                id: Date.now(),
+                start_time: data.startTime.toISOString(),
+                end_time: data.endTime.toISOString(),
+                status: 'completed'
+            };
+            history.push(newSession);
+            localStorage.setItem('fastingHistory', JSON.stringify(history));
+
+            localStorage.removeItem('activeFast');
+            setActiveFast(null);
+            setShowSummary(false);
+            router.push('/dashboard/profile');
+        }
     };
 
     const handleDiscardFast = () => {
@@ -304,7 +403,7 @@ export default function DashboardPage() {
     );
 }
 
-function FastingScheduleWidget({ fastingData, onStart }: { fastingData: any, onStart: (planId?: number) => void }) {
+function FastingScheduleWidget({ fastingData, onStart }: { fastingData: UserFastingData | null, onStart: (planId?: number) => void }) {
     if (!fastingData) return (
         <div className="bg-white rounded-[3rem] p-8 shadow-2xl shadow-emerald-500/10 border border-slate-50 flex flex-col items-center justify-center min-h-[400px]">
             <p className="text-slate-400 font-bold mb-4">Complete your setup to see your plan</p>

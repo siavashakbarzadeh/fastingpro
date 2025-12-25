@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class WaterController extends Controller
 {
+    public function index(Request $request)
+    {
+        return $request->user()->waterLogs()
+            ->orderBy('logged_at', 'desc')
+            ->get();
+    }
+
     public function store(Request $request)
     {
         $request->validate([
