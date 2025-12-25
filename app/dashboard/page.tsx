@@ -30,8 +30,10 @@ export default function DashboardPage() {
                 setActiveFast(res.data);
                 localStorage.setItem('activeFast', JSON.stringify(res.data));
             } else {
-                // If API returns null, but we have local, double check or clear
-                // For now, let local persist if API fails or is not found
+                // If API returns null, and we don't have local anymore, clear state
+                if (!localStorage.getItem('activeFast')) {
+                    setActiveFast(null);
+                }
             }
         } catch (error: any) {
             console.error('API Error:', error);
@@ -154,7 +156,12 @@ export default function DashboardPage() {
 
             {activeFast ? (
                 <div className="bg-white rounded-[2.5rem] p-1 shadow-2xl shadow-emerald-500/10 border border-slate-50">
-                    <FastingTimer initialFast={activeFast} fastingData={fastingData} onRefresh={fetchFast} />
+                    <FastingTimer
+                        initialFast={activeFast}
+                        fastingData={fastingData}
+                        onRefresh={fetchFast}
+                        onStop={() => setActiveFast(null)}
+                    />
                 </div>
             ) : (
                 <FastingScheduleWidget fastingData={fastingData} onStart={handleStart} />

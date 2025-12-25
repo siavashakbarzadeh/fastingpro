@@ -9,9 +9,10 @@ interface FastingTimerProps {
     initialFast: any;
     fastingData: any;
     onRefresh: () => void;
+    onStop?: () => void;
 }
 
-export default function FastingTimer({ initialFast, fastingData, onRefresh }: FastingTimerProps) {
+export default function FastingTimer({ initialFast, fastingData, onRefresh, onStop }: FastingTimerProps) {
     const [remaining, setRemaining] = useState(0);
     const [progress, setProgress] = useState(0);
 
@@ -37,12 +38,15 @@ export default function FastingTimer({ initialFast, fastingData, onRefresh }: Fa
     }, [initialFast]);
 
     const handleStop = async () => {
+        // Immediate local feedback
+        localStorage.removeItem('activeFast');
+        if (onStop) onStop();
+
         try {
             await api.post('/fasts/end');
         } catch (error: any) {
             console.error('API Error ending fast:', error);
         } finally {
-            localStorage.removeItem('activeFast');
             onRefresh();
         }
     };
