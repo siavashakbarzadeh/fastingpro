@@ -33,6 +33,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Water Intake
     Route::get('/water/logs', [\App\Http\Controllers\Api\WaterController::class, 'index']);
     Route::post('/water/intake', [\App\Http\Controllers\Api\WaterController::class, 'store']);
+
+    // Recipes & Diet Plans
+    Route::apiResource('recipes', \App\Http\Controllers\Api\RecipeController::class);
+    Route::apiResource('diet-plans', \App\Http\Controllers\Api\DietPlanController::class);
 });
 
 // Auth Routes

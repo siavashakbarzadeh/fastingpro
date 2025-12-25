@@ -84,7 +84,7 @@ const RECIPES: Recipe[] = [
         ingredients: ['1 can tuna', '1 tbsp curry powder', 'Lettuce leaves', 'Diced cucumber'],
         steps: ['Mix tuna with curry powder and cucumber.', 'Spoon into lettuce leaves.', 'Roll and serve.'],
         whyItFits: 'Tuna provides heart-healthy fats while lettuce keeps carbs low.',
-        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80'
+        image: '/recipes/curry_tuna_salad.png'
     },
     {
         id: '2',
@@ -100,7 +100,7 @@ const RECIPES: Recipe[] = [
         ingredients: ['Chicken breast', 'Romaine lettuce', 'Parmesan', 'Caesar dressing'],
         steps: ['Grill chicken until cooked.', 'Toss lettuce with dressing.', 'Top with chicken and parmesan.'],
         whyItFits: 'High protein content with minimal carbs from croutons.',
-        image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=500&q=80'
+        image: '/recipes/chicken_caesar_salad.png'
     },
 
     // --- Soup ---
@@ -118,7 +118,7 @@ const RECIPES: Recipe[] = [
         ingredients: ['White beans', 'Kale', 'Carrots', 'Vegetable broth', 'Garlic'],
         steps: ['Sauté garlic and carrots.', 'Add broth and beans; simmer 20 min.', 'Stir in kale until wilted.'],
         whyItFits: 'Beans help lower cholesterol and kale offers essential vitamins.',
-        image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=500&q=80'
+        image: '/recipes/kale_bean_soup.png'
     },
     {
         id: '4',
@@ -134,7 +134,7 @@ const RECIPES: Recipe[] = [
         ingredients: ['Pumpkin puree', 'Coconut milk', 'Ginger', 'Onion'],
         steps: ['Sauté onion and ginger.', 'Add pumpkin and mix.', 'Blend with coconut milk until smooth.'],
         whyItFits: 'Plant-based and rich in antioxidants.',
-        image: 'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=500&q=80'
+        image: '/recipes/pumpkin_soup.png'
     },
 
     // --- Breakfast ---
@@ -152,7 +152,7 @@ const RECIPES: Recipe[] = [
         ingredients: ['2 eggs', 'Butter', 'Salt', 'Chives'],
         steps: ['Whisk eggs well.', 'Cook on low heat stirring constantly.', 'Top with chives.'],
         whyItFits: 'Eggs are a complete protein source with zero carbs.',
-        image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=500&q=80'
+        image: '/recipes/soft_scrambled_eggs.png'
     },
     {
         id: '6',
@@ -168,7 +168,7 @@ const RECIPES: Recipe[] = [
         ingredients: ['Whole wheat bread', 'Spinach', 'Boiled eggs', 'Hummus'],
         steps: ['Toast bread.', 'Spread hummus.', 'Layer spinach and sliced eggs.'],
         whyItFits: 'Provides sustained energy from complex carbs and protein.',
-        image: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=500&q=80'
+        image: '/recipes/spinach_egg_sandwich.png'
     },
 
     // --- Smoothie ---
@@ -420,8 +420,8 @@ export default function RecipesPage() {
                         <button
                             onClick={() => setActiveTab('recipes')}
                             className={`flex-1 py-2 rounded-lg text-sm font-black transition-all ${activeTab === 'recipes'
-                                    ? 'bg-white text-slate-900 shadow-sm'
-                                    : 'text-slate-400 hover:text-slate-600'
+                                ? 'bg-white text-slate-900 shadow-sm'
+                                : 'text-slate-400 hover:text-slate-600'
                                 }`}
                         >
                             Recipes
@@ -429,8 +429,8 @@ export default function RecipesPage() {
                         <button
                             onClick={() => setActiveTab('diet_plans')}
                             className={`flex-1 py-2 rounded-lg text-sm font-black transition-all ${activeTab === 'diet_plans'
-                                    ? 'bg-white text-slate-900 shadow-sm'
-                                    : 'text-slate-400 hover:text-slate-600'
+                                ? 'bg-white text-slate-900 shadow-sm'
+                                : 'text-slate-400 hover:text-slate-600'
                                 }`}
                         >
                             Diet plans
@@ -460,8 +460,8 @@ export default function RecipesPage() {
                                     key={filter.id}
                                     onClick={() => setSelectedHealthCategory(filter.id)}
                                     className={`px-4 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all border ${selectedHealthCategory === filter.id
-                                            ? 'bg-slate-800 text-white border-slate-800'
-                                            : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-200'
+                                        ? 'bg-slate-800 text-white border-slate-800'
+                                        : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-200'
                                         }`}
                                 >
                                     {filter.label}
