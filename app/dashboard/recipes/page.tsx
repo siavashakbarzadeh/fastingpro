@@ -11,7 +11,8 @@ import {
     Heart,
     Zap,
     Filter,
-    ArrowLeft
+    ArrowLeft,
+    Check
 } from 'lucide-react';
 import Link from 'next/link';
 
