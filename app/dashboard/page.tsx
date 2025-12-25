@@ -15,6 +15,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [waterIntake, setWaterIntake] = useState(0);
     const [fastingData, setFastingData] = useState<any>(null);
+    const [cycleData, setCycleData] = useState<any>(null);
 
     const fetchFast = async () => {
         try {
@@ -59,12 +60,25 @@ export default function DashboardPage() {
             }
         };
 
+        const loadCycleData = () => {
+            const saved = localStorage.getItem('cycleData');
+            if (saved) {
+                try {
+                    setCycleData(JSON.parse(saved));
+                } catch (e: any) {
+                    console.error(e);
+                }
+            }
+        };
+
         loadWaterIntake();
         loadFastingData();
+        loadCycleData();
         // Optional: listen for storage changes
         const handleStorage = () => {
             loadWaterIntake();
             loadFastingData();
+            loadCycleData();
         };
         window.addEventListener('storage', handleStorage);
         return () => window.removeEventListener('storage', handleStorage);
@@ -189,11 +203,11 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            <CycleHistoryWidget />
+            <CycleHistoryWidget cycleData={cycleData} />
 
             <div className="space-y-4">
-                <ConceptionGauge />
-                <ConceptionLikelihoodChart />
+                <ConceptionGauge cycleData={cycleData} />
+                <ConceptionLikelihoodChart cycleData={cycleData} />
             </div>
 
             {fastingData && (

@@ -1,10 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
-export default function CycleHistoryWidget() {
+export default function CycleHistoryWidget({ cycleData }: { cycleData?: any }) {
     const [showData, setShowData] = useState(true);
+
+    // Calculate current cycle metrics
+    const lastDate = cycleData?.lastPeriodStart ? new Date(cycleData.lastPeriodStart) : new Date();
+    const todayDate = new Date();
+    const diffTime = Math.max(0, todayDate.getTime() - lastDate.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const cycleLen = cycleData?.cycleLength || 28;
+    const currentDay = ((diffDays - 1) % cycleLen) + 1;
 
     const days = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
@@ -18,7 +27,12 @@ export default function CycleHistoryWidget() {
 
     return (
         <div className="w-full bg-[#fdfcf9] rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-50">
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">Your cycle history</h2>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-slate-800">Your cycle history</h2>
+                <Link href="/period-tracker" className="text-sm font-black text-indigo-500 hover:text-indigo-600 flex items-center gap-1">
+                    Edit <ChevronRight size={14} />
+                </Link>
+            </div>
 
             {/* Legend Box */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8">

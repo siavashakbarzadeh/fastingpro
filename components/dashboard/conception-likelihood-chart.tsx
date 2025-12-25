@@ -2,7 +2,15 @@
 
 import React from 'react';
 
-export default function ConceptionLikelihoodChart() {
+export default function ConceptionLikelihoodChart({ cycleData }: { cycleData?: any }) {
+    // Calculate current cycle metrics
+    const lastDate = cycleData?.lastPeriodStart ? new Date(cycleData.lastPeriodStart) : new Date();
+    const todayDate = new Date();
+    const diffTime = Math.max(0, todayDate.getTime() - lastDate.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const cycleLen = cycleData?.cycleLength || 28;
+    const currentDay = ((diffDays - 1) % cycleLen) + 1;
+
     const bars = [
         { height: 'h-8', color: 'bg-rose-50' },
         { height: 'h-10', color: 'bg-rose-50' },

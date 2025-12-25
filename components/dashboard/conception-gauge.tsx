@@ -3,12 +3,27 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 
-export default function ConceptionGauge() {
+export default function ConceptionGauge({ cycleData }: { cycleData?: any }) {
     // Progress gauge constants
     const radius = 120;
     const stroke = 24;
     const normalizedRadius = radius - stroke * 2;
     const circumference = normalizedRadius * 2 * Math.PI;
+
+    // Calculate current cycle metrics
+    const lastDate = cycleData?.lastPeriodStart ? new Date(cycleData.lastPeriodStart) : new Date();
+    const todayDate = new Date();
+    const diffTime = todayDate.getTime() - lastDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const cycleLen = cycleData?.cycleLength || 28;
+    const currentDay = ((diffDays - 1) % cycleLen) + 1;
+
+    // Approximate fertile window (simplified)
+    const ovulationDay = Math.floor(cycleLen / 2);
+    const fertileStart = ovulationDay - 5;
+    const fertileEnd = ovulationDay + 1;
+
+    const isIdeal = currentDay >= fertileStart && currentDay <= fertileEnd;
 
     return (
         <div className="w-full bg-white rounded-[3rem] p-10 flex flex-col items-center shadow-2xl shadow-slate-200/50 relative overflow-hidden">
