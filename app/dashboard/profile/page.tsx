@@ -15,7 +15,7 @@ export default function ProfilePage() {
         weight: '93.1',
         weightChange: '+13.1',
         fastingDays: '0',
-        fastingHours: '0',
+        fastingMinutes: '0',
         longestFast: '0',
     });
     const [chartData, setChartData] = useState<number[]>([]);
@@ -66,7 +66,7 @@ export default function ProfilePage() {
                 weight,
                 weightChange: '+13.1',
                 fastingDays: uniqueDays.size.toString(),
-                fastingHours: totalMinutes.toString(),
+                fastingMinutes: totalMinutes.toString(),
                 longestFast: longestMinutes.toString(),
             });
             setChartData(dailyMinutes);
@@ -162,7 +162,7 @@ export default function ProfilePage() {
                         </div>
                         <div>
                             <div className="text-[#002855]/40 text-[10px] font-black uppercase tracking-widest leading-none mb-1">Fasting minutes</div>
-                            <div className="text-xl font-black text-[#002855]">{stats.fastingHours} m</div>
+                            <div className="text-xl font-black text-[#002855]">{stats.fastingMinutes} m</div>
                         </div>
                     </div>
 

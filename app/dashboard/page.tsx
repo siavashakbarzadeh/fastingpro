@@ -140,23 +140,14 @@ export default function DashboardPage() {
             // Update stats in localStorage for physical representation on Profile
             localStorage.setItem('currentWeight', data.weight.toString());
 
-            // Increment fasting days (simple mock logic for now)
-            const days = parseInt(localStorage.getItem('fastingDays') || '2');
-            localStorage.setItem('fastingDays', (days + 1).toString());
-
-            // Update total hours
-            const hours = parseFloat(localStorage.getItem('fastingHours') || '14.6');
-            const newSessionHours = (data.endTime.getTime() - data.startTime.getTime()) / (1000 * 60 * 60);
-            localStorage.setItem('fastingHours', (hours + newSessionHours).toFixed(1));
-
+            // Redirect to profile only on success to see updated stats
+            router.push('/dashboard/profile');
         } catch (error: any) {
             console.error('API Error ending fast:', error);
         } finally {
             localStorage.removeItem('activeFast');
             setShowSummary(false);
             fetchFast();
-            // Redirect to profile to see updated stats
-            router.push('/dashboard/profile');
         }
     };
 
