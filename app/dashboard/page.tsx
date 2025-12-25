@@ -7,7 +7,7 @@ import FastingSummary from '@/components/fasting/summary';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import Link from 'next/link';
-import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain, Pencil, ChevronRight as LucideChevronRight, Smile } from 'lucide-react';
+import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain, Pencil, ChevronRight as LucideChevronRight, Smile, Heart, ShieldAlert, Baby, Pill, Stethoscope, Moon, Trees } from 'lucide-react';
 import CycleHistoryWidget from '@/components/dashboard/cycle-history';
 import ConceptionGauge from '@/components/dashboard/conception-gauge';
 import ConceptionLikelihoodChart from '@/components/dashboard/conception-likelihood-chart';
@@ -358,6 +358,132 @@ export default function DashboardPage() {
                         </div>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-teal-500 group-hover:bg-teal-50 transition-colors">
+                        <ChevronRight size={20} strokeWidth={3} />
+                    </div>
+                </div>
+            </Link>
+
+            {/* Sex Life / Intimacy Widget */}
+            <Link href="/sex-life" className="block">
+                <div className="bg-white border-2 border-slate-50 shadow-xl shadow-blue-500/5 rounded-[2.5rem] p-6 flex items-center justify-between gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center gap-4 z-10">
+                        <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 shadow-sm group-hover:scale-110 transition-transform">
+                            <Heart size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h4 className="text-slate-800 font-black text-lg">Enhance Sex Life</h4>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Mood & Intimacy</p>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-rose-500 group-hover:bg-rose-50 transition-colors">
+                        <ChevronRight size={20} strokeWidth={3} />
+                    </div>
+                </div>
+            </Link>
+
+            {/* Discharge Decoder Widget */}
+            <Link href="/discharge" className="block">
+                <div className="bg-white border-2 border-slate-50 shadow-xl shadow-blue-500/5 rounded-[2.5rem] p-6 flex items-center justify-between gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center gap-4 z-10">
+                        <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-500 shadow-sm group-hover:scale-110 transition-transform">
+                            <ShieldAlert size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h4 className="text-slate-800 font-black text-lg">Decode My Discharge</h4>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Self-Check Tool</p>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-violet-500 group-hover:bg-violet-50 transition-colors">
+                        <ChevronRight size={20} strokeWidth={3} />
+                    </div>
+                </div>
+            </Link>
+
+            {/* Pregnancy Tracker Widget */}
+            <Link href="/pregnancy" className="block">
+                <div className="bg-white border-2 border-slate-50 shadow-xl shadow-blue-500/5 rounded-[2.5rem] p-6 flex items-center justify-between gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center gap-4 z-10">
+                        <div className="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-500 shadow-sm group-hover:scale-110 transition-transform">
+                            <Baby size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h4 className="text-slate-800 font-black text-lg">Track My Pregnancy</h4>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Weekly Journey</p>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-sky-500 group-hover:bg-sky-50 transition-colors">
+                        <ChevronRight size={20} strokeWidth={3} />
+                    </div>
+                </div>
+            </Link>
+
+            {/* Understand Body Widget */}
+            <Link href="/understand-body" className="block">
+                <div className="bg-white border-2 border-slate-50 shadow-xl shadow-blue-500/5 rounded-[2.5rem] p-6 flex items-center justify-between gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center gap-4 z-10">
+                        <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-500 shadow-sm group-hover:scale-110 transition-transform">
+                            <Brain size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h4 className="text-slate-800 font-black text-lg">Understand My Body</h4>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Literacy & Patterns</p>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-violet-500 group-hover:bg-violet-50 transition-colors">
+                        <ChevronRight size={20} strokeWidth={3} />
+                    </div>
+                </div>
+            </Link>
+
+            {/* Medications Widget */}
+            <Link href="/medications" className="block">
+                <div className="bg-white border-2 border-slate-50 shadow-xl shadow-blue-500/5 rounded-[2.5rem] p-6 flex items-center justify-between gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center gap-4 z-10">
+                        <div className="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-500 shadow-sm group-hover:scale-110 transition-transform">
+                            <Pill size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h4 className="text-slate-800 font-black text-lg">Manage Medications</h4>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Tracker & Reminders</p>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-teal-500 group-hover:bg-teal-50 transition-colors">
+                        <ChevronRight size={20} strokeWidth={3} />
+                    </div>
+                </div>
+            </Link>
+
+            {/* Symptoms Widget */}
+            <Link href="/symptoms" className="block">
+                <div className="bg-white border-2 border-slate-50 shadow-xl shadow-blue-500/5 rounded-[2.5rem] p-6 flex items-center justify-between gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center gap-4 z-10">
+                        <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 shadow-sm group-hover:scale-110 transition-transform">
+                            <Stethoscope size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h4 className="text-slate-800 font-black text-lg">Track Symptoms</h4>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Diary & Patterns</p>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-rose-500 group-hover:bg-rose-50 transition-colors">
+                        <ChevronRight size={20} strokeWidth={3} />
+                    </div>
+                </div>
+            </Link>
+
+            {/* Sleep Widget */}
+            <Link href="/sleep" className="block">
+                <div className="bg-slate-900 border-2 border-slate-800 shadow-xl shadow-indigo-900/20 rounded-[2.5rem] p-6 flex items-center justify-between gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center gap-4 z-10">
+                        <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-300 shadow-sm group-hover:scale-110 transition-transform">
+                            <Moon size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h4 className="text-white font-black text-lg">Improve Sleep</h4>
+                            <p className="text-indigo-300 font-bold text-xs uppercase tracking-wider">Diary & Habits</p>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-indigo-400 group-hover:bg-slate-700 transition-colors">
                         <ChevronRight size={20} strokeWidth={3} />
                     </div>
                 </div>
