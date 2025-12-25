@@ -137,16 +137,19 @@ export default function DashboardPage() {
                 start_time: data.startTime.toISOString(),
             });
 
-            // Update stats in localStorage for physical representation on Profile
+            // Update weight in localStorage for Profile usage
             localStorage.setItem('currentWeight', data.weight.toString());
 
-            // Redirect to profile only on success to see updated stats
+            // Clear active fast both in state and storage
+            localStorage.removeItem('activeFast');
+            setActiveFast(null);
+            setShowSummary(false);
+
+            // Redirect to profile to see updated stats
             router.push('/dashboard/profile');
         } catch (error: any) {
             console.error('API Error ending fast:', error);
         } finally {
-            localStorage.removeItem('activeFast');
-            setShowSummary(false);
             fetchFast();
         }
     };
