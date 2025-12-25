@@ -793,6 +793,40 @@ export default function FastingSetupPage() {
     const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('kg');
     const [bmiValue, setBmiValue] = useState<number | null>(null);
     const [processProgress, setProcessProgress] = useState(0);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    // Load data from localStorage on mount
+    useEffect(() => {
+        const savedData = localStorage.getItem('fastingData');
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                if (data.answers) setAnswers(data.answers);
+                if (data.weightUnit) setWeightUnit(data.weightUnit);
+                if (data.heightUnit) setHeightUnit(data.heightUnit);
+                // We keep currentStep as is to not confuse users if they just refreshed, 
+                // but we could also restore it. For now let's just restore answers.
+            } catch (e) {
+                console.error('Failed to parse fastingData', e);
+            }
+        }
+        setIsLoaded(true);
+    }, []);
+
+    // Save data whenever it changes
+    useEffect(() => {
+        if (isLoaded) {
+            const dataToSave = {
+                answers,
+                weightUnit,
+                heightUnit,
+                bmiValue,
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem('fastingData', JSON.stringify(dataToSave));
+            window.dispatchEvent(new Event('storage'));
+        }
+    }, [answers, weightUnit, heightUnit, bmiValue, isLoaded]);
 
     // Calculate BMI whenever height or weight changes
     useEffect(() => {

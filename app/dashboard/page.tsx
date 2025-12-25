@@ -5,12 +5,13 @@ import FastingTimer from '@/components/fasting/timer';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import Link from 'next/link';
-import { Flame, Info, Bell, Settings, Droplet } from 'lucide-react';
+import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain } from 'lucide-react';
 
 export default function DashboardPage() {
     const [activeFast, setActiveFast] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [waterIntake, setWaterIntake] = useState(0);
+    const [fastingData, setFastingData] = useState<any>(null);
 
     const fetchFast = async () => {
         try {
@@ -44,10 +45,26 @@ export default function DashboardPage() {
             }
         };
 
+        const loadFastingData = () => {
+            const saved = localStorage.getItem('fastingData');
+            if (saved) {
+                try {
+                    setFastingData(JSON.parse(saved));
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        };
+
         loadWaterIntake();
+        loadFastingData();
         // Optional: listen for storage changes
-        window.addEventListener('storage', loadWaterIntake);
-        return () => window.removeEventListener('storage', loadWaterIntake);
+        const handleStorage = () => {
+            loadWaterIntake();
+            loadFastingData();
+        };
+        window.addEventListener('storage', handleStorage);
+        return () => window.removeEventListener('storage', handleStorage);
     }, []);
 
     const handleStart = async (planId: number = 1) => {
@@ -164,6 +181,44 @@ export default function DashboardPage() {
                     <ChevronRight size={24} strokeWidth={3} />
                 </div>
             </div>
+
+            {fastingData && (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-black text-slate-800 px-2">Your Profile</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-xl shadow-slate-200/50">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
+                                    <Activity size={20} />
+                                </div>
+                                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">BMI</span>
+                            </div>
+                            <span className="text-2xl font-black text-slate-800">{fastingData.bmiValue || '--'}</span>
+                        </div>
+                        <div className="bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-xl shadow-slate-200/50">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+                                    <Scale size={20} />
+                                </div>
+                                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Target</span>
+                            </div>
+                            <span className="text-2xl font-black text-slate-800">{fastingData.answers?.goal_weight || '--'} {fastingData.weightUnit}</span>
+                        </div>
+                        <div className="col-span-2 bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-xl shadow-slate-200/50 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+                                    <Brain size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-slate-400 text-xs font-black uppercase tracking-widest">Fasting Level</p>
+                                    <p className="text-slate-800 font-black text-lg capitalize">{fastingData.answers?.experience || 'Beginner'}</p>
+                                </div>
+                            </div>
+                            <Link href="/fasting" className="text-xs font-black text-indigo-500 hover:text-indigo-600 uppercase tracking-widest">Update</Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
