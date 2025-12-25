@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import FastingTimer from '@/components/fasting/timer';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
-import { Flame, Info, Bell, Settings } from 'lucide-react';
+import Link from 'next/link';
+import { Flame, Info, Bell, Settings, Droplet } from 'lucide-react';
 
 export default function DashboardPage() {
     const [activeFast, setActiveFast] = useState<any>(null);
@@ -46,7 +47,7 @@ export default function DashboardPage() {
     );
 
     return (
-        <div className="max-w-md mx-auto space-y-8 p-6 animate-fade-in">
+        <div className="max-w-md mx-auto space-y-8 p-6 animate-fade-in pb-32">
             <header className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-black text-slate-800">Today</h1>
@@ -92,6 +93,37 @@ export default function DashboardPage() {
                     </div>
                 </div>
             )}
+
+            {/* Water Tracker Widget */}
+            <Link href="/water-tracker" className="block">
+                <div className="bg-white border-2 border-slate-50 shadow-xl shadow-blue-500/5 rounded-[2.5rem] p-8 flex flex-col items-center justify-center gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-5">
+                        <Droplet size={120} fill="currentColor" className="text-blue-500" />
+                    </div>
+                    <div className="w-full flex justify-between items-center z-10">
+                        <h4 className="text-slate-800 font-black text-xl">Water</h4>
+                        <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                            <ChevronRight size={16} strokeWidth={4} />
+                        </div>
+                    </div>
+
+                    <div className="relative w-32 h-32 z-10">
+                        {/* Background Circle */}
+                        <svg className="w-full h-full transform -rotate-90">
+                            <circle cx="64" cy="64" r="54" stroke="#eff6ff" strokeWidth="12" fill="none" />
+                            <circle cx="64" cy="64" r="54" stroke="#3b82f6" strokeWidth="12" fill="none" strokeDasharray="339.29" strokeDashoffset="305.3" strokeLinecap="round" />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center text-blue-500">
+                            <Droplet fill="currentColor" size={32} />
+                        </div>
+                    </div>
+
+                    <div className="text-center z-10">
+                        <span className="text-4xl font-black text-slate-800 block mb-1">250</span>
+                        <span className="text-slate-400 font-bold text-lg">/ 2500 ml</span>
+                    </div>
+                </div>
+            </Link>
 
             <div className="bg-indigo-50 border-2 border-indigo-100 rounded-[2rem] p-6 flex items-center justify-between group cursor-pointer hover:bg-indigo-100 transition-colors">
                 <div className="space-y-1">
