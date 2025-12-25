@@ -59,11 +59,11 @@ const evaluateDischarge = (form: FormState): EvaluationResult => {
         riskLevel = 'see_doctor';
         messages.push('Green or grey discharge can indicate a bacterial infection or STI.');
     } else if (color === 'yellow') {
-        if (riskLevel !== 'see_doctor') riskLevel = 'monitor';
+        riskLevel = 'monitor';
         messages.push('Yellow discharge can sometimes be normal, but if accompanied by smell or itching it may suggest an infection.');
     } else if (color === 'bloody' || color === 'brown') {
         if (cycle !== 'during_period' && cycle !== 'before_period') {
-            if (riskLevel !== 'see_doctor') riskLevel = 'monitor';
+            riskLevel = 'monitor';
             messages.push('Spotting outside your period can happen (e.g., ovulation), but persistent bleeding should be checked.');
         }
     }
@@ -195,8 +195,8 @@ export default function DischargePage() {
                                         key={opt}
                                         onClick={() => setForm({ ...form, color: opt as DischargeColor })}
                                         className={`p-3 rounded-xl border-2 text-sm font-bold capitalize transition-all ${form.color === opt
-                                                ? 'border-rose-500 bg-rose-50 text-rose-700'
-                                                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
+                                            ? 'border-rose-500 bg-rose-50 text-rose-700'
+                                            : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
                                             }`}
                                     >
                                         {opt}
@@ -214,8 +214,8 @@ export default function DischargePage() {
                                         key={opt}
                                         onClick={() => setForm({ ...form, consistency: opt as DischargeConsistency })}
                                         className={`px-4 py-3 rounded-xl border-2 text-sm font-bold capitalize transition-all ${form.consistency === opt
-                                                ? 'border-rose-500 bg-rose-50 text-rose-700'
-                                                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
+                                            ? 'border-rose-500 bg-rose-50 text-rose-700'
+                                            : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
                                             }`}
                                     >
                                         {opt === 'clumpy' ? 'Clumpy (Cottage cheese)' : opt}
@@ -237,8 +237,8 @@ export default function DischargePage() {
                                         key={opt.val}
                                         onClick={() => setForm({ ...form, smell: opt.val as DischargeSmell })}
                                         className={`w-full text-left p-4 rounded-xl border-2 text-sm font-bold transition-all ${form.smell === opt.val
-                                                ? 'border-rose-500 bg-rose-50 text-rose-700'
-                                                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
+                                            ? 'border-rose-500 bg-rose-50 text-rose-700'
+                                            : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
                                             }`}
                                     >
                                         {opt.label}
@@ -256,8 +256,8 @@ export default function DischargePage() {
                                         key={opt.id}
                                         onClick={() => handleToggleSymptom(opt.id)}
                                         className={`w-full flex items-center justify-between p-4 rounded-xl border-2 text-sm font-bold transition-all ${form.symptoms.includes(opt.id)
-                                                ? 'border-rose-500 bg-rose-50 text-rose-700'
-                                                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
+                                            ? 'border-rose-500 bg-rose-50 text-rose-700'
+                                            : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
                                             }`}
                                     >
                                         <span>{opt.label}</span>
@@ -282,8 +282,8 @@ export default function DischargePage() {
                                         key={opt.val}
                                         onClick={() => setForm({ ...form, cycle: opt.val as CycleContext })}
                                         className={`p-3 rounded-xl border-2 text-sm font-bold transition-all ${form.cycle === opt.val
-                                                ? 'border-rose-500 bg-rose-50 text-rose-700'
-                                                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
+                                            ? 'border-rose-500 bg-rose-50 text-rose-700'
+                                            : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-rose-200'
                                             }`}
                                     >
                                         {opt.label}
@@ -305,8 +305,8 @@ export default function DischargePage() {
 
                         {/* Result Card */}
                         <section className={`rounded-[2.5rem] p-8 text-white shadow-xl ${result?.riskLevel === 'see_doctor' ? 'bg-rose-500 shadow-rose-500/20' :
-                                result?.riskLevel === 'monitor' ? 'bg-amber-500 shadow-amber-500/20' :
-                                    'bg-emerald-500 shadow-emerald-500/20'
+                            result?.riskLevel === 'monitor' ? 'bg-amber-500 shadow-amber-500/20' :
+                                'bg-emerald-500 shadow-emerald-500/20'
                             }`}>
                             <div className="flex items-start gap-4 mb-6">
                                 <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">

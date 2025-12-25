@@ -188,10 +188,10 @@ export default function LearnPage() {
 
     // --- Handlers ---
 
-    const toggleSave = (e: React.MouseEvent, id: string) => {
+    const toggleSave = (e: React.MouseEvent<HTMLElement>, id: string) => {
         e.stopPropagation();
-        setSavedIds(prev =>
-            prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
+        setSavedIds((prev: string[]) =>
+            prev.includes(id) ? prev.filter((sid: string) => sid !== id) : [...prev, id]
         );
     };
 
@@ -231,8 +231,8 @@ export default function LearnPage() {
                                 key={topic.id}
                                 onClick={() => setSelectedTopic(topic.id)}
                                 className={`px-4 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all border ${selectedTopic === topic.id
-                                        ? 'bg-indigo-500 text-white border-indigo-500 shadow-md shadow-indigo-500/20'
-                                        : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-200'
+                                    ? 'bg-indigo-500 text-white border-indigo-500 shadow-md shadow-indigo-500/20'
+                                    : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-200'
                                     }`}
                             >
                                 {topic.label}
@@ -336,9 +336,9 @@ export default function LearnPage() {
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${article.topic === 'sleep' ? 'bg-indigo-50 text-indigo-500' :
-                                                article.topic === 'activity' ? 'bg-emerald-50 text-emerald-500' :
-                                                    article.topic === 'symptoms' ? 'bg-rose-50 text-rose-500' :
-                                                        'bg-slate-100 text-slate-500'
+                                            article.topic === 'activity' ? 'bg-emerald-50 text-emerald-500' :
+                                                article.topic === 'symptoms' ? 'bg-rose-50 text-rose-500' :
+                                                    'bg-slate-100 text-slate-500'
                                             }`}>
                                             {TOPICS.find(t => t.id === article.topic)?.label}
                                         </span>
@@ -434,8 +434,8 @@ export default function LearnPage() {
                             <Button
                                 onClick={(e) => toggleSave(e as any, activeArticle.id)}
                                 className={`flex-1 rounded-xl font-bold py-6 shadow-none border items-center gap-2 ${savedIds.includes(activeArticle.id)
-                                        ? 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100'
-                                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                                    ? 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100'
+                                    : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                                     }`}
                                 variant="ghost"
                             >
