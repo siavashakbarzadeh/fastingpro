@@ -489,6 +489,24 @@ export default function DashboardPage() {
                 </div>
             </Link>
 
+            {/* Mental Health Widget */}
+            <Link href="/mental-health" className="block">
+                <div className="bg-white border-2 border-slate-50 shadow-xl shadow-indigo-500/5 rounded-[2.5rem] p-6 flex items-center justify-between gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center gap-4 z-10">
+                        <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 shadow-sm group-hover:scale-110 transition-transform">
+                            <Heart size={28} strokeWidth={2.5} fill="currentColor" />
+                        </div>
+                        <div>
+                            <h4 className="text-slate-800 font-black text-lg">Support My Mind</h4>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Mood & Self-Care</p>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 transition-colors">
+                        <ChevronRight size={20} strokeWidth={3} />
+                    </div>
+                </div>
+            </Link>
+
             <div className="bg-indigo-50 border-2 border-indigo-100 rounded-[2rem] p-6 flex items-center justify-between group cursor-pointer hover:bg-indigo-100 transition-colors">
                 <div className="space-y-1">
                     <h4 className="text-indigo-900 font-black text-lg">Daily Insight</h4>
