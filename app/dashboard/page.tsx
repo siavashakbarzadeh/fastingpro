@@ -214,7 +214,7 @@ export default function DashboardPage() {
                 <div className="space-y-6">
                     <h3 className="text-xl font-black text-slate-800 px-2">Your Profile</h3>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-xl shadow-slate-200/50">
+                        <Link href="/body-data" className="bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-xl shadow-slate-200/50 hover:scale-[1.02] transition-transform cursor-pointer block">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
                                     <Activity size={20} />
@@ -222,8 +222,8 @@ export default function DashboardPage() {
                                 <span className="text-xs font-black text-slate-400 uppercase tracking-widest">BMI</span>
                             </div>
                             <span className="text-2xl font-black text-slate-800">{fastingData.bmiValue || '--'}</span>
-                        </div>
-                        <div className="bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-xl shadow-slate-200/50">
+                        </Link>
+                        <Link href="/body-data" className="bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-xl shadow-slate-200/50 hover:scale-[1.02] transition-transform cursor-pointer block">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500">
                                     <Scale size={20} />
@@ -231,7 +231,7 @@ export default function DashboardPage() {
                                 <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Target</span>
                             </div>
                             <span className="text-2xl font-black text-slate-800">{fastingData.answers?.goal_weight || '--'} {fastingData.weightUnit}</span>
-                        </div>
+                        </Link>
                         <div className="col-span-2 bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-xl shadow-slate-200/50 flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">

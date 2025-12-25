@@ -13,6 +13,7 @@ export default function CycleHistoryWidget({ cycleData }: { cycleData?: any }) {
     const diffTime = Math.max(0, todayDate.getTime() - lastDate.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
     const cycleLen = cycleData?.cycleLength || 28;
+    const periodLen = cycleData?.periodDuration || 5;
     const currentDay = ((diffDays - 1) % cycleLen) + 1;
 
     // Generate days for the full cycle
