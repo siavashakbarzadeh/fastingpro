@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import FastingTimer from '@/components/fasting/timer';
 import FastingSummary from '@/components/fasting/summary';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain, Pencil, ChevronRight as LucideChevronRight, Smile, Heart, ShieldAlert, Baby, Pill, Stethoscope, Moon, Trees } from 'lucide-react';

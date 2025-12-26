@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ChevronLeft, Pencil, Camera, Info, Scale } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 interface FastingSummaryProps {
     startTime: Date;
