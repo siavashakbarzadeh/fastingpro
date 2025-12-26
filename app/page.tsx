@@ -53,7 +53,7 @@ const Navbar = () => {
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:rotate-12 transition-transform">
             <Timer className="text-white" size={24} />
           </div>
-          <span className="text-xl font-black text-slate-900 tracking-tight">ProFasting<span className="text-indigo-600">Health</span></span>
+          <span className="text-xl font-black text-slate-900 tracking-tight">GoHealthing</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -105,7 +105,7 @@ const HeroSection = () => {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-black text-slate-900 leading-[1.1] tracking-tight">
-            One app for your <span className="text-indigo-600">fasting</span> and everyday health.
+            One app for your <span className="text-indigo-600">everyday health.</span>
           </h1>
 
           <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-lg">
@@ -611,7 +611,7 @@ const Footer = () => {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-slate-400 text-xs font-bold font-mono tracking-widest uppercase">
-          <p>© 2025 ProFasting Health. All rights reserved.</p>
+          <p>© 2025 GoHealthing. All rights reserved.</p>
           <p>Handcrafted for Holistic Health</p>
         </div>
       </div>

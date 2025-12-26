@@ -1,7 +1,7 @@
 {
-    "name": "fastingpro/backend",
+    "name": "gohealthing/backend",
     "type": "project",
-    "description": "Fasting Pro Clone API",
+    "description": "GoHealthing API",
     "keywords": [
         "laravel",
         "framework"

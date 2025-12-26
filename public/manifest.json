@@ -1,6 +1,6 @@
 {
-    "name": "Fasting Pro",
-    "short_name": "FastingPro",
+    "name": "GoHealthing",
+    "short_name": "GoHealthing",
     "description": "Intermittent Fasting Tracker",
     "start_url": "/",
     "display": "standalone",

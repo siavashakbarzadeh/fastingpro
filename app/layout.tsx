@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Fasting Pro",
-    description: "Intermittent Fasting Tracker",
+    title: "GoHealthing",
+    description: "Holistic Health Tracker & AI Partner",
     manifest: "/manifest.json",
 };
 
