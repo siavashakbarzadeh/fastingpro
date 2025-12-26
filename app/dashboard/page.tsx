@@ -35,6 +35,23 @@ interface CycleTodaySummary {
     message: string;
 }
 
+// Medications types
+type MedStatus = "scheduled" | "taken" | "skipped";
+
+interface TodayDose {
+    id: string;
+    time: string;
+    name: string;
+    dose: string;
+    status: MedStatus;
+}
+
+interface MedicationsTodaySummary {
+    totalDoses: number;
+    takenDoses: number;
+    nextDose?: TodayDose;
+}
+
 export default function DashboardPage() {
     const router = useRouter();
     const { summary: brushingSummary, logTodayBrushed } = useBrushingTracker();
@@ -72,6 +89,19 @@ export default function DashboardPage() {
         cycleDay: 16,
         fertilityLevel: "low",
         message: "It's currently a lower chance to conceive",
+    };
+
+    // Medications state (mock data)
+    const todayDoses: TodayDose[] = [
+        { id: "1", time: "08:00", name: "Metformin", dose: "500mg", status: "taken" },
+        { id: "2", time: "14:00", name: "Vitamin D", dose: "1000 IU", status: "scheduled" },
+        { id: "3", time: "20:00", name: "Omega-3", dose: "1000mg", status: "scheduled" },
+    ];
+
+    const medSummary: MedicationsTodaySummary = {
+        totalDoses: todayDoses.length,
+        takenDoses: todayDoses.filter(d => d.status === "taken").length,
+        nextDose: todayDoses.find(d => d.status === "scheduled"),
     };
 
     // Computed values
@@ -304,6 +334,11 @@ export default function DashboardPage() {
                 <div className="mt-3">
                     <CycleTodayCard summary={cycleToday} />
                 </div>
+
+                {/* Medications summary card */}
+                <div className="mt-3">
+                    <MedicationsTodayCard summary={medSummary} />
+                </div>
             </section>
 
             {/* Section 3: Body */}
@@ -433,6 +468,56 @@ function CaloriesTodayCard(props: {
                     style={{ width: `${progress * 100}%` }}
                 />
             </div>
+        </div>
+    );
+}
+
+// Medications Today Card Component
+function MedicationsTodayCard({ summary }: { summary: MedicationsTodaySummary }) {
+    const router = useRouter();
+    const { totalDoses, takenDoses, nextDose } = summary;
+    const remainingDoses = totalDoses - takenDoses;
+
+    return (
+        <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-2">
+            <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-900">
+                    Medications today
+                </h3>
+                {totalDoses > 0 && (
+                    <span className="text-xs font-medium rounded-full bg-teal-50 text-teal-700 px-2.5 py-0.5 border border-teal-100">
+                        {takenDoses}/{totalDoses} taken
+                    </span>
+                )}
+            </div>
+
+            {totalDoses === 0 ? (
+                <p className="text-xs text-slate-500">
+                    No doses scheduled for today.
+                </p>
+            ) : (
+                <>
+                    <p className="text-xs text-slate-600">
+                        {totalDoses} {totalDoses === 1 ? 'dose' : 'doses'} scheduled • {takenDoses} taken • {remainingDoses} remaining
+                    </p>
+                    {nextDose && (
+                        <div className="pt-1 border-t border-slate-100">
+                            <p className="text-xs text-slate-600">
+                                <span className="font-semibold text-slate-700">Next:</span>{" "}
+                                {nextDose.time} – {nextDose.name} {nextDose.dose}
+                            </p>
+                        </div>
+                    )}
+                </>
+            )}
+
+            <button
+                type="button"
+                onClick={() => router.push("/medications")}
+                className="text-xs font-medium text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1"
+            >
+                Open meds <ChevronRight size={14} />
+            </button>
         </div>
     );
 }
