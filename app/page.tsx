@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import BottomNav from '@/components/ui/BottomNav';
 
 // --- Types ---
 
@@ -137,6 +138,7 @@ function FastingStatusCard({ status }: { status: DashboardFastStatus }) {
 
 export default function MobileDashboard() {
   return (
+    <>
     <AppShell activeTab="me">
       {/* Hero Section - Read-only Fasting Card */}
       <section className="px-6 pt-4 pb-2">
@@ -232,6 +234,7 @@ export default function MobileDashboard() {
     </AppShell>
     {/* Bottom Navigation */}
     <BottomNav />
+    </>
   );
 }
 
