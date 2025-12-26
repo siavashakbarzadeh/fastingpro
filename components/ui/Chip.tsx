@@ -6,6 +6,7 @@ interface ChipProps {
     onClick?: () => void;
     variant?: 'primary' | 'secondary' | 'accent' | 'danger' | 'slate';
     icon?: React.ElementType;
+    className?: string;
 }
 
 export const Chip: React.FC<ChipProps> = ({
@@ -14,6 +15,7 @@ export const Chip: React.FC<ChipProps> = ({
     onClick,
     variant = 'primary',
     icon: Icon,
+    className = '',
 }) => {
     const variants = {
         primary: {
@@ -44,7 +46,7 @@ export const Chip: React.FC<ChipProps> = ({
         <button
             onClick={onClick}
             className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${active ? currentVariant.active : currentVariant.inactive
-                }`}
+                } ${className}`}
         >
             {Icon && <Icon size={12} />}
             {label}
