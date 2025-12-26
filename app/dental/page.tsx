@@ -19,6 +19,7 @@ import {
     Trophy,
     AlertCircle
 } from 'lucide-react';
+import CoachTip from '@/components/dashboard/CoachTip';
 import { useBrushingTracker } from '@/lib/hooks/useBrushingTracker';
 
 // --- Types ---
@@ -400,6 +401,11 @@ export default function DentalPage() {
 
                 {/* Brushing Timer */}
                 <BrushingTimer onComplete={() => markHabitDone('brushed')} />
+
+                {/* Coaching tip for dental */}
+                <div className="mt-4">
+                    <CoachTip domain="dental" />
+                </div>
 
             </div>
 

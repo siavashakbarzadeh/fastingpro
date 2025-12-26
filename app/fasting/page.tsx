@@ -14,6 +14,7 @@ import {
     TrendingDown,
     Plus,
 } from 'lucide-react';
+import CoachTip from '@/components/dashboard/CoachTip';
 import { AppShell } from '@/components/ui/AppShell';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -479,6 +480,9 @@ export default function FastingPage() {
                     </div>
                 </section>
 
+                <div>
+                    <CoachTip domain="fasting" />
+                </div>
                 <div className="h-10" /> {/* Spacer */}
             </main>
         </AppShell>

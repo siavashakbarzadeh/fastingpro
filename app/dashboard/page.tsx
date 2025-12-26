@@ -24,6 +24,7 @@ import {
     Plus
 } from 'lucide-react';
 import { useBrushingTracker } from '@/lib/hooks/useBrushingTracker';
+import SmartRemindersCard from '@/components/dashboard/smart-reminders-card';
 
 // Cycle types
 type FertilityLevel = "low" | "medium" | "high";
@@ -239,6 +240,11 @@ export default function DashboardPage() {
                     )}
                 </div>
             </section>
+
+            {/* Smart reminders (context-aware) */}
+            <div>
+                <SmartRemindersCard />
+            </div>
 
             {/* Section 2: Today habits */}
             <section>

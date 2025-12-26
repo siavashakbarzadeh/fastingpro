@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import InsightsCard from '@/components/dashboard/InsightsCard';
 import api from "@/lib/api";
 import { differenceInMinutes, format } from "date-fns";
 
@@ -90,6 +91,8 @@ const HistoryPage = () => {
   return (
     <div className="max-w-md mx-auto px-4 py-4 space-y-6 bg-slate-50 min-h-screen">
       <h1 className="text-xl font-bold">History & insights</h1>
+
+      <InsightsCard />
 
       {/* Fasting Section */}
       <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-3">

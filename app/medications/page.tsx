@@ -16,6 +16,7 @@ import {
     Search,
     Pill
 } from 'lucide-react';
+import CoachTip from '@/components/dashboard/CoachTip';
 import { AppShell } from '@/components/ui/AppShell';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -305,6 +306,10 @@ export default function MedicationsPage() {
                         </Card>
                     </div>
                 )}
+                {/* Coaching tip for medications */}
+                <div className="mt-6">
+                    <CoachTip domain="meds" />
+                </div>
             </main>
         </AppShell>
     );
