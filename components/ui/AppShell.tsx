@@ -56,7 +56,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                             <button className="p-2 bg-slate-50 rounded-full text-slate-400">
                                 <Bell size={18} />
                             </button>
-                            <Link href="/dashboard/profile" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
+                            <Link href="/me" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
                                 <img src="https://ui-avatars.com/api/?name=User&background=14b8a6&color=fff" alt="Profile" className="w-full h-full object-cover" />
                             </Link>
                         </div>
@@ -75,7 +75,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                         <NavItem href="/dashboard/plans" icon={Calendar} label="Plan" active={activeTab === 'plan'} />
                         <NavItem href="/dashboard/learn" icon={BookOpen} label="Learn" active={activeTab === 'learn'} />
                         <NavItem href="/dashboard/recipes" icon={Utensils} label="Recipes" active={activeTab === 'recipes'} />
-                        <NavItem href="/dashboard/profile" icon={User} label="Me" active={activeTab === 'me'} />
+                        <NavItem href="/me" icon={User} label="Me" active={activeTab === 'me'} />
                     </nav>
                 )}
 
