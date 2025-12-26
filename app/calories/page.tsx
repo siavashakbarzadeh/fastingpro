@@ -19,75 +19,28 @@ import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-
-// --- Types ---
-
-type MealType = "breakfast" | "lunch" | "dinner" | "snack";
-
-interface FoodEntry {
-    id: string;
-    meal: MealType;
-    name: string;
-    calories: number;
-    portion?: string;
-}
-
-interface ExerciseEntry {
-    id: string;
-    name: string;
-    durationMinutes: number;
-    calories: number;
-}
-
-interface DayData {
-    date: string; // ISO format (YYYY-MM-DD)
-    goal: number;
-    foods: FoodEntry[];
-    exercises: ExerciseEntry[];
-    isCompleted: boolean;
-}
-
-// --- Mock Initial Data ---
+import { LoadingState, ErrorState, EmptyState } from '@/components/ui/StatusStates';
+import { useCalories } from '@/hooks/useCalories';
+import { validate } from '@/lib/utils';
+import { MealType, FoodEntry } from '@/lib/api-client';
 
 const TODAY = new Date().toISOString().split('T')[0];
 
-const INITIAL_DAYS: Record<string, DayData> = {
-    [TODAY]: {
-        date: TODAY,
-        goal: 2000,
-        foods: [
-            { id: '1', meal: 'breakfast', name: 'Oatmeal', calories: 350, portion: '1 serving' },
-            { id: '2', meal: 'breakfast', name: 'Coffee', calories: 45, portion: '1 cup' },
-            { id: '3', meal: 'lunch', name: 'Chicken Salad', calories: 520, portion: '1 bowl' },
-        ],
-        exercises: [
-            { id: 'e1', name: 'Walking', durationMinutes: 30, calories: 150 },
-        ],
-        isCompleted: false,
-    }
-};
-
-// Generate some mock history for the last 6 days
-for (let i = 1; i <= 6; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    INITIAL_DAYS[dateStr] = {
-        date: dateStr,
-        goal: 2000,
-        foods: [
-            { id: `old-f-${i}`, meal: 'dinner', name: 'Pasta', calories: 700 + (i * 10), portion: '1 plate' },
-        ],
-        exercises: [],
-        isCompleted: true,
-    };
-}
-
-// --- Main Page Component ---
-
 export default function CaloriesDiaryPage() {
     const [selectedDate, setSelectedDate] = useState(TODAY);
-    const [days, setDays] = useState<Record<string, DayData>>(INITIAL_DAYS);
+    const {
+        data: dayData,
+        isLoading,
+        error,
+        isSaving,
+        totals,
+        addFood,
+        removeFood,
+        addExercise,
+        removeExercise,
+        toggleComplete,
+        retry
+    } = useCalories(selectedDate);
 
     // UI state for modals/forms
     const [activeAddMeal, setActiveAddMeal] = useState<MealType | null>(null);
@@ -96,100 +49,62 @@ export default function CaloriesDiaryPage() {
     // Form states
     const [foodForm, setFoodForm] = useState({ name: '', calories: '', portion: '1 serving' });
     const [exerciseForm, setExerciseForm] = useState({ name: '', duration: '', burned: '' });
-
-    // --- Select Day Data ---
-    const dayData = useMemo(() => days[selectedDate] || {
-        date: selectedDate,
-        goal: 2000,
-        foods: [],
-        exercises: [],
-        isCompleted: false
-    }, [days, selectedDate]);
-
-    // --- Computed Totals ---
-    const foodCalories = useMemo(() => dayData.foods.reduce((acc, f) => acc + f.calories, 0), [dayData.foods]);
-    const exerciseCalories = useMemo(() => dayData.exercises.reduce((acc, e) => acc + e.calories, 0), [dayData.exercises]);
-    const netCalories = foodCalories - exerciseCalories;
-    const remaining = dayData.goal - netCalories;
-    const isOver = remaining < 0;
+    const [formError, setFormError] = useState<string | null>(null);
 
     // --- Actions ---
 
-    const handleAddFood = (e: React.FormEvent) => {
+    const handleAddFood = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!activeAddMeal || !foodForm.name || !foodForm.calories) return;
+        setFormError(null);
 
-        const newEntry: FoodEntry = {
-            id: Date.now().toString(),
-            meal: activeAddMeal,
+        if (!activeAddMeal) return;
+
+        // Validation
+        if (!validate.isNotEmpty(foodForm.name)) {
+            setFormError('Food name is required');
+            return;
+        }
+        if (!validate.isPositiveNumber(foodForm.calories)) {
+            setFormError('Calories must be a positive number');
+            return;
+        }
+
+        const success = await addFood(activeAddMeal, {
             name: foodForm.name,
             calories: parseInt(foodForm.calories),
             portion: foodForm.portion
-        };
+        });
 
-        setDays(prev => ({
-            ...prev,
-            [selectedDate]: {
-                ...dayData,
-                foods: [...dayData.foods, newEntry]
-            }
-        }));
-
-        setFoodForm({ name: '', calories: '', portion: '1 serving' });
-        setActiveAddMeal(null);
+        if (success) {
+            setFoodForm({ name: '', calories: '', portion: '1 serving' });
+            setActiveAddMeal(null);
+        }
     };
 
-    const handleAddExercise = (e: React.FormEvent) => {
+    const handleAddExercise = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!exerciseForm.name || !exerciseForm.burned) return;
+        setFormError(null);
 
-        const newEntry: ExerciseEntry = {
-            id: Date.now().toString(),
+        // Validation
+        if (!validate.isNotEmpty(exerciseForm.name)) {
+            setFormError('Activity name is required');
+            return;
+        }
+        if (!validate.isPositiveNumber(exerciseForm.burned)) {
+            setFormError('Calories burned must be a positive number');
+            return;
+        }
+
+        const success = await addExercise({
             name: exerciseForm.name,
             durationMinutes: parseInt(exerciseForm.duration) || 0,
             calories: parseInt(exerciseForm.burned)
-        };
+        });
 
-        setDays(prev => ({
-            ...prev,
-            [selectedDate]: {
-                ...dayData,
-                exercises: [...dayData.exercises, newEntry]
-            }
-        }));
-
-        setExerciseForm({ name: '', duration: '', burned: '' });
-        setIsAddingExercise(false);
-    };
-
-    const removeFood = (id: string) => {
-        setDays(prev => ({
-            ...prev,
-            [selectedDate]: {
-                ...dayData,
-                foods: dayData.foods.filter(f => f.id !== id)
-            }
-        }));
-    };
-
-    const removeExercise = (id: string) => {
-        setDays(prev => ({
-            ...prev,
-            [selectedDate]: {
-                ...dayData,
-                exercises: dayData.exercises.filter(e => e.id !== id)
-            }
-        }));
-    };
-
-    const toggleComplete = () => {
-        setDays(prev => ({
-            ...prev,
-            [selectedDate]: {
-                ...dayData,
-                isCompleted: !dayData.isCompleted
-            }
-        }));
+        if (success) {
+            setExerciseForm({ name: '', duration: '', burned: '' });
+            setIsAddingExercise(false);
+        }
     };
 
     const changeDay = (offset: number) => {
@@ -197,10 +112,15 @@ export default function CaloriesDiaryPage() {
         d.setDate(d.getDate() + offset);
         setSelectedDate(d.toISOString().split('T')[0]);
     };
+    const isOver = totals.remaining < 0;
 
     // Helper to filter foods by meal
-    const getMealFoods = (meal: MealType) => dayData.foods.filter(f => f.meal === meal);
-    const getMealTotal = (meal: MealType) => getMealFoods(meal).reduce((acc, f) => acc + f.calories, 0);
+    const getMealFoods = (meal: MealType) => dayData?.foods.filter((f: FoodEntry) => f.meal === meal) || [];
+    const getMealTotal = (meal: MealType) => getMealFoods(meal).reduce((acc: number, f: FoodEntry) => acc + f.calories, 0);
+
+    if (isLoading && !dayData) return <LoadingState />;
+    if (error && !dayData) return <ErrorState message={error} onRetry={retry} />;
+    if (!dayData) return <EmptyState message="No data for this day" />;
 
     return (
         <AppShell
@@ -231,13 +151,13 @@ export default function CaloriesDiaryPage() {
                         <Settings size={20} className="text-slate-300" />
                     </div>
 
-                    {/* 7-Day Overview Strip */}
+                    {/* Simple Date Strip (last 7 days logic could be improved with real data) */}
                     <div className="flex justify-between w-full px-2 mb-2">
-                        {Object.keys(days).sort().slice(-7).map((dateStr) => {
+                        {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+                            const d = new Date();
+                            d.setDate(d.getDate() - (6 - i));
+                            const dateStr = d.toISOString().split('T')[0];
                             const isSelected = dateStr === selectedDate;
-                            const d = days[dateStr];
-                            const dTotal = d.foods.reduce((a, b) => a + b.calories, 0) - d.exercises.reduce((a, b) => a + b.calories, 0);
-                            const status = dTotal > d.goal ? 'bg-danger' : 'bg-primary';
                             return (
                                 <button
                                     key={dateStr}
@@ -245,16 +165,16 @@ export default function CaloriesDiaryPage() {
                                     className="flex flex-col items-center gap-2 group"
                                 >
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${isSelected ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/20' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'}`}>
-                                        {new Date(dateStr).toLocaleDateString('en-US', { weekday: 'narrow' })}
+                                        {d.toLocaleDateString('en-US', { weekday: 'narrow' })}
                                     </div>
-                                    <div className={`w-1 h-1 rounded-full ${status} ${isSelected ? 'opacity-100' : 'opacity-30 group-hover:opacity-60'}`} />
+                                    <div className={`w-1 h-1 rounded-full bg-primary ${isSelected ? 'opacity-100' : 'opacity-30 group-hover:opacity-60'}`} />
                                 </button>
                             );
                         })}
                     </div>
                 </header>
 
-                {/* Summary Bar Card (MyFitnessPal Style) */}
+                {/* Summary Bar Card */}
                 <section className="px-6 relative -mb-10 z-10">
                     <Card variant="white" padding="none" className="shadow-xl py-6 border-b-4 border-primary">
                         <div className="grid grid-cols-4 items-end px-4 text-center">
@@ -264,21 +184,21 @@ export default function CaloriesDiaryPage() {
                             </div>
                             <div className="flex flex-col items-center">
                                 <span className="text-[10px] font-black text-slate-300 mb-1">-</span>
-                                <div className="text-xs font-black text-orange-500">{foodCalories}</div>
+                                <div className="text-xs font-black text-orange-500">{totals.food}</div>
                                 <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Food</div>
                             </div>
                             <div className="flex flex-col items-center">
                                 <span className="text-[10px] font-black text-slate-300 mb-1">+</span>
-                                <div className="text-xs font-black text-emerald-500">{exerciseCalories}</div>
+                                <div className="text-xs font-black text-emerald-500">{totals.exercise}</div>
                                 <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Exercise</div>
                             </div>
                             <div>
-                                <div className={`text-xs font-black ${isOver ? 'text-danger' : 'text-primary'}`}>{remaining}</div>
-                                <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Net</div>
+                                <div className={`text-xs font-black ${isOver ? 'text-danger' : 'text-primary'}`}>{totals.remaining}</div>
+                                <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Remaining</div>
                             </div>
                         </div>
                         <div className="mt-4 px-8">
-                            <ProgressBar progress={Math.min(100, (netCalories / dayData.goal) * 100)} color={isOver ? 'danger' : 'primary'} height="sm" />
+                            <ProgressBar progress={Math.min(100, (totals.net / dayData.goal) * 100)} color={isOver ? 'danger' : 'primary'} height="sm" />
                         </div>
                     </Card>
                 </section>
@@ -305,7 +225,7 @@ export default function CaloriesDiaryPage() {
                                 <Activity size={14} className="text-emerald-500" />
                                 Exercise
                             </h3>
-                            <span className="text-[10px] font-black text-emerald-500">{exerciseCalories} kcal</span>
+                            <span className="text-[10px] font-black text-emerald-500">{totals.exercise} kcal</span>
                         </div>
                         <Card padding="none">
                             <div className="divide-y divide-slate-50">
@@ -340,7 +260,7 @@ export default function CaloriesDiaryPage() {
                             <div>
                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Daily Success</span>
                                 <div className={`text-xl font-black ${isOver ? 'text-danger' : 'text-primary'}`}>
-                                    {isOver ? `${Math.abs(remaining)} over` : `${remaining} remaining`}
+                                    {isOver ? `${Math.abs(totals.remaining)} over` : `${totals.remaining} remaining`}
                                 </div>
                             </div>
                             <Button
@@ -367,14 +287,16 @@ export default function CaloriesDiaryPage() {
                             </button>
                         </div>
                         <form onSubmit={handleAddFood} className="space-y-4">
-                            <input
-                                type="text"
-                                placeholder="Food name"
-                                className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-primary/20 outline-none"
-                                value={foodForm.name}
-                                onChange={e => setFoodForm({ ...foodForm, name: e.target.value })}
-                                autoFocus
-                            />
+                            <div className="space-y-1">
+                                <input
+                                    type="text"
+                                    placeholder="Food name"
+                                    className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-primary/20 outline-none"
+                                    value={foodForm.name}
+                                    onChange={e => setFoodForm({ ...foodForm, name: e.target.value })}
+                                    autoFocus
+                                />
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <input
                                     type="number"
@@ -395,7 +317,12 @@ export default function CaloriesDiaryPage() {
                                     <option value="1 cup">1 cup</option>
                                 </select>
                             </div>
-                            <Button type="submit" className="w-full" size="lg">Add Food</Button>
+
+                            {formError && <p className="text-[10px] font-bold text-danger uppercase tracking-tighter px-2">{formError}</p>}
+
+                            <Button type="submit" className="w-full" size="lg" isLoading={isSaving} disabled={isSaving}>
+                                Add Food
+                            </Button>
                         </form>
                     </Card>
                 </div>
@@ -436,7 +363,12 @@ export default function CaloriesDiaryPage() {
                                     onChange={e => setExerciseForm({ ...exerciseForm, burned: e.target.value })}
                                 />
                             </div>
-                            <Button type="submit" className="w-full" size="lg" variant="secondary">Add Exercise</Button>
+
+                            {formError && <p className="text-[10px] font-bold text-danger uppercase tracking-tighter px-2">{formError}</p>}
+
+                            <Button type="submit" className="w-full" size="lg" variant="secondary" isLoading={isSaving} disabled={isSaving}>
+                                Add Exercise
+                            </Button>
                         </form>
                     </Card>
                 </div>

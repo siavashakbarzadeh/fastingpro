@@ -10,13 +10,18 @@ import {
     Leaf,
     Zap,
     Filter,
-    ArrowLeft,
     ChevronRight,
     Check,
     Calendar,
-    Award
+    Award,
+    ArrowLeft,
+    ChevronLeft
 } from 'lucide-react';
-import Link from 'next/link';
+import { AppShell } from '@/components/ui/AppShell';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Chip } from '@/components/ui/Chip';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 
 // --- Types ---
 
@@ -63,13 +68,12 @@ interface DietPlan {
     summary: string;
     highlight: string;
     imageUrl: string;
-    description?: string[]; // Bullet points for modal
+    description?: string[];
 }
 
 // --- Mock Data ---
 
 const RECIPES: Recipe[] = [
-    // --- Salad ---
     {
         id: '1',
         title: 'Curry and Tuna Salad Roll',
@@ -102,8 +106,6 @@ const RECIPES: Recipe[] = [
         whyItFits: 'High protein content with minimal carbs from croutons.',
         image: '/recipes/chicken_caesar_salad.png'
     },
-
-    // --- Soup ---
     {
         id: '3',
         title: 'Tuscan Kale & Bean Soup',
@@ -136,8 +138,6 @@ const RECIPES: Recipe[] = [
         whyItFits: 'Plant-based and rich in antioxidants.',
         image: '/recipes/pumpkin_soup.png'
     },
-
-    // --- Breakfast ---
     {
         id: '5',
         title: 'Soft-Scrambled Eggs',
@@ -170,8 +170,6 @@ const RECIPES: Recipe[] = [
         whyItFits: 'Provides sustained energy from complex carbs and protein.',
         image: '/recipes/spinach_egg_sandwich.png'
     },
-
-    // --- Smoothie ---
     {
         id: '7',
         title: 'Cucumber Smoothie',
@@ -204,8 +202,6 @@ const RECIPES: Recipe[] = [
         whyItFits: 'Matcha and blueberries supports heart health and brain function.',
         image: 'https://images.unsplash.com/photo-1502741221712-4299b4226d40?w=500&q=80'
     },
-
-    // --- Main Course ---
     {
         id: '9',
         title: 'Grilled Pork with Fresh Coconut Milk',
@@ -342,11 +338,11 @@ const HEALTH_FILTERS: { id: HealthCategory | 'all'; label: string }[] = [
 ];
 
 const RECIPE_COURSE_CONFIG: { id: CourseCategory; label: string }[] = [
-    { id: 'salad', label: 'Salad' },
-    { id: 'soup', label: 'Soup' },
+    { id: 'salad', label: 'Salads' },
+    { id: 'soup', label: 'Soups' },
     { id: 'breakfast', label: 'Breakfast' },
-    { id: 'smoothie', label: 'Smoothie' },
-    { id: 'main_course', label: 'Main course' }
+    { id: 'smoothie', label: 'Smoothies' },
+    { id: 'main_course', label: 'Main Courses' }
 ];
 
 const DIET_PLAN_CONFIG: { id: DietPlanCategory; label: string; icon?: string }[] = [
@@ -375,6 +371,7 @@ export default function RecipesPage() {
     // --- Derived Data ---
     const filteredRecipes = useMemo(() => {
         return RECIPES.filter(recipe => {
+            if (activeCourseForSeeAll && recipe.course !== activeCourseForSeeAll) return false;
             if (selectedHealthCategory !== 'all' && !recipe.healthCategories.includes(selectedHealthCategory)) return false;
             const query = searchQuery.toLowerCase();
             const matchesSearch = recipe.title.toLowerCase().includes(query) || recipe.summary.toLowerCase().includes(query);
@@ -382,7 +379,7 @@ export default function RecipesPage() {
             if (quickOnly && !recipe.isQuick) return false;
             return true;
         });
-    }, [selectedHealthCategory, searchQuery, quickOnly]);
+    }, [selectedHealthCategory, searchQuery, quickOnly, activeCourseForSeeAll]);
 
     const activeRecipe = useMemo(() => RECIPES.find(r => r.id === openRecipeId), [openRecipeId]);
     const activeDietPlan = useMemo(() => DIET_PLANS.find(p => p.id === openDietPlanId), [openDietPlanId]);
@@ -391,7 +388,7 @@ export default function RecipesPage() {
     const getBadgeStyle = (cat: HealthCategory) => {
         switch (cat) {
             case 'vegetarian': return 'bg-orange-100 text-orange-700';
-            case 'vegan': return 'bg-green-100 text-green-700';
+            case 'vegan': return 'bg-emerald-100 text-emerald-700';
             case 'heart_healthy': return 'bg-rose-100 text-rose-700';
             case 'low_carb': return 'bg-blue-100 text-blue-700';
             default: return 'bg-slate-100 text-slate-700';
@@ -403,141 +400,124 @@ export default function RecipesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-800 relative">
-
-            {/* Header with Tabs */}
-            <header className="bg-white sticky top-0 z-20 shadow-sm border-b border-slate-100">
-                <div className="max-w-xl mx-auto px-6 py-4">
-                    <div className="flex items-center gap-3 mb-4">
-                        <Link href="/dashboard" className="p-2 -ml-2 rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors">
-                            <ArrowLeft size={24} strokeWidth={2.5} />
-                        </Link>
-                        <h1 className="text-xl font-black text-slate-800">Nutrition & Plans</h1>
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="flex bg-slate-100 p-1 rounded-xl mb-2">
-                        <button
-                            onClick={() => setActiveTab('recipes')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-black transition-all ${activeTab === 'recipes'
-                                ? 'bg-white text-slate-900 shadow-sm'
-                                : 'text-slate-400 hover:text-slate-600'
-                                }`}
-                        >
-                            Recipes
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('diet_plans')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-black transition-all ${activeTab === 'diet_plans'
-                                ? 'bg-white text-slate-900 shadow-sm'
-                                : 'text-slate-400 hover:text-slate-600'
-                                }`}
-                        >
-                            Diet plans
-                        </button>
-                    </div>
+        <AppShell
+            title="Nutrition"
+            subtitle="Recipes & Diet Plans"
+            showBackButton
+            backUrl="/dashboard"
+            activeTab="plan"
+        >
+            <main className="px-6 py-8 space-y-10">
+                {/* Tabs */}
+                <div className="flex bg-slate-100 p-1.5 rounded-2xl">
+                    <button
+                        onClick={() => { setActiveTab('recipes'); setActiveCourseForSeeAll(null); }}
+                        className={`flex-1 py-3 rounded-xl text-xs font-black uppercase transition-all ${activeTab === 'recipes' ? 'bg-white text-primary shadow-md' : 'text-slate-400'}`}
+                    >
+                        Recipes
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('diet_plans'); setActiveCourseForSeeAll(null); }}
+                        className={`flex-1 py-3 rounded-xl text-xs font-black uppercase transition-all ${activeTab === 'diet_plans' ? 'bg-white text-primary shadow-md' : 'text-slate-400'}`}
+                    >
+                        Diet Plans
+                    </button>
                 </div>
 
-                {/* Sub-header Filters (only for Recipes) */}
-                {activeTab === 'recipes' && (
-                    <div className="max-w-xl mx-auto px-6 pb-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
-                        {/* Search */}
-                        <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                            <input
-                                type="text"
-                                placeholder="Search recipes..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-50 border-none rounded-2xl pl-12 pr-4 py-3 text-slate-700 font-bold placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
-                            />
-                        </div>
-
-                        {/* Chips */}
-                        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                            {HEALTH_FILTERS.map(filter => (
+                {activeTab === 'recipes' ? (
+                    <>
+                        {/* Search & Filters */}
+                        {!activeCourseForSeeAll && (
+                            <section className="space-y-6">
+                                <div className="relative">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search recipes..."
+                                        value={searchQuery}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                                        className="w-full bg-slate-50 border-none rounded-2xl pl-12 pr-4 py-4 text-sm font-black text-slate-700 outline-none focus:ring-2 focus:ring-primary/20 placeholder:opacity-50"
+                                    />
+                                </div>
+                                <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                                    {HEALTH_FILTERS.map(filter => (
+                                        <button
+                                            key={filter.id}
+                                            onClick={() => setSelectedHealthCategory(filter.id)}
+                                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase whitespace-nowrap transition-all border-2 ${selectedHealthCategory === filter.id
+                                                ? 'bg-primary border-primary text-white'
+                                                : 'bg-white border-slate-100 text-slate-400'
+                                                }`}
+                                        >
+                                            {filter.label}
+                                        </button>
+                                    ))}
+                                </div>
                                 <button
-                                    key={filter.id}
-                                    onClick={() => setSelectedHealthCategory(filter.id)}
-                                    className={`px-4 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all border ${selectedHealthCategory === filter.id
-                                        ? 'bg-slate-800 text-white border-slate-800'
-                                        : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-200'
-                                        }`}
+                                    onClick={() => setQuickOnly(!quickOnly)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${quickOnly ? 'bg-amber-100 text-amber-700' : 'bg-slate-50 text-slate-400'}`}
                                 >
-                                    {filter.label}
+                                    <Zap size={14} fill={quickOnly ? "currentColor" : "none"} />
+                                    Under 20 Minutes
                                 </button>
-                            ))}
-                        </div>
+                            </section>
+                        )}
 
-                        {/* Quick Filter */}
-                        <button
-                            onClick={() => setQuickOnly(!quickOnly)}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${quickOnly ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-400 hover:text-slate-600'
-                                }`}
-                        >
-                            <Zap size={14} fill={quickOnly ? "currentColor" : "none"} />
-                            Quick recipes only (≤ 20 min)
-                        </button>
-                    </div>
-                )}
-            </header>
-
-            <main className="max-w-xl mx-auto px-6 py-6 space-y-8 min-h-[50vh]">
-
-                {/* === RECIPES TAB CONTENT === */}
-                {activeTab === 'recipes' && (
-                    activeCourseForSeeAll ? (
-                        // "See All" View
-                        <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                            <button
-                                onClick={() => setActiveCourseForSeeAll(null)}
-                                className="flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-bold text-sm mb-6 transition-colors"
-                            >
-                                <ArrowLeft size={16} /> Back to recipes
-                            </button>
-                            <h2 className="text-2xl font-black text-slate-800 mb-6 capitalize">
-                                All {RECIPE_COURSE_CONFIG.find(c => c.id === activeCourseForSeeAll)?.label} Recipes
-                            </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                {filteredRecipes.filter(r => r.course === activeCourseForSeeAll).length > 0 ? (
-                                    filteredRecipes.filter(r => r.course === activeCourseForSeeAll).map(recipe => (
-                                        <RecipeCard
-                                            key={recipe.id}
-                                            recipe={recipe}
-                                            onClick={() => setOpenRecipeId(recipe.id)}
-                                            getBadgeStyle={getBadgeStyle}
-                                            getHealthCatLabel={getHealthCatLabel}
-                                        />
-                                    ))
-                                ) : (
-                                    <div className="col-span-full py-12 text-center text-slate-400 font-medium">
-                                        No recipes found for this category with current filters.
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ) : (
-                        // Sections View
-                        <>
-                            {RECIPE_COURSE_CONFIG.map(section => {
-                                const sectionRecipes = filteredRecipes.filter(r => r.course === section.id);
-                                return (
-                                    <div key={section.id} className="space-y-4">
-                                        <div className="flex justify-between items-end">
-                                            <h3 className="text-xl font-black text-slate-800">{section.label}</h3>
-                                            {sectionRecipes.length > 0 && (
-                                                <button
-                                                    onClick={() => setActiveCourseForSeeAll(section.id)}
-                                                    className="flex items-center text-emerald-500 font-black text-xs hover:gap-1 transition-all"
-                                                >
-                                                    See all <ChevronRight size={14} />
-                                                </button>
-                                            )}
+                        {activeCourseForSeeAll ? (
+                            <section className="animate-in slide-in-from-right-4 duration-300">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <button
+                                        onClick={() => setActiveCourseForSeeAll(null)}
+                                        className="p-2 -ml-2 rounded-xl bg-slate-50 text-slate-400"
+                                    >
+                                        <ChevronLeft size={20} />
+                                    </button>
+                                    <SectionHeader
+                                        title={`${RECIPE_COURSE_CONFIG.find(c => c.id === activeCourseForSeeAll)?.label}`}
+                                        description="All available recipes"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-1 gap-6">
+                                    {filteredRecipes.length > 0 ? (
+                                        filteredRecipes.map((recipe: Recipe) => (
+                                            <RecipeCard
+                                                key={recipe.id}
+                                                recipe={recipe}
+                                                onClick={() => setOpenRecipeId(recipe.id)}
+                                                getBadgeStyle={getBadgeStyle}
+                                                getHealthCatLabel={getHealthCatLabel}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-20 bg-slate-50 rounded-[2.5rem]">
+                                            <p className="text-sm font-black text-slate-400 uppercase">No recipes found matching filters</p>
                                         </div>
-                                        {sectionRecipes.length > 0 ? (
+                                    )}
+                                </div>
+                            </section>
+                        ) : (
+                            <section className="space-y-12">
+                                {RECIPE_COURSE_CONFIG.map(section => {
+                                    const sectionRecipes = RECIPES.filter(r => r.course === section.id);
+                                    if (sectionRecipes.length === 0) return null;
+
+                                    return (
+                                        <div key={section.id} className="space-y-4">
+                                            <SectionHeader
+                                                title={section.label}
+                                                description="Featured items"
+                                                action={
+                                                    <button
+                                                        onClick={() => setActiveCourseForSeeAll(section.id)}
+                                                        className="text-primary font-black text-[10px] uppercase flex items-center gap-1"
+                                                    >
+                                                        See All <ChevronRight size={14} />
+                                                    </button>
+                                                }
+                                            />
                                             <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 no-scrollbar snap-x snap-mandatory">
-                                                {sectionRecipes.slice(0, 4).map(recipe => (
-                                                    <div key={recipe.id} className="snap-center shrink-0 w-[280px]">
+                                                {sectionRecipes.slice(0, 4).map((recipe: Recipe) => (
+                                                    <div key={recipe.id} className="snap-center shrink-0 w-[240px]">
                                                         <RecipeCard
                                                             recipe={recipe}
                                                             onClick={() => setOpenRecipeId(recipe.id)}
@@ -547,31 +527,24 @@ export default function RecipesPage() {
                                                     </div>
                                                 ))}
                                             </div>
-                                        ) : (
-                                            <div className="bg-slate-100/50 rounded-xl p-6 text-center text-slate-400 text-sm font-medium">
-                                                No matches.
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </>
-                    )
-                )}
-
-                {/* === DIET PLANS TAB CONTENT === */}
-                {activeTab === 'diet_plans' && (
-                    <div className="space-y-10 animate-in fade-in duration-300">
+                                        </div>
+                                    );
+                                })}
+                            </section>
+                        )}
+                    </>
+                ) : (
+                    <section className="space-y-12">
                         {DIET_PLAN_CONFIG.map(section => {
                             const plans = DIET_PLANS.filter(p => p.category === section.id);
                             if (plans.length === 0) return null;
 
                             return (
                                 <div key={section.id} className="space-y-4">
-                                    <h3 className="text-xl font-black text-slate-800">{section.label}</h3>
+                                    <SectionHeader title={section.label} description="Curated by nutritionists" />
                                     <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 no-scrollbar snap-x snap-mandatory">
-                                        {plans.map(plan => (
-                                            <div key={plan.id} className="snap-center shrink-0 w-[300px]">
+                                        {plans.map((plan: DietPlan) => (
+                                            <div key={plan.id} className="snap-center shrink-0 w-[240px]">
                                                 <DietPlanCard plan={plan} onClick={() => setOpenDietPlanId(plan.id)} />
                                             </div>
                                         ))}
@@ -579,126 +552,167 @@ export default function RecipesPage() {
                                 </div>
                             );
                         })}
-                    </div>
+                    </section>
                 )}
             </main>
 
-            {/* --- Recipe Modal --- */}
+            {/* Recipe Modal */}
             {activeRecipe && (
-                <div className="fixed inset-0 z-50 flex justify-end sm:items-center sm:justify-center bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200 p-0 sm:p-4">
-                    <div className="bg-white w-full h-full sm:h-[90vh] sm:max-w-2xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 duration-300" onClick={(e) => e.stopPropagation()}>
-                        <div className="relative h-56 sm:h-64 w-full shrink-0 group">
-                            <Image src={activeRecipe.image} alt={activeRecipe.title} fill className="object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                            <button onClick={() => setOpenRecipeId(null)} className="absolute top-4 right-4 bg-black/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-black/40 transition-colors z-20">
-                                <X size={20} />
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-6 overflow-hidden">
+                    <Card variant="white" className="w-full max-w-2xl h-[90vh] shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col">
+                        <div className="relative h-64 shrink-0">
+                            <Image
+                                src={activeRecipe.image}
+                                alt={activeRecipe.title}
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <button
+                                onClick={() => setOpenRecipeId(null)}
+                                className="absolute top-6 right-6 p-2 bg-black/20 text-white rounded-full hover:bg-black/40 transition-colors"
+                            >
+                                <X size={24} />
                             </button>
-                            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                                <div className="flex flex-wrap items-center gap-2 mb-3">
-                                    {activeRecipe.isPro && <span className="bg-amber-400 text-white px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm">PRO</span>}
+                            <div className="absolute bottom-6 left-8 right-8">
+                                <div className="flex gap-2 mb-2">
+                                    {activeRecipe.isPro && <Chip label="PRO" variant="primary" active />}
                                     {activeRecipe.healthCategories.map(cat => (
-                                        <span key={cat} className="bg-white/20 backdrop-blur-md text-white px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider">{getHealthCatLabel(cat)}</span>
+                                        <Chip key={cat} label={getHealthCatLabel(cat)} variant="secondary" active />
                                     ))}
                                 </div>
-                                <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight shadow-sm">{activeRecipe.title}</h2>
+                                <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{activeRecipe.title}</h2>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 bg-white scrollbar-thin scrollbar-thumb-slate-200">
-                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+
+                        <div className="flex-1 overflow-y-auto p-8 space-y-8 scroll-smooth">
+                            <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Clock size={18} /></div>
-                                    <div><div className="text-[10px] font-bold text-slate-400 uppercase">Prep Time</div><div className="text-sm font-black text-slate-800">{activeRecipe.prepMinutes} min</div></div>
+                                    <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                                        <Clock size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Time</div>
+                                        <div className="text-sm font-black text-slate-800">{activeRecipe.prepMinutes} MIN</div>
+                                    </div>
                                 </div>
                                 <div className="w-px h-8 bg-slate-200" />
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-orange-100 text-orange-600 rounded-full"><Flame size={18} /></div>
-                                    <div><div className="text-[10px] font-bold text-slate-400 uppercase">Calories</div><div className="text-sm font-black text-slate-800">{activeRecipe.calories}</div></div>
+                                    <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
+                                        <Flame size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Energy</div>
+                                        <div className="text-sm font-black text-slate-800">{activeRecipe.calories} KCAL</div>
+                                    </div>
                                 </div>
                             </div>
+
                             <div className="space-y-4">
-                                <p className="text-slate-600 font-medium leading-relaxed">{activeRecipe.summary}</p>
-                                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex gap-3">
-                                    <Leaf className="shrink-0 text-emerald-500 mt-0.5" size={18} />
-                                    <div><h4 className="text-xs font-black text-emerald-800 uppercase tracking-wide mb-1">Why it fits your goals</h4><p className="text-sm text-emerald-700 font-medium">{activeRecipe.whyItFits}</p></div>
+                                <SectionHeader title="Goal Fit" description="Why we chose this for you" />
+                                <div className="bg-emerald-50/50 border-2 border-dashed border-emerald-100 rounded-[2rem] p-6 flex gap-4">
+                                    <Leaf className="text-emerald-500 shrink-0" size={24} />
+                                    <p className="text-sm font-bold text-emerald-800 leading-relaxed italic">
+                                        "{activeRecipe.whyItFits}"
+                                    </p>
                                 </div>
                             </div>
-                            <div>
-                                <h3 className="text-lg font-black text-slate-800 mb-4">Ingredients</h3>
-                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {activeRecipe.ingredients.map((ing, idx) => (
-                                        <li key={idx} className="flex items-center gap-2 text-sm font-medium text-slate-600 bg-slate-50 px-3 py-2 rounded-lg"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />{ing}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-black text-slate-800 mb-4">Instructions</h3>
-                                <div className="space-y-6">
-                                    {activeRecipe.steps.map((step, idx) => (
-                                        <div key={idx} className="flex gap-4 group">
-                                            <div className="flex flex-col items-center"><div className="w-7 h-7 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-lg shadow-slate-200">{idx + 1}</div>{idx !== activeRecipe.steps.length - 1 && <div className="w-0.5 h-full bg-slate-100 my-2 group-hover:bg-emerald-100 transition-colors" />}</div>
-                                            <p className="text-sm text-slate-600 font-medium leading-relaxed pb-6 pt-1">{step}</p>
+
+                            <div className="space-y-4">
+                                <SectionHeader title="Ingredients" description="Everything you'll need" />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {activeRecipe.ingredients.map((ing: string, idx: number) => (
+                                        <div key={idx} className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                            <span className="text-sm font-black text-slate-700 uppercase">{ing}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                            <div className="pt-6 border-t border-slate-100 text-center"><p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide max-w-xs mx-auto">Nutrition values are approximate and for general education only. This is not personalized dietary advice.</p></div>
+
+                            <div className="space-y-4">
+                                <SectionHeader title="Preparation" description="Step-by-step instructions" />
+                                <div className="space-y-6">
+                                    {activeRecipe.steps.map((step: string, idx: number) => (
+                                        <div key={idx} className="flex gap-6">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center text-xs font-black shadow-lg shadow-primary/20 shrink-0">
+                                                    {idx + 1}
+                                                </div>
+                                                {idx < activeRecipe.steps.length - 1 && (
+                                                    <div className="w-0.5 flex-1 bg-slate-100 rounded-full" />
+                                                )}
+                                            </div>
+                                            <p className="text-sm font-bold text-slate-600 leading-relaxed pt-1 uppercase tracking-tight">
+                                                {step}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </Card>
                 </div>
             )}
 
-            {/* --- Diet Plan Modal --- */}
+            {/* Diet Plan Modal */}
             {activeDietPlan && (
-                <div className="fixed inset-0 z-50 flex justify-end sm:items-center sm:justify-center bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200 p-0 sm:p-4">
-                    <div className="bg-white w-full h-full sm:h-[85vh] sm:max-w-xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 duration-300" onClick={(e) => e.stopPropagation()}>
-                        <div className="relative h-64 w-full shrink-0 group">
-                            <Image src={activeDietPlan.imageUrl} alt={activeDietPlan.title} fill className="object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/80 via-transparent to-transparent" />
-                            <button onClick={() => setOpenDietPlanId(null)} className="absolute top-4 right-4 bg-black/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-black/40 transition-colors z-20">
-                                <X size={20} />
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-6 overflow-hidden">
+                    <Card variant="white" className="w-full max-w-xl h-[90vh] shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col">
+                        <div className="relative h-64 shrink-0">
+                            <Image
+                                src={activeDietPlan.imageUrl}
+                                alt={activeDietPlan.title}
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent" />
+                            <button
+                                onClick={() => setOpenDietPlanId(null)}
+                                className="absolute top-6 right-6 p-2 bg-black/20 text-white rounded-full hover:bg-black/40 transition-colors"
+                            >
+                                <X size={24} />
                             </button>
-                            <div className="absolute bottom-0 left-0 right-0 p-8">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <span className="bg-white text-emerald-800 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
-                                        <Calendar size={12} /> {activeDietPlan.durationWeeks} Week Plan
-                                    </span>
-                                </div>
-                                <h2 className="text-3xl font-black text-white leading-tight mb-2">{activeDietPlan.title}</h2>
-                                <p className="text-emerald-100 font-medium">{activeDietPlan.summary}</p>
+                            <div className="absolute bottom-6 left-8 right-8">
+                                <Chip label={`${activeDietPlan.durationWeeks} WEEK PLAN`} variant="primary" active className="mb-2" />
+                                <h2 className="text-3xl font-black text-white uppercase tracking-tighter">{activeDietPlan.title}</h2>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-white">
-                            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">
-                                <h4 className="flex items-center gap-2 text-sm font-black text-emerald-800 uppercase tracking-wide mb-3">
-                                    <Award size={18} className="text-emerald-500" /> Plan Goal
+
+                        <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                            <div className="bg-primary/5 border-2 border-dashed border-primary/20 rounded-[2rem] p-6">
+                                <h4 className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest mb-2">
+                                    <Award size={18} /> Main Objective
                                 </h4>
-                                <p className="text-lg font-bold text-emerald-900 leading-snug">
+                                <p className="text-lg font-black text-slate-800 leading-tight uppercase tracking-tighter">
                                     {activeDietPlan.highlight}
                                 </p>
                             </div>
 
-                            <div>
-                                <h3 className="text-lg font-black text-slate-800 mb-4">What's included</h3>
-                                <ul className="space-y-4">
-                                    {activeDietPlan.description?.map((desc, i) => (
-                                        <li key={i} className="flex gap-4">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-                                            <p className="text-slate-600 font-medium">{desc}</p>
-                                        </li>
+                            <div className="space-y-4">
+                                <SectionHeader title="The Strategy" description="What makes this plan work" />
+                                <div className="space-y-3">
+                                    {activeDietPlan.description?.map((desc: string, i: number) => (
+                                        <div key={i} className="flex gap-4 p-4 bg-slate-50 rounded-2xl">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                                            <p className="text-sm font-black text-slate-700 uppercase leading-snug">{desc}</p>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
                             </div>
 
-                            <div className="pt-8 mt-8 border-t border-slate-100 text-center">
-                                <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                                    Consult a healthcare professional before making significant changes to your diet, especially if you have pre-existing conditions.
+                            <div className="p-6 bg-slate-900 rounded-[2rem] text-center">
+                                <h4 className="text-white font-black text-sm uppercase mb-2">Important Notice</h4>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">
+                                    Consult a healthcare professional before significantly changing your diet.
+                                    This plan is for educational purposes only.
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </Card>
                 </div>
             )}
-        </div>
+        </AppShell>
     );
 }
 
@@ -716,57 +730,88 @@ function RecipeCard({
     getHealthCatLabel: (cat: HealthCategory) => string;
 }) {
     return (
-        <div
+        <Card
+            variant="white"
+            padding="none"
+            className="overflow-hidden hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group h-full flex flex-col"
             onClick={onClick}
-            className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer flex flex-col h-full group"
         >
-            <div className="relative h-48 w-full bg-slate-200 overflow-hidden">
-                <Image src={recipe.image} alt={recipe.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60" />
-                <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-                    {recipe.isPro && <div className="bg-amber-400 text-white px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider shadow-lg">PRO</div>}
+            <div className="relative h-44 shrink-0 overflow-hidden">
+                <Image
+                    src={recipe.image}
+                    alt={recipe.title}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                <div className="absolute top-4 left-4 flex gap-1">
+                    {recipe.isPro && <div className="bg-amber-400 text-white px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-lg">PRO</div>}
                 </div>
-                <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
-                    <div className="bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1"><Clock size={10} /> {recipe.prepMinutes}m</div>
+                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                    <div className="px-2 py-1 bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-black text-white flex items-center gap-1">
+                        <Clock size={10} /> {recipe.prepMinutes}M
+                    </div>
                 </div>
             </div>
-            <div className="p-5 flex flex-col flex-1">
-                <div className="flex flex-wrap gap-1 mb-2">
+            <div className="p-5 flex-1 flex flex-col">
+                <div className="flex gap-1 mb-3">
                     {recipe.healthCategories.slice(0, 2).map(cat => (
-                        <span key={cat} className={`text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-md ${getBadgeStyle(cat)}`}>{getHealthCatLabel(cat)}</span>
+                        <span key={cat} className={`text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-md ${getBadgeStyle(cat)}`}>
+                            {getHealthCatLabel(cat)}
+                        </span>
                     ))}
-                    {recipe.healthCategories.length > 2 && <span className="text-[9px] font-black text-slate-400 px-1 py-1">+</span>}
                 </div>
-                <h3 className="text-base font-black text-slate-800 leading-snug mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors">{recipe.title}</h3>
-                <div className="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 flex items-center gap-1"><Flame size={12} /> {recipe.calories} kcal</span>
-                    <span className="text-xs font-black text-emerald-500 uppercase tracking-wide group-hover:underline decoration-2 underline-offset-2">View</span>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight line-clamp-2 leading-none mb-4 flex-1">
+                    {recipe.title}
+                </h3>
+                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                    <div className="flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase">
+                        <Flame size={12} className="text-orange-500" /> {recipe.calories} KCAL
+                    </div>
+                    <ChevronRight size={16} className="text-primary opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }
 
 function DietPlanCard({ plan, onClick }: { plan: DietPlan; onClick: () => void }) {
     return (
-        <div
+        <Card
+            variant="white"
+            padding="none"
+            className="overflow-hidden hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group h-full flex flex-col"
             onClick={onClick}
-            className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer flex flex-col h-full group"
         >
-            <div className="relative h-44 w-full bg-slate-200 overflow-hidden">
-                <Image src={plan.imageUrl} alt={plan.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+            <div className="relative h-44 shrink-0 overflow-hidden">
+                <Image
+                    src={plan.imageUrl}
+                    alt={plan.title}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute top-3 left-3">
-                    {plan.isPro && <div className="bg-amber-400 text-white px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider shadow-lg">PRO</div>}
+                <div className="absolute top-4 left-4">
+                    {plan.isPro && <div className="bg-amber-400 text-white px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-lg">PRO</div>}
+                </div>
+                <div className="absolute bottom-4 left-4">
+                    <div className="px-2 py-1 bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-black text-white flex items-center gap-1 uppercase">
+                        <Calendar size={10} /> {plan.durationWeeks} WEEK PLAN
+                    </div>
                 </div>
             </div>
-            <div className="p-5 flex flex-col flex-1">
-                <h3 className="text-lg font-black text-slate-800 leading-tight mb-2 group-hover:text-emerald-600 transition-colors">{plan.title}</h3>
-                <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 mb-3">
-                    <Calendar size={14} /> {plan.durationWeeks} Week Plan
+            <div className="p-5 flex-1 flex flex-col">
+                <h4 className="text-base font-black text-slate-800 uppercase tracking-tighter leading-none mb-2">
+                    {plan.title}
+                </h4>
+                <p className="text-[10px] font-bold text-slate-400 uppercase line-clamp-2 leading-relaxed italic">
+                    {plan.summary}
+                </p>
+                <div className="mt-auto pt-4 flex justify-between items-center">
+                    <span className="text-[10px] font-black text-primary uppercase tracking-widest">Enroll Now</span>
+                    <ChevronRight size={16} className="text-primary opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
                 </div>
-                <p className="text-xs text-slate-500 font-medium line-clamp-2 leading-relaxed">{plan.summary}</p>
             </div>
-        </div>
+        </Card>
     );
 }
