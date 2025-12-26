@@ -9,6 +9,7 @@ interface CardProps {
     padding?: 'none' | 'sm' | 'md' | 'lg';
     className?: string;
     footer?: React.ReactNode;
+    onClick?: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -20,6 +21,7 @@ export const Card: React.FC<CardProps> = ({
     padding = 'md',
     className = '',
     footer,
+    onClick,
 }) => {
     const variants = {
         white: 'bg-white border border-border shadow-sm text-slate-900',
@@ -35,7 +37,10 @@ export const Card: React.FC<CardProps> = ({
     };
 
     return (
-        <div className={`rounded-[2.5rem] overflow-hidden transition-all ${variants[variant]} ${className}`}>
+        <div
+            onClick={onClick}
+            className={`rounded-[2.5rem] overflow-hidden transition-all ${variants[variant]} ${className}`}
+        >
             {(title || Icon) && (
                 <div className={`flex items-center justify-between mb-6 px-8 pt-8`}>
                     <div className="flex items-center gap-3">
