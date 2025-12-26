@@ -1,544 +1,494 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import Link from 'next/link';
 import {
-    ArrowLeft,
-    Utensils,
-    Flame,
     Plus,
-    Target,
+    X,
+    ChevronLeft,
     ChevronRight,
-    Coffee,
-    Apple,
-    Zap,
-    History,
-    TrendingUp,
-    TrendingDown,
+    Utensils,
     Activity,
-    Trash2,
+    Settings,
+    History,
     Check
 } from 'lucide-react';
 
+import { AppShell } from '@/components/ui/AppShell';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Chip } from '@/components/ui/Chip';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { ProgressBar } from '@/components/ui/ProgressBar';
+
 // --- Types ---
 
-type MealCategory =
-    | "breakfast"
-    | "lunch"
-    | "dinner"
-    | "snack"
-    | "tea"
-    | "coffee"
-    | "juice"
-    | "soda"
-    | "other";
+type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
 interface FoodEntry {
     id: string;
-    type: "meal" | "drink";
-    category: MealCategory;
+    meal: MealType;
     name: string;
     calories: number;
+    portion?: string;
 }
 
-interface ActivityEntry {
+interface ExerciseEntry {
     id: string;
     name: string;
     durationMinutes: number;
-    caloriesBurned: number;
+    calories: number;
 }
 
-interface DaySummary {
-    date: string; // ISO
-    intake: number;
-    burned: number;
-    net: number;
+interface DayData {
+    date: string; // ISO format (YYYY-MM-DD)
     goal: number;
+    foods: FoodEntry[];
+    exercises: ExerciseEntry[];
+    isCompleted: boolean;
 }
 
-// --- Mock Data ---
+// --- Mock Initial Data ---
 
-const MOCK_HISTORY: DaySummary[] = [
-    { date: '2023-12-20', intake: 2100, burned: 400, net: 1700, goal: 2000 },
-    { date: '2023-12-21', intake: 2300, burned: 200, net: 2100, goal: 2000 },
-    { date: '2023-12-22', intake: 1900, burned: 300, net: 1600, goal: 2000 },
-    { date: '2023-12-23', intake: 2500, burned: 600, net: 1900, goal: 2000 },
-    { date: '2023-12-24', intake: 2000, burned: 100, net: 1900, goal: 2000 },
-    { date: '2023-12-25', intake: 2800, burned: 200, net: 2600, goal: 2000 },
-];
+const TODAY = new Date().toISOString().split('T')[0];
 
-const QUICK_FOODS = [
-    { name: 'Tea (no sugar)', cal: 30, cat: 'tea' as MealCategory, type: 'drink' as const },
-    { name: 'Tea (with sugar)', cal: 60, cat: 'tea' as MealCategory, type: 'drink' as const },
-    { name: 'Healthy Snack', cal: 150, cat: 'snack' as MealCategory, type: 'meal' as const },
-    { name: 'Light Meal', cal: 400, cat: 'lunch' as MealCategory, type: 'meal' as const },
-];
+const INITIAL_DAYS: Record<string, DayData> = {
+    [TODAY]: {
+        date: TODAY,
+        goal: 2000,
+        foods: [
+            { id: '1', meal: 'breakfast', name: 'Oatmeal', calories: 350, portion: '1 serving' },
+            { id: '2', meal: 'breakfast', name: 'Coffee', calories: 45, portion: '1 cup' },
+            { id: '3', meal: 'lunch', name: 'Chicken Salad', calories: 520, portion: '1 bowl' },
+        ],
+        exercises: [
+            { id: 'e1', name: 'Walking', durationMinutes: 30, calories: 150 },
+        ],
+        isCompleted: false,
+    }
+};
 
-const QUICK_ACTIVITIES = [
-    { name: 'Casual Walk', dur: 15, burn: 60 },
-    { name: 'Brisk Walk', dur: 30, burn: 150 },
-    { name: 'Yoga Session', dur: 45, burn: 180 },
-];
+// Generate some mock history for the last 6 days
+for (let i = 1; i <= 6; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    INITIAL_DAYS[dateStr] = {
+        date: dateStr,
+        goal: 2000,
+        foods: [
+            { id: `old-f-${i}`, meal: 'dinner', name: 'Pasta', calories: 700 + (i * 10), portion: '1 plate' },
+        ],
+        exercises: [],
+        isCompleted: true,
+    };
+}
 
-// --- Main Page ---
+// --- Main Page Component ---
 
-export default function CaloriesPage() {
-    // --- State ---
-    const [dailyGoal, setDailyGoal] = useState(2000);
-    const [tempGoal, setTempGoal] = useState(dailyGoal.toString());
-    const [foodEntries, setFoodEntries] = useState<FoodEntry[]>([]);
-    const [activityEntries, setActivityEntries] = useState<ActivityEntry[]>([]);
+export default function CaloriesDiaryPage() {
+    const [selectedDate, setSelectedDate] = useState(TODAY);
+    const [days, setDays] = useState<Record<string, DayData>>(INITIAL_DAYS);
 
-    // Forms
-    const [foodForm, setFoodForm] = useState({ name: '', calories: '', category: 'breakfast' as MealCategory });
-    const [activityForm, setActivityForm] = useState({ name: '', duration: '', burned: '' });
+    // UI state for modals/forms
+    const [activeAddMeal, setActiveAddMeal] = useState<MealType | null>(null);
+    const [isAddingExercise, setIsAddingExercise] = useState(false);
 
-    // Filter
-    const [foodFilter, setFoodFilter] = useState<'All' | 'Meals' | 'Drinks'>('All');
+    // Form states
+    const [foodForm, setFoodForm] = useState({ name: '', calories: '', portion: '1 serving' });
+    const [exerciseForm, setExerciseForm] = useState({ name: '', duration: '', burned: '' });
 
-    // --- Derived ---
-    const intakeToday = useMemo(() => foodEntries.reduce((acc, curr) => acc + curr.calories, 0), [foodEntries]);
-    const burnedToday = useMemo(() => activityEntries.reduce((acc, curr) => acc + curr.caloriesBurned, 0), [activityEntries]);
-    const netToday = intakeToday - burnedToday;
-    const progress = Math.min((netToday / dailyGoal) * 100, 100);
+    // --- Select Day Data ---
+    const dayData = useMemo(() => days[selectedDate] || {
+        date: selectedDate,
+        goal: 2000,
+        foods: [],
+        exercises: [],
+        isCompleted: false
+    }, [days, selectedDate]);
 
-    const goalStatus = useMemo(() => {
-        const diff = dailyGoal - netToday;
-        if (Math.abs(diff) <= dailyGoal * 0.1) return "You’re close to your goal today.";
-        return diff > 0
-            ? `You are ${Math.round(diff)} kcal below your goal.`
-            : `You are ${Math.round(Math.abs(diff))} kcal above your goal.`;
-    }, [dailyGoal, netToday]);
-
-    const statsHistory = useMemo(() => {
-        const todaySummary: DaySummary = {
-            date: new Date().toISOString().split('T')[0],
-            intake: intakeToday,
-            burned: burnedToday,
-            net: netToday,
-            goal: dailyGoal
-        };
-        const all = [...MOCK_HISTORY, todaySummary];
-        const avgNet = Math.round(all.reduce((acc, curr) => acc + curr.net, 0) / all.length);
-        const daysInGoal = all.filter(d => d.net <= d.goal * 1.1).length;
-        return { all, avgNet, daysInGoal };
-    }, [intakeToday, burnedToday, netToday, dailyGoal]);
+    // --- Computed Totals ---
+    const foodCalories = useMemo(() => dayData.foods.reduce((acc, f) => acc + f.calories, 0), [dayData.foods]);
+    const exerciseCalories = useMemo(() => dayData.exercises.reduce((acc, e) => acc + e.calories, 0), [dayData.exercises]);
+    const netCalories = foodCalories - exerciseCalories;
+    const remaining = dayData.goal - netCalories;
+    const isOver = remaining < 0;
 
     // --- Actions ---
-    const addFood = (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
-        if (!foodForm.name || !foodForm.calories) return;
 
-        const isDrink = ['tea', 'coffee', 'juice', 'soda'].includes(foodForm.category);
+    const handleAddFood = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!activeAddMeal || !foodForm.name || !foodForm.calories) return;
+
         const newEntry: FoodEntry = {
             id: Date.now().toString(),
-            type: isDrink ? 'drink' : 'meal',
-            category: foodForm.category,
+            meal: activeAddMeal,
             name: foodForm.name,
-            calories: parseInt(foodForm.calories)
+            calories: parseInt(foodForm.calories),
+            portion: foodForm.portion
         };
-        setFoodEntries([...foodEntries, newEntry]);
-        setFoodForm({ name: '', calories: '', category: foodForm.category });
+
+        setDays(prev => ({
+            ...prev,
+            [selectedDate]: {
+                ...dayData,
+                foods: [...dayData.foods, newEntry]
+            }
+        }));
+
+        setFoodForm({ name: '', calories: '', portion: '1 serving' });
+        setActiveAddMeal(null);
     };
 
-    const addQuickFood = (name: string, cal: number, cat: MealCategory, type: 'drink' | 'meal') => {
-        const newEntry: FoodEntry = {
+    const handleAddExercise = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!exerciseForm.name || !exerciseForm.burned) return;
+
+        const newEntry: ExerciseEntry = {
             id: Date.now().toString(),
-            type,
-            category: cat,
-            name,
-            calories: cal
+            name: exerciseForm.name,
+            durationMinutes: parseInt(exerciseForm.duration) || 0,
+            calories: parseInt(exerciseForm.burned)
         };
-        setFoodEntries([...foodEntries, newEntry]);
+
+        setDays(prev => ({
+            ...prev,
+            [selectedDate]: {
+                ...dayData,
+                exercises: [...dayData.exercises, newEntry]
+            }
+        }));
+
+        setExerciseForm({ name: '', duration: '', burned: '' });
+        setIsAddingExercise(false);
     };
 
-    const addActivity = (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
-        if (!activityForm.name || !activityForm.burned) return;
-
-        const newEntry: ActivityEntry = {
-            id: Date.now().toString(),
-            name: activityForm.name,
-            durationMinutes: parseInt(activityForm.duration) || 0,
-            caloriesBurned: parseInt(activityForm.burned)
-        };
-        setActivityEntries([...activityEntries, newEntry]);
-        setActivityForm({ name: '', duration: '', burned: '' });
+    const removeFood = (id: string) => {
+        setDays(prev => ({
+            ...prev,
+            [selectedDate]: {
+                ...dayData,
+                foods: dayData.foods.filter(f => f.id !== id)
+            }
+        }));
     };
 
-    const addQuickActivity = (name: string, dur: number, burn: number) => {
-        const newEntry: ActivityEntry = {
-            id: Date.now().toString(),
-            name,
-            durationMinutes: dur,
-            caloriesBurned: burn
-        };
-        setActivityEntries([...activityEntries, newEntry]);
+    const removeExercise = (id: string) => {
+        setDays(prev => ({
+            ...prev,
+            [selectedDate]: {
+                ...dayData,
+                exercises: dayData.exercises.filter(e => e.id !== id)
+            }
+        }));
     };
 
-    const removeFood = (id: string) => setFoodEntries(foodEntries.filter(f => f.id !== id));
-    const removeActivity = (id: string) => setActivityEntries(activityEntries.filter(a => a.id !== id));
-
-    const saveGoal = () => {
-        const val = parseInt(tempGoal);
-        if (!isNaN(val) && val > 0) {
-            setDailyGoal(val);
-        }
+    const toggleComplete = () => {
+        setDays(prev => ({
+            ...prev,
+            [selectedDate]: {
+                ...dayData,
+                isCompleted: !dayData.isCompleted
+            }
+        }));
     };
 
-    // --- Filtering Logic ---
-    const filteredFood = foodEntries.filter(f => {
-        if (foodFilter === 'All') return true;
-        if (foodFilter === 'Meals') return f.type === 'meal';
-        if (foodFilter === 'Drinks') return f.type === 'drink';
-        return true;
-    });
+    const changeDay = (offset: number) => {
+        const d = new Date(selectedDate);
+        d.setDate(d.getDate() + offset);
+        setSelectedDate(d.toISOString().split('T')[0]);
+    };
 
-    const foodByCat = (cat: string) => filteredFood.filter(f => f.category === cat);
-    const catTotal = (cat: string) => foodByCat(cat).reduce((a, b) => a + b.calories, 0);
+    // Helper to filter foods by meal
+    const getMealFoods = (meal: MealType) => dayData.foods.filter(f => f.meal === meal);
+    const getMealTotal = (meal: MealType) => getMealFoods(meal).reduce((acc, f) => acc + f.calories, 0);
 
     return (
-        <div className="min-h-screen bg-slate-50 pt-4 pb-20 font-sans text-slate-800">
-            <main className="max-w-md mx-auto p-4 space-y-6">
+        <AppShell
+            title="Calories"
+            subtitle="Diary"
+            showBackButton
+            backUrl="/"
+            activeTab="recipes"
+            hideTopBar
+        >
+            <div className="flex flex-col min-h-full">
 
-                {/* Header */}
-                <header className="flex items-center gap-4 mb-2">
-                    <Link href="/" className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100 text-slate-400 hover:text-indigo-600 transition-colors">
-                        <ArrowLeft size={20} />
-                    </Link>
-                    <div>
-                        <h1 className="text-xl font-black tracking-tight">Calories & activity</h1>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fuel & Recovery</p>
+                {/* Custom Header with Date Switcher */}
+                <header className="bg-white px-6 pt-6 pb-4 flex flex-col items-center">
+                    <div className="flex items-center justify-between w-full mb-4">
+                        <History size={20} className="text-slate-300" />
+                        <div className="flex items-center gap-4">
+                            <button onClick={() => changeDay(-1)} className="p-1 text-slate-400 hover:text-primary transition-colors">
+                                <ChevronLeft size={24} />
+                            </button>
+                            <span className="text-sm font-black text-slate-900">
+                                {selectedDate === TODAY ? "Today" : new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                            <button onClick={() => changeDay(1)} className="p-1 text-slate-400 hover:text-primary transition-colors">
+                                <ChevronRight size={24} />
+                            </button>
+                        </div>
+                        <Settings size={20} className="text-slate-300" />
+                    </div>
+
+                    {/* 7-Day Overview Strip */}
+                    <div className="flex justify-between w-full px-2 mb-2">
+                        {Object.keys(days).sort().slice(-7).map((dateStr) => {
+                            const isSelected = dateStr === selectedDate;
+                            const d = days[dateStr];
+                            const dTotal = d.foods.reduce((a, b) => a + b.calories, 0) - d.exercises.reduce((a, b) => a + b.calories, 0);
+                            const status = dTotal > d.goal ? 'bg-danger' : 'bg-primary';
+                            return (
+                                <button
+                                    key={dateStr}
+                                    onClick={() => setSelectedDate(dateStr)}
+                                    className="flex flex-col items-center gap-2 group"
+                                >
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${isSelected ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/20' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'}`}>
+                                        {new Date(dateStr).toLocaleDateString('en-US', { weekday: 'narrow' })}
+                                    </div>
+                                    <div className={`w-1 h-1 rounded-full ${status} ${isSelected ? 'opacity-100' : 'opacity-30 group-hover:opacity-60'}`} />
+                                </button>
+                            );
+                        })}
                     </div>
                 </header>
 
-                {/* Daily Goal Card */}
-                <section className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center shadow-inner">
-                            <Target size={24} />
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-black tracking-tight">Set Daily Goal</h2>
-                            <p className="text-xs font-bold text-slate-400">Target: {dailyGoal} kcal</p>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                        <input
-                            type="number"
-                            value={tempGoal}
-                            onChange={(e) => setTempGoal(e.target.value)}
-                            className="flex-1 bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-indigo-100 transition-all outline-none"
-                            placeholder="Goal kcal"
-                        />
-                        <button
-                            onClick={saveGoal}
-                            className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black text-sm active:scale-95 transition-all shadow-lg shadow-indigo-100"
-                        >
-                            Save
-                        </button>
-                    </div>
-                </section>
-
-                {/* Today Summary */}
-                <section className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl shadow-slate-200 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-                        <Zap size={100} />
-                    </div>
-
-                    <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-8">
+                {/* Summary Bar Card (MyFitnessPal Style) */}
+                <section className="px-6 relative -mb-10 z-10">
+                    <Card variant="white" padding="none" className="shadow-xl py-6 border-b-4 border-primary">
+                        <div className="grid grid-cols-4 items-end px-4 text-center">
                             <div>
-                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Today's Net</h3>
-                                <div className="text-4xl font-black tracking-tighter">{netToday} <span className="text-lg text-slate-500 font-bold">kcal</span></div>
+                                <div className="text-xs font-black text-slate-900">{dayData.goal}</div>
+                                <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Goal</div>
                             </div>
-                            <div className="text-right">
-                                <div className="text-[10px] font-black uppercase text-indigo-400 tracking-widest mb-1">Status</div>
-                                <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${netToday > dailyGoal ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                                    {netToday > dailyGoal ? 'Over Goal' : 'On Track'}
-                                </div>
+                            <div className="flex flex-col items-center">
+                                <span className="text-[10px] font-black text-slate-300 mb-1">-</span>
+                                <div className="text-xs font-black text-orange-500">{foodCalories}</div>
+                                <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Food</div>
                             </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 mb-8">
-                            <div className="bg-white/5 border border-white/10 rounded-3xl p-4">
-                                <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest block mb-1">Intake</span>
-                                <div className="text-xl font-black text-orange-400">{intakeToday}</div>
+                            <div className="flex flex-col items-center">
+                                <span className="text-[10px] font-black text-slate-300 mb-1">+</span>
+                                <div className="text-xs font-black text-emerald-500">{exerciseCalories}</div>
+                                <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Exercise</div>
                             </div>
-                            <div className="bg-white/5 border border-white/10 rounded-3xl p-4">
-                                <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest block mb-1">Burned</span>
-                                <div className="text-xl font-black text-blue-400">{burnedToday}</div>
+                            <div>
+                                <div className={`text-xs font-black ${isOver ? 'text-danger' : 'text-primary'}`}>{remaining}</div>
+                                <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Net</div>
                             </div>
                         </div>
-
-                        <div className="space-y-4">
-                            <div className="h-4 bg-white/5 rounded-full overflow-hidden border border-white/10">
-                                <div
-                                    className={`h-full transition-all duration-1000 ${netToday > dailyGoal ? 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.4)]' : 'bg-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.4)]'}`}
-                                    style={{ width: `${progress}%` }}
-                                />
-                            </div>
-                            <p className="text-xs font-bold text-slate-300 italic text-center">
-                                "{goalStatus}"
-                            </p>
+                        <div className="mt-4 px-8">
+                            <ProgressBar progress={Math.min(100, (netCalories / dayData.goal) * 100)} color={isOver ? 'danger' : 'primary'} height="sm" />
                         </div>
-                    </div>
+                    </Card>
                 </section>
 
-                {/* Food & Drinks Log */}
-                <section className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
-                    <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center">
-                                <Utensils size={20} />
+                {/* Diary Content */}
+                <div className="flex-1 bg-slate-50 pt-16 px-6 pb-32 space-y-6">
+
+                    {/* Meal Sections */}
+                    {(['breakfast', 'lunch', 'dinner', 'snack'] as MealType[]).map((meal) => (
+                        <MealSection
+                            key={meal}
+                            meal={meal}
+                            entries={getMealFoods(meal)}
+                            total={getMealTotal(meal)}
+                            onAdd={() => setActiveAddMeal(meal)}
+                            onRemove={removeFood}
+                        />
+                    ))}
+
+                    {/* Exercise Section */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between px-2">
+                            <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                                <Activity size={14} className="text-emerald-500" />
+                                Exercise
+                            </h3>
+                            <span className="text-[10px] font-black text-emerald-500">{exerciseCalories} kcal</span>
+                        </div>
+                        <Card padding="none">
+                            <div className="divide-y divide-slate-50">
+                                {dayData.exercises.map(entry => (
+                                    <div key={entry.id} className="p-4 flex justify-between items-center bg-white first:rounded-t-3xl last:rounded-b-3xl">
+                                        <div>
+                                            <div className="text-xs font-black text-slate-800">{entry.name}</div>
+                                            <div className="text-[9px] font-bold text-slate-400 uppercase">{entry.durationMinutes} minutes</div>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-xs font-black text-emerald-500">{entry.calories}</span>
+                                            <button onClick={() => removeExercise(entry.id)} className="text-slate-200 hover:text-danger p-1">
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                <button
+                                    onClick={() => setIsAddingExercise(true)}
+                                    className="w-full py-4 text-[10px] font-black text-primary uppercase tracking-widest hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Plus size={14} />
+                                    Add Exercise
+                                </button>
                             </div>
-                            <h2 className="text-xl font-black">Food & drinks</h2>
+                        </Card>
+                    </div>
+
+                    {/* Daily Footer */}
+                    <div className="pt-6 border-t border-slate-200">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Daily Success</span>
+                                <div className={`text-xl font-black ${isOver ? 'text-danger' : 'text-primary'}`}>
+                                    {isOver ? `${Math.abs(remaining)} over` : `${remaining} remaining`}
+                                </div>
+                            </div>
+                            <Button
+                                variant={dayData.isCompleted ? 'ghost' : 'primary'}
+                                icon={dayData.isCompleted ? <Check size={16} /> : undefined}
+                                onClick={toggleComplete}
+                            >
+                                {dayData.isCompleted ? 'Completed' : 'Complete Day'}
+                            </Button>
                         </div>
                     </div>
 
-                    {/* Filter Tabs */}
-                    <div className="flex gap-2 mb-8">
-                        {['All', 'Meals', 'Drinks'].map((f) => (
-                            <button
-                                key={f}
-                                onClick={() => setFoodFilter(f as any)}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${foodFilter === f ? 'bg-orange-500 text-white shadow-lg shadow-orange-100' : 'bg-slate-50 text-slate-400'
-                                    }`}
-                            >
-                                {f}
+                </div>
+            </div>
+
+            {/* Add Food Form Overlay */}
+            {activeAddMeal && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <Card variant="white" className="w-full max-w-sm mb-20 animate-in slide-in-from-bottom-8 duration-300">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-sm font-black uppercase text-slate-900 tracking-widest">Add to {activeAddMeal}</h3>
+                            <button onClick={() => setActiveAddMeal(null)} className="p-2 text-slate-300">
+                                <X size={20} />
                             </button>
-                        ))}
-                    </div>
-
-                    {/* Entries List */}
-                    <div className="space-y-6 mb-10">
-                        {['breakfast', 'lunch', 'dinner', 'snack', 'tea', 'coffee', 'juice', 'soda', 'other'].map(cat => {
-                            const entries = foodByCat(cat);
-                            if (entries.length === 0) return null;
-                            return (
-                                <div key={cat} className="space-y-3">
-                                    <div className="flex items-center justify-between border-b border-slate-50 pb-2">
-                                        <h4 className="text-[10px] font-black uppercase text-slate-300 tracking-[0.2em]">{cat}</h4>
-                                        <span className="text-[10px] font-black text-orange-500">{catTotal(cat)} kcal</span>
-                                    </div>
-                                    {entries.map(entry => (
-                                        <div key={entry.id} className="flex items-center justify-between group">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-                                                <span className="text-sm font-bold text-slate-700">{entry.name}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-xs font-black text-slate-400">{entry.calories} kcal</span>
-                                                <button
-                                                    onClick={() => removeFood(entry.id)}
-                                                    className="p-1 text-slate-200 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        })}
-                        {filteredFood.length === 0 && (
-                            <div className="text-center py-10">
-                                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 mx-auto mb-3">
-                                    <Utensils size={24} />
-                                </div>
-                                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Nothing logged yet</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Add Form */}
-                    <form onSubmit={addFood} className="space-y-3 pt-6 border-t border-slate-50">
-                        <select
-                            value={foodForm.category}
-                            onChange={(e) => setFoodForm({ ...foodForm, category: e.target.value as MealCategory })}
-                            className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-orange-100 transition-all outline-none"
-                        >
-                            <option value="breakfast">Breakfast</option>
-                            <option value="lunch">Lunch</option>
-                            <option value="dinner">Dinner</option>
-                            <option value="snack">Snack</option>
-                            <option value="tea">Tea</option>
-                            <option value="coffee">Coffee</option>
-                            <option value="juice">Juice</option>
-                            <option value="soda">Soda</option>
-                            <option value="other">Other</option>
-                        </select>
-                        <div className="flex gap-2">
+                        </div>
+                        <form onSubmit={handleAddFood} className="space-y-4">
                             <input
                                 type="text"
-                                placeholder="Food/Drink Name"
+                                placeholder="Food name"
+                                className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-primary/20 outline-none"
                                 value={foodForm.name}
-                                onChange={(e) => setFoodForm({ ...foodForm, name: e.target.value })}
-                                className="flex-1 bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-orange-100 transition-all outline-none"
+                                onChange={e => setFoodForm({ ...foodForm, name: e.target.value })}
+                                autoFocus
                             />
-                            <input
-                                type="number"
-                                placeholder="kcal"
-                                value={foodForm.calories}
-                                onChange={(e) => setFoodForm({ ...foodForm, calories: e.target.value })}
-                                className="w-24 bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-orange-100 transition-all outline-none"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-sm active:scale-95 transition-all shadow-lg shadow-orange-100"
-                        >
-                            Add Entry
-                        </button>
-                    </form>
-
-                    {/* Quick Add Foods */}
-                    <div className="flex flex-wrap gap-2 mt-4">
-                        {QUICK_FOODS.map(f => (
-                            <button
-                                key={f.name}
-                                onClick={() => addQuickFood(f.name, f.cal, f.cat, f.type)}
-                                className="px-3 py-1.5 bg-orange-50 text-orange-600 rounded-xl text-[9px] font-black uppercase tracking-tighter hover:bg-orange-100 transition-colors"
-                            >
-                                +{f.cal} kcal {f.name}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                {/* Activity Log */}
-                <section className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center">
-                            <Activity size={20} />
-                        </div>
-                        <h2 className="text-xl font-black">Activity & exercise</h2>
-                    </div>
-
-                    <div className="space-y-4 mb-10">
-                        {activityEntries.map(a => (
-                            <div key={a.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-blue-500 shadow-sm border border-slate-100">
-                                        <Flame size={18} />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-black text-slate-800">{a.name}</h4>
-                                        <p className="text-[10px] font-bold text-slate-400 capitalize">{a.durationMinutes > 0 ? `${a.durationMinutes} minutes` : ''}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <span className="text-sm font-black text-blue-600">-{a.caloriesBurned} kcal</span>
-                                    <button
-                                        onClick={() => removeActivity(a.id)}
-                                        className="text-slate-200 hover:text-rose-500 transition-colors"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <input
+                                    type="number"
+                                    placeholder="Calories"
+                                    className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-primary/20 outline-none"
+                                    value={foodForm.calories}
+                                    onChange={e => setFoodForm({ ...foodForm, calories: e.target.value })}
+                                />
+                                <select
+                                    className="w-full bg-slate-50 border-none rounded-2xl p-4 text-xs font-black focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
+                                    value={foodForm.portion}
+                                    onChange={e => setFoodForm({ ...foodForm, portion: e.target.value })}
+                                >
+                                    <option value="½ serving">½ serving</option>
+                                    <option value="1 serving">1 serving</option>
+                                    <option value="2 servings">2 servings</option>
+                                    <option value="1 bowl">1 bowl</option>
+                                    <option value="1 cup">1 cup</option>
+                                </select>
                             </div>
-                        ))}
-                        {activityEntries.length === 0 && (
-                            <div className="text-center py-10 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
-                                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No activities logged</p>
-                            </div>
-                        )}
-                    </div>
+                            <Button type="submit" className="w-full" size="lg">Add Food</Button>
+                        </form>
+                    </Card>
+                </div>
+            )}
 
-                    {/* Add Activity Form */}
-                    <form onSubmit={addActivity} className="space-y-3 pt-6 border-t border-slate-50">
-                        <input
-                            type="text"
-                            placeholder="Activity (e.g. Walking)"
-                            value={activityForm.name}
-                            onChange={(e) => setActivityForm({ ...activityForm, name: e.target.value })}
-                            className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
-                        />
-                        <div className="flex gap-2">
-                            <input
-                                type="number"
-                                placeholder="Minutes"
-                                value={activityForm.duration}
-                                onChange={(e) => setActivityForm({ ...activityForm, duration: e.target.value })}
-                                className="flex-1 bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
-                            />
-                            <input
-                                type="number"
-                                placeholder="Burned kcal"
-                                value={activityForm.burned}
-                                onChange={(e) => setActivityForm({ ...activityForm, burned: e.target.value })}
-                                className="flex-1 bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm active:scale-95 transition-all shadow-lg shadow-blue-100"
-                        >
-                            Log Activity
-                        </button>
-                    </form>
-
-                    {/* Quick Add Activities */}
-                    <div className="flex flex-wrap gap-2 mt-4">
-                        {QUICK_ACTIVITIES.map(a => (
-                            <button
-                                key={a.name}
-                                onClick={() => addQuickActivity(a.name, a.dur, a.burn)}
-                                className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-[9px] font-black uppercase tracking-tighter hover:bg-blue-100 transition-colors"
-                            >
-                                +{a.dur}m {a.name} (-{a.burn} kcal)
+            {/* Add Exercise Form Overlay */}
+            {isAddingExercise && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <Card variant="white" className="w-full max-w-sm mb-20 animate-in slide-in-from-bottom-8 duration-300">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-sm font-black uppercase text-slate-900 tracking-widest">Log Exercise</h3>
+                            <button onClick={() => setIsAddingExercise(false)} className="p-2 text-slate-300">
+                                <X size={20} />
                             </button>
-                        ))}
-                    </div>
-                </section>
-
-                {/* 7-Day History */}
-                <section className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
-                    <div className="flex items-center gap-3 mb-10">
-                        <div className="w-10 h-10 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center">
-                            <History size={20} />
                         </div>
-                        <h2 className="text-xl font-black">Last 7 days</h2>
-                    </div>
+                        <form onSubmit={handleAddExercise} className="space-y-4">
+                            <input
+                                type="text"
+                                placeholder="Activity (e.g. Running)"
+                                className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-primary/20 outline-none"
+                                value={exerciseForm.name}
+                                onChange={e => setExerciseForm({ ...exerciseForm, name: e.target.value })}
+                                autoFocus
+                            />
+                            <div className="grid grid-cols-2 gap-4">
+                                <input
+                                    type="number"
+                                    placeholder="Minutes"
+                                    className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-primary/20 outline-none"
+                                    value={exerciseForm.duration}
+                                    onChange={e => setExerciseForm({ ...exerciseForm, duration: e.target.value })}
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Burned kcal"
+                                    className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-black focus:ring-2 focus:ring-primary/20 outline-none"
+                                    value={exerciseForm.burned}
+                                    onChange={e => setExerciseForm({ ...exerciseForm, burned: e.target.value })}
+                                />
+                            </div>
+                            <Button type="submit" className="w-full" size="lg" variant="secondary">Add Exercise</Button>
+                        </form>
+                    </Card>
+                </div>
+            )}
 
-                    <div className="flex items-end justify-between gap-1 h-32 mb-10 overflow-x-auto no-scrollbar pb-2">
-                        {statsHistory.all.map((day, idx) => {
-                            const maxVal = Math.max(...statsHistory.all.map(d => d.net), dailyGoal);
-                            const barHeight = (day.net / maxVal) * 100;
-                            const isOver = day.net > day.goal * 1.1;
-                            return (
-                                <div key={idx} className="flex flex-col items-center gap-3 shrink-0 group">
-                                    <div className="relative w-8 h-full bg-slate-50 rounded-full overflow-hidden flex flex-col justify-end border border-slate-100">
-                                        <div
-                                            className={`w-full transition-all duration-1000 group-hover:opacity-80 ${isOver ? 'bg-rose-500' : 'bg-emerald-500'}`}
-                                            style={{ height: `${barHeight}%` }}
-                                        />
-                                    </div>
-                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">
-                                        {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
+        </AppShell>
+    );
+}
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest block mb-2">Avg. Net</span>
-                            <div className="text-lg font-black text-slate-700">{statsHistory.avgNet} <span className="text-[10px]">kcal</span></div>
+// --- Internal Components ---
+
+function MealSection({ meal, entries, total, onAdd, onRemove }: {
+    meal: MealType;
+    entries: FoodEntry[];
+    total: number;
+    onAdd: () => void;
+    onRemove: (id: string) => void;
+}) {
+    return (
+        <div className="space-y-3">
+            <div className="flex items-center justify-between px-2">
+                <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                    <Utensils size={14} className="text-orange-500" />
+                    {meal}
+                </h3>
+                <span className="text-[10px] font-black text-orange-500">{total} kcal</span>
+            </div>
+            <Card padding="none">
+                <div className="divide-y divide-slate-50">
+                    {entries.map(entry => (
+                        <div key={entry.id} className="p-4 flex justify-between items-center bg-white first:rounded-t-3xl last:rounded-b-3xl">
+                            <div>
+                                <div className="text-xs font-black text-slate-800">{entry.name}</div>
+                                <div className="text-[9px] font-bold text-slate-400 uppercase">{entry.portion}</div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <span className="text-xs font-black text-orange-400">{entry.calories}</span>
+                                <button onClick={() => onRemove(entry.id)} className="text-slate-200 hover:text-danger p-1">
+                                    <X size={14} />
+                                </button>
+                            </div>
                         </div>
-                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest block mb-2">Success rate</span>
-                            <div className="text-lg font-black text-slate-700">{statsHistory.daysInGoal} of 7 <span className="text-[10px]">days</span></div>
-                        </div>
-                    </div>
-                </section>
-
-                <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest py-4">
-                    Self-tracking for educational purposes • Not medical advice
-                </p>
-            </main>
+                    ))}
+                    <button
+                        onClick={onAdd}
+                        className="w-full py-4 text-[10px] font-black text-primary uppercase tracking-widest hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Plus size={14} />
+                        Add Food
+                    </button>
+                </div>
+            </Card>
         </div>
     );
 }

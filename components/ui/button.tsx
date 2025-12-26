@@ -1,40 +1,50 @@
-import * as React from "react"
-import { twMerge } from "tailwind-merge"
-import { clsx, type ClassValue } from "clsx"
+import React from 'react';
 
-export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs))
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+    variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+    size?: 'sm' | 'md' | 'lg';
+    isLoading?: boolean;
+    icon?: React.ReactNode;
 }
 
-export interface ButtonProps
-    extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'default' | 'outline' | 'ghost' | 'destructive';
-    size?: 'default' | 'sm' | 'lg';
-}
+export const Button: React.FC<ButtonProps> = ({
+    children,
+    variant = 'primary',
+    size = 'md',
+    isLoading,
+    icon,
+    className = '',
+    ...props
+}) => {
+    const baseStyles = 'inline-flex items-center justify-center rounded-2xl font-black transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none gap-2';
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant = 'default', size = 'default', ...props }, ref) => {
-        return (
-            <button
-                ref={ref}
-                className={cn(
-                    "inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50",
-                    {
-                        'bg-orange-600 text-white hover:bg-orange-500 shadow-lg shadow-orange-900/20': variant === 'default',
-                        'border border-slate-700 bg-transparent hover:bg-slate-800 text-slate-100': variant === 'outline',
-                        'hover:bg-slate-800 text-slate-100': variant === 'ghost',
-                        'bg-red-600 text-white hover:bg-red-500': variant === 'destructive',
-                        'h-11 px-6 py-2': size === 'default',
-                        'h-9 px-3': size === 'sm',
-                        'h-14 px-8 text-lg': size === 'lg',
-                    },
-                    className
-                )}
-                {...props}
-            />
-        )
-    }
-)
-Button.displayName = "Button"
+    const variants = {
+        primary: 'bg-primary text-white hover:bg-primary-600 shadow-lg shadow-primary/20',
+        secondary: 'bg-secondary text-white hover:bg-secondary-600 shadow-lg shadow-secondary/20',
+        ghost: 'bg-transparent text-muted hover:bg-slate-100',
+        danger: 'bg-danger text-white hover:bg-danger/90 shadow-lg shadow-danger/20',
+    };
 
-export { Button }
+    const sizes = {
+        sm: 'px-4 py-2 text-xs',
+        md: 'px-6 py-3 text-sm',
+        lg: 'px-8 py-4 text-base',
+    };
+
+    return (
+        <button
+            className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+            disabled={isLoading || props.disabled}
+            {...props}
+        >
+            {isLoading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+                <>
+                    {icon && <span className="shrink-0">{icon}</span>}
+                    {children}
+                </>
+            )}
+        </button>
+    );
+};

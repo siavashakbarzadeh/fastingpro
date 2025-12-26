@@ -12,19 +12,37 @@ const config: Config = {
                 background: "var(--background)",
                 foreground: "var(--foreground)",
                 primary: {
-                    DEFAULT: "#F97316", // Orange 500
-                    50: "#FFF7ED",
-                    100: "#FFEDD5",
-                    200: "#FED7AA",
-                    300: "#FDBA74",
-                    400: "#FB923C",
-                    500: "#F97316",
-                    600: "#EA580C",
-                    700: "#C2410C",
-                    800: "#9A3412",
-                    900: "#7C2D12",
-                    950: "#431407",
+                    DEFAULT: "#14b8a6", // Teal 500
+                    50: "#f0fdfa",
+                    100: "#ccfbf1",
+                    500: "#14b8a6",
+                    600: "#0d9488",
+                    700: "#0f766e",
                 },
+                secondary: {
+                    DEFAULT: "#6366f1", // Indigo 500
+                    50: "#eef2ff",
+                    100: "#e0e7ff",
+                    500: "#6366f1",
+                    600: "#4f46e5",
+                    text: "#312e81",
+                },
+                accent: {
+                    DEFAULT: "#f59e0b", // Amber 500
+                    50: "#fffbeb",
+                    500: "#f59e0b",
+                },
+                danger: {
+                    DEFAULT: "#f43f5e", // Rose 500
+                    50: "#fff1f2",
+                },
+                surface: "#ffffff",
+                border: "#e2e8f0", // slate-200
+                muted: "#64748b",  // slate-500
+            },
+            borderRadius: {
+                '2xl': '1.25rem',
+                '3xl': '1.5rem',
             },
             animation: {
                 "fade-in": "fadeIn 0.5s ease-in-out",

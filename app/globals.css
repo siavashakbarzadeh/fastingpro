@@ -3,9 +3,23 @@
 @tailwind utilities;
 
 :root {
-  --foreground: 255, 255, 255;
-  --background: 2, 6, 23;
-  /* slate-950 */
+  --foreground: 15, 23, 42;
+  /* slate-900 */
+  --background: 248, 250, 252;
+  /* slate-50 */
+  --surface: 255, 255, 255;
+  --primary: 20, 184, 166;
+  /* teal-500 */
+  --secondary: 99, 102, 241;
+  /* indigo-500 */
+  --accent: 245, 158, 11;
+  /* amber-500 */
+  --danger: 244, 63, 94;
+  /* rose-500 */
+  --border: 226, 232, 240;
+  /* slate-200 */
+  --muted: 100, 116, 139;
+  /* slate-500 */
 }
 
 body {
