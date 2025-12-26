@@ -273,8 +273,8 @@ export default function PeriodTrackerPage() {
                             <button
                                 onClick={() => setCycleData({ ...cycleData, goal: 'conceive' })}
                                 className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all ${cycleData.goal === 'conceive'
-                                        ? 'bg-emerald-500 text-white'
-                                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                    ? 'bg-emerald-500 text-white'
+                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                                     }`}
                             >
                                 Trying to conceive
@@ -282,8 +282,8 @@ export default function PeriodTrackerPage() {
                             <button
                                 onClick={() => setCycleData({ ...cycleData, goal: 'avoid' })}
                                 className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all ${cycleData.goal === 'avoid'
-                                        ? 'bg-amber-500 text-white'
-                                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                    ? 'bg-amber-500 text-white'
+                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                                     }`}
                             >
                                 Avoid pregnancy
@@ -291,8 +291,8 @@ export default function PeriodTrackerPage() {
                             <button
                                 onClick={() => setCycleData({ ...cycleData, goal: 'track' })}
                                 className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all ${cycleData.goal === 'track'
-                                        ? 'bg-indigo-500 text-white'
-                                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                    ? 'bg-indigo-500 text-white'
+                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                                     }`}
                             >
                                 Just tracking
@@ -323,8 +323,8 @@ export default function PeriodTrackerPage() {
                     <button
                         onClick={handleSave}
                         className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${isSaved
-                                ? 'bg-emerald-500 text-white'
-                                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                             }`}
                     >
                         {isSaved ? '✓ Saved' : 'Save period settings'}
@@ -337,10 +337,13 @@ export default function PeriodTrackerPage() {
                         Your Cycle History
                     </h2>
 
-                    <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-3">
+                    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 space-y-1">
                         {cycleHistory.length > 0 ? (
-                            cycleHistory.map((cycle) => (
-                                <div key={cycle.cycleNumber} className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">
+                            cycleHistory.map((cycle, index) => (
+                                <div
+                                    key={cycle.cycleNumber}
+                                    className={`flex items-start justify-between py-3 ${index !== cycleHistory.length - 1 ? 'border-b border-slate-100' : ''}`}
+                                >
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                             <h4 className="text-sm font-bold text-slate-800">Cycle #{cycle.cycleNumber}</h4>
@@ -350,7 +353,7 @@ export default function PeriodTrackerPage() {
                                             {new Date(cycle.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} → {new Date(cycle.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                         </p>
                                     </div>
-                                    <span className={`px-2 py-1 rounded-full text-[10px] font-semibold ${flowColors[cycle.flow]}`}>
+                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${flowColors[cycle.flow]}`}>
                                         {cycle.flow}
                                     </span>
                                 </div>
