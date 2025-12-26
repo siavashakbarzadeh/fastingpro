@@ -1,18 +1,18 @@
 import React from 'react';
 
 interface CardProps {
-    children: React.ReactNode;
+    children?: React.ReactNode;
     title?: string;
     subtitle?: string;
     icon?: React.ElementType;
-    variant?: 'white' | 'dark' | 'glass';
+    variant?: 'white' | 'dark' | 'glass' | 'primary' | 'secondary' | 'accent' | 'danger';
     padding?: 'none' | 'sm' | 'md' | 'lg';
     className?: string;
     footer?: React.ReactNode;
     onClick?: () => void;
 }
 
-export const Card: React.FC<CardProps> = ({
+export const Card = ({
     children,
     title,
     subtitle,
@@ -22,14 +22,18 @@ export const Card: React.FC<CardProps> = ({
     className = '',
     footer,
     onClick,
-}) => {
-    const variants = {
+}: CardProps) => {
+    const variants: Record<string, string> = {
         white: 'bg-white border border-border shadow-sm text-slate-900',
         dark: 'bg-slate-900 text-white shadow-xl shadow-slate-200',
         glass: 'bg-white/80 backdrop-blur-md border border-white/20 shadow-lg',
+        primary: 'bg-primary text-white shadow-xl shadow-primary/20',
+        secondary: 'bg-secondary text-white shadow-xl shadow-secondary/20',
+        accent: 'bg-accent text-white shadow-xl shadow-accent/20',
+        danger: 'bg-danger text-white shadow-xl shadow-danger/20',
     };
 
-    const paddings = {
+    const paddings: Record<string, string> = {
         none: '',
         sm: 'p-4',
         md: 'p-6 sm:p-8',
@@ -39,7 +43,7 @@ export const Card: React.FC<CardProps> = ({
     return (
         <div
             onClick={onClick}
-            className={`rounded-[2.5rem] overflow-hidden transition-all ${variants[variant]} ${className}`}
+            className={`rounded-[2.5rem] overflow-hidden transition-all ${variants[variant as string]} ${className}`}
         >
             {(title || Icon) && (
                 <div className={`flex items-center justify-between mb-6 px-8 pt-8`}>
