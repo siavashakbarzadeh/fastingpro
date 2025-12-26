@@ -61,6 +61,11 @@ export default function DashboardPage() {
     const [longestFastHours] = useState(18);
     const [currentStreak] = useState(3);
 
+    // Calories state
+    const [caloriesInToday, setCaloriesInToday] = useState(1450);
+    const [caloriesOutToday, setCaloriesOutToday] = useState(2050);
+    const [calorieGoal] = useState(1800);
+
     // Cycle state (mock data)
     const cycleToday: CycleTodaySummary = {
         dateLabel: "Today, Dec 26",
@@ -339,6 +344,13 @@ export default function DashboardPage() {
                         <p className="text-lg font-bold text-slate-800">{currentStreak} days</p>
                     </div>
                 </div>
+
+                {/* Calories today card */}
+                <CaloriesTodayCard
+                    caloriesIn={caloriesInToday}
+                    caloriesOut={caloriesOutToday}
+                    calorieGoal={calorieGoal}
+                />
             </section>
 
             {/* Section 4: Modules */}
@@ -366,6 +378,61 @@ export default function DashboardPage() {
                 </div>
             </section>
 
+        </div>
+    );
+}
+
+// Calories Today Card Component
+function CaloriesTodayCard(props: {
+    caloriesIn: number;
+    caloriesOut: number;
+    calorieGoal: number;
+}) {
+    const { caloriesIn, caloriesOut, calorieGoal } = props;
+    const net = caloriesIn - caloriesOut;
+    const progress = calorieGoal > 0 ? Math.min(caloriesIn / calorieGoal, 1) : 0;
+
+    const netLabel = net > 0 ? `+${net} kcal` : net < 0 ? `${net} kcal` : "0 kcal";
+    const netColor = net < 0 ? "text-emerald-600" : net > 0 ? "text-amber-600" : "text-slate-600";
+
+    return (
+        <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-3">
+            <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-900">
+                    Calories today
+                </h3>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                    <p className="text-xs text-slate-500">Eaten</p>
+                    <p className="text-base font-semibold text-slate-900">
+                        {caloriesIn.toLocaleString()} kcal
+                    </p>
+                </div>
+                <div>
+                    <p className="text-xs text-slate-500">Burned</p>
+                    <p className="text-base font-semibold text-slate-900">
+                        {caloriesOut.toLocaleString()} kcal
+                    </p>
+                </div>
+            </div>
+
+            <div className="flex items-center justify-between text-sm">
+                <p className="text-xs text-slate-500">
+                    Goal: {calorieGoal.toLocaleString()} kcal
+                </p>
+                <p className={`text-sm font-semibold ${netColor}`}>
+                    Net: {netLabel}
+                </p>
+            </div>
+
+            <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+                <div
+                    className="h-full rounded-full bg-violet-500 transition-all duration-300"
+                    style={{ width: `${progress * 100}%` }}
+                />
+            </div>
         </div>
     );
 }
