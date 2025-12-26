@@ -347,39 +347,6 @@ export default function DashboardPage() {
                     Body
                 </h2>
 
-                {/* Weight + BMI card */}
-                <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-3 mb-3">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <div className="flex items-baseline gap-2">
-                                <h3 className="text-3xl font-black text-slate-800">{weightKg}</h3>
-                                <span className="text-lg text-slate-500">kg</span>
-                            </div>
-                            <div className="flex items-center gap-1 mt-1">
-                                {weeklyDiff < 0 ? (
-                                    <TrendingDown className="text-green-500" size={16} />
-                                ) : (
-                                    <TrendingUp className="text-red-500" size={16} />
-                                )}
-                                <p className={`text-sm font-semibold ${weeklyDiff < 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {weeklyDiff > 0 ? '+' : ''}{weeklyDiff.toFixed(1)} kg this week
-                                </p>
-                            </div>
-                        </div>
-                        <Scale className="text-slate-400" size={24} />
-                    </div>
-
-                    <div className="bg-slate-50 rounded-xl p-3">
-                        <p className="text-sm text-slate-600">
-                            BMI <span className="font-bold text-slate-800">{bmi.toFixed(1)}</span> – {bmiCategory}
-                        </p>
-                    </div>
-
-                    <button className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2 rounded-lg transition-colors">
-                        Log weight
-                    </button>
-                </div>
-
                 {/* Calories today card */}
                 <CaloriesTodayCard
                     caloriesIn={caloriesInToday}
