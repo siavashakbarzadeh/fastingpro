@@ -25,6 +25,16 @@ import {
 } from 'lucide-react';
 import { useBrushingTracker } from '@/lib/hooks/useBrushingTracker';
 
+// Cycle types
+type FertilityLevel = "low" | "medium" | "high";
+
+interface CycleTodaySummary {
+    dateLabel: string;
+    cycleDay: number;
+    fertilityLevel: FertilityLevel;
+    message: string;
+}
+
 export default function DashboardPage() {
     const router = useRouter();
     const { summary: brushingSummary, logTodayBrushed } = useBrushingTracker();
@@ -50,6 +60,14 @@ export default function DashboardPage() {
     const [fastingDays] = useState(12);
     const [longestFastHours] = useState(18);
     const [currentStreak] = useState(3);
+
+    // Cycle state (mock data)
+    const cycleToday: CycleTodaySummary = {
+        dateLabel: "Today, Dec 26",
+        cycleDay: 16,
+        fertilityLevel: "low",
+        message: "It's currently a lower chance to conceive",
+    };
 
     // Computed values
     const bmi = weightKg && heightCm ? weightKg / Math.pow(heightCm / 100, 2) : 0;
@@ -260,6 +278,11 @@ export default function DashboardPage() {
                     </div>
 
                 </div>
+
+                {/* Cycle summary card */}
+                <div className="mt-3">
+                    <CycleTodayCard summary={cycleToday} />
+                </div>
             </section>
 
             {/* Section 3: Body */}
@@ -343,6 +366,49 @@ export default function DashboardPage() {
                 </div>
             </section>
 
+        </div>
+    );
+}
+
+// Cycle Today Card Component
+function CycleTodayCard({ summary }: { summary: CycleTodaySummary }) {
+    const router = useRouter();
+
+    const levelColors: Record<FertilityLevel, string> = {
+        low: "bg-sky-50 text-sky-700 border-sky-200",
+        medium: "bg-amber-50 text-amber-700 border-amber-200",
+        high: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    };
+
+    const levelLabels: Record<FertilityLevel, string> = {
+        low: "Lower chance",
+        medium: "Good timing",
+        high: "High chance",
+    };
+
+    return (
+        <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-3">
+            <p className="text-xs text-slate-500 font-medium">{summary.dateLabel}</p>
+
+            <p className="text-sm font-semibold text-slate-900">
+                {summary.message}
+            </p>
+
+            <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 font-medium">Day {summary.cycleDay} of cycle</span>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold border ${levelColors[summary.fertilityLevel]}`}>
+                    {levelLabels[summary.fertilityLevel]}
+                </span>
+            </div>
+
+            <button
+                type="button"
+                onClick={() => router.push("/cycle")}
+                className="text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-1"
+            >
+                Here's what you can do
+                <ChevronRight size={14} />
+            </button>
         </div>
     );
 }
