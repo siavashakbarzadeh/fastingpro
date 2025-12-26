@@ -19,7 +19,10 @@ import {
     Users,
     Zap,
     Info,
-    CloudRain
+    CloudRain,
+    Send,
+    Loader2,
+    Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -42,6 +45,11 @@ interface SelfCareAction {
     label: string;
     icon: React.ElementType;
     completed: boolean;
+}
+
+interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
 }
 
 // --- Helpers & Consts ---
@@ -92,13 +100,38 @@ export default function MentalHealthPage() {
     const [isSavingPlan, setIsSavingPlan] = useState(false);
     const [planSaved, setPlanSaved] = useState(false);
 
+    // AI Chat State
+    const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+    const [userInput, setUserInput] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
+    const [chatError, setChatError] = useState<string | null>(null);
+
+    // Load chat history from localStorage
+    useEffect(() => {
+        const saved = localStorage.getItem('mental_health_chat_history');
+        if (saved) {
+            try {
+                setChatHistory(JSON.parse(saved));
+            } catch (e) {
+                console.error('Failed to load chat history', e);
+            }
+        }
+    }, []);
+
+    // Save chat history to localStorage
+    useEffect(() => {
+        if (chatHistory.length > 0) {
+            localStorage.setItem('mental_health_chat_history', JSON.stringify(chatHistory));
+        }
+    }, [chatHistory]);
+
     // --- Derived ---
     const insights = useMemo(() => {
         const last7 = history.slice(-7);
         const lowMoods = last7.filter((c: CheckIn) => c.mood === 'low' || c.mood === 'very_low').length;
         const highStressDays = last7.filter((c: CheckIn) => c.stress === 'high' || c.stress === 'moderate').length;
 
-        const messages = [];
+        const messages: string[] = [];
         if (lowMoods > 0) messages.push(`You rated ${lowMoods} of the last 7 days as 'Low' or 'Very Low'.`);
         if (highStressDays > 2) messages.push(`Stress has been moderate to high on ${highStressDays} days this week.`);
         if (messages.length === 0) messages.push('Your mood has been consistent and positive lately.');
@@ -141,6 +174,48 @@ export default function MentalHealthPage() {
         setActions((prev: SelfCareAction[]) => prev.map((a: SelfCareAction) => a.id === id ? { ...a, completed: !a.completed } : a));
     };
 
+    const sendChatMessage = async () => {
+        if (!userInput.trim() || isTyping) return;
+
+        const newMessage: ChatMessage = { role: 'user', content: userInput.trim() };
+        const updatedHistory = [...chatHistory, newMessage];
+
+        setChatHistory(updatedHistory);
+        setUserInput('');
+        setIsTyping(true);
+        setChatError(null);
+
+        try {
+            const res = await fetch('/api/ai/mental-health', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    language: 'en', // Could be dynamic
+                    mood: currentMood,
+                    stress: currentStress,
+                    history: updatedHistory.slice(-6), // Send last 6 turns for context
+                    message: newMessage.content
+                })
+            });
+
+            if (!res.ok) throw new Error('Failed to get response');
+
+            const aiResponse = await res.text();
+            setChatHistory([...updatedHistory, { role: 'assistant', content: aiResponse }]);
+        } catch (err: any) {
+            setChatError('Sorry, I am having trouble connecting right now. Please try again or reach out to a professional.');
+        } finally {
+            setIsTyping(false);
+        }
+    };
+
+    const clearChat = () => {
+        if (confirm('Clear conversation history?')) {
+            setChatHistory([]);
+            localStorage.removeItem('mental_health_chat_history');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-800">
             {/* Header */}
@@ -175,7 +250,7 @@ export default function MentalHealthPage() {
                                 <div>
                                     <label className="text-sm font-black text-slate-400 uppercase tracking-wider mb-4 block">Mood Rating</label>
                                     <div className="grid grid-cols-5 gap-2">
-                                        {(Object.keys(MOOD_CONFIG) as Mood[]).map((m) => {
+                                        {(Object.keys(MOOD_CONFIG) as Mood[]).map((m: Mood) => {
                                             const Icon = MOOD_CONFIG[m].icon;
                                             const isSelected = currentMood === m;
                                             return (
@@ -198,7 +273,7 @@ export default function MentalHealthPage() {
                                     <div>
                                         <label className="text-sm font-black text-slate-400 uppercase tracking-wider mb-3 block">Stress Level</label>
                                         <div className="flex flex-wrap gap-2">
-                                            {(Object.keys(STRESS_CONFIG) as StressLevel[]).map((s) => (
+                                            {(Object.keys(STRESS_CONFIG) as StressLevel[]).map((s: StressLevel) => (
                                                 <button
                                                     key={s}
                                                     onClick={() => setCurrentStress(s)}
@@ -215,7 +290,7 @@ export default function MentalHealthPage() {
                                     <div>
                                         <label className="text-sm font-black text-slate-400 uppercase tracking-wider mb-3 block">Sleep Quality</label>
                                         <div className="flex items-center gap-2">
-                                            {[1, 2, 3, 4, 5].map((val) => (
+                                            {[1, 2, 3, 4, 5].map((val: number) => (
                                                 <button
                                                     key={val}
                                                     onClick={() => setCurrentSleep(val)}
@@ -265,7 +340,7 @@ export default function MentalHealthPage() {
 
                             {/* Day Row */}
                             <div className="flex items-end justify-between gap-1 mb-10 overflow-x-auto no-scrollbar py-2">
-                                {history.map((day, idx) => {
+                                {history.map((day: CheckIn, idx: number) => {
                                     const m = MOOD_CONFIG[day.mood];
                                     const Icon = m.icon;
                                     return (
@@ -289,7 +364,7 @@ export default function MentalHealthPage() {
                                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-wide flex items-center gap-2">
                                     <Info size={14} /> Weekly Insights
                                 </h3>
-                                {insights.map((msg, i) => (
+                                {insights.map((msg: string, i: number) => (
                                     <div key={i} className="flex gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 items-start">
                                         <Zap size={16} className="text-indigo-500 mt-0.5 shrink-0" />
                                         <p className="text-sm font-medium text-slate-600 leading-relaxed">{msg}</p>
@@ -316,7 +391,7 @@ export default function MentalHealthPage() {
                             </div>
 
                             <div className="space-y-3 mb-8">
-                                {actions.map((action) => {
+                                {actions.map((action: SelfCareAction) => {
                                     const Icon = action.icon;
                                     return (
                                         <button
@@ -375,6 +450,93 @@ export default function MentalHealthPage() {
                                 color="text-rose-500 bg-rose-50"
                             />
                         </div>
+
+                        {/* AI Chat Companion */}
+                        <section className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col h-[500px]">
+                            <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
+                                        <MessageSquare size={20} fill="currentColor" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-black tracking-tight">AI Companion</h2>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Supportive Listener</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={clearChat}
+                                    className="p-2 text-slate-300 hover:text-rose-500 transition-colors"
+                                    title="Clear chat history"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+                                {chatHistory.length === 0 ? (
+                                    <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                                        <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-300 mb-4">
+                                            <MessageSquare size={32} />
+                                        </div>
+                                        <p className="text-sm font-bold text-slate-400 max-w-[200px]">
+                                            Speak your mind. I&apos;m here to listen and support you.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    chatHistory.map((msg: ChatMessage, idx: number) => (
+                                        <div
+                                            key={idx}
+                                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                        >
+                                            <div className={`max-w-[85%] p-4 rounded-3xl text-sm font-medium leading-relaxed ${msg.role === 'user'
+                                                ? 'bg-indigo-600 text-white rounded-br-none'
+                                                : 'bg-slate-50 text-slate-700 rounded-bl-none border border-slate-100'
+                                                }`}>
+                                                {msg.content}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+
+                                {isTyping && (
+                                    <div className="flex justify-start">
+                                        <div className="bg-slate-50 text-slate-400 p-4 rounded-3xl rounded-bl-none border border-slate-100 flex items-center gap-2">
+                                            <Loader2 size={16} className="animate-spin" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">AI is thinking...</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {chatError && (
+                                    <div className="bg-rose-50 text-rose-600 p-4 rounded-2xl text-xs font-bold border border-rose-100 italic">
+                                        {chatError}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-4 bg-slate-50/50 border-t border-slate-50">
+                                <div className="relative flex items-center">
+                                    <input
+                                        type="text"
+                                        value={userInput}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserInput(e.target.value)}
+                                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && sendChatMessage()}
+                                        placeholder="How are you feeling?"
+                                        className="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-4 pr-12 text-sm font-medium focus:ring-2 focus:ring-indigo-100 transition-all outline-none transition-all"
+                                    />
+                                    <button
+                                        onClick={sendChatMessage}
+                                        disabled={!userInput.trim() || isTyping}
+                                        className="absolute right-2 p-2 bg-indigo-600 text-white rounded-xl disabled:opacity-30 transition-all active:scale-95 shadow-lg shadow-indigo-100"
+                                    >
+                                        <Send size={18} />
+                                    </button>
+                                </div>
+                                <p className="text-[9px] text-center text-slate-400 font-bold mt-3 uppercase tracking-tighter">
+                                    AI-powered companion • Not a replacement for professional care
+                                </p>
+                            </div>
+                        </section>
                     </div>
                 </div>
 
