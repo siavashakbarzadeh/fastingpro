@@ -78,45 +78,69 @@ const LEARN_ARTICLES: LearnArticle[] = [
   { id: 'l3', title: 'Understanding your cycle', category: 'Health', time: '7 min', link: '/dashboard/learn' },
 ];
 
+// --- Fasting Status (mock) ---
+interface DashboardFastStatus {
+  isActive: boolean;
+  protocolName: string;
+  elapsedMinutes: number;
+  remainingMinutes?: number;
+  endTimeLabel?: string;
+}
+
+const MOCK_FAST_STATUS: DashboardFastStatus = {
+  isActive: true,
+  protocolName: '16:8',
+  elapsedMinutes: 260, // 4h20m
+  remainingMinutes: 220, // 3h40m
+  endTimeLabel: 'Ends at 20:00',
+};
+
+function formatMinutes(mins: number) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function FastingStatusCard({ status }: { status: DashboardFastStatus }) {
+  const pct = status.remainingMinutes !== undefined
+    ? Math.min(100, Math.round((status.elapsedMinutes / (status.elapsedMinutes + status.remainingMinutes)) * 100))
+    : 0;
+
+  return (
+    <Link href="/fasting" className="block">
+      <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-2 cursor-pointer">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-black text-slate-800">{status.isActive ? 'Fasting now' : 'No active fast'}</h3>
+            <p className="text-xs font-bold text-slate-400">{status.isActive ? status.protocolName : `Next: ${status.protocolName} today`}</p>
+          </div>
+          <div className="text-xs text-slate-400 font-bold">{status.isActive ? status.endTimeLabel : ''}</div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="text-[13px] font-black text-slate-800">
+            {status.isActive ? `Elapsed: ${formatMinutes(status.elapsedMinutes)}` : '—'}
+          </div>
+          <div className="text-[12px] text-slate-500">{status.isActive && status.remainingMinutes ? `Remaining: ${formatMinutes(status.remainingMinutes)}` : ''}</div>
+        </div>
+
+        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div className={`h-full bg-emerald-400 rounded-full transition-all`} style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 // --- Main Page Component ---
 
 export default function MobileDashboard() {
   return (
     <AppShell activeTab="me">
-      {/* Hero Section */}
+      {/* Hero Section - Read-only Fasting Card */}
       <section className="px-6 pt-4 pb-2">
-        <Card
-          variant="dark"
-          padding="none"
-          className="p-6 relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <Timer size={100} />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fast in Progress</span>
-            </div>
-            <h2 className="text-3xl font-black mb-1">14:22:08</h2>
-            <p className="text-xs font-bold text-slate-400 mb-6">Started today at 8:00 AM</p>
-
-            <div className="grid grid-cols-4 gap-2 mb-6">
-              <StatusPill icon={Activity} value="2.4k" label="Steps" />
-              <StatusPill icon={Moon} value="7h" label="Sleep" />
-              <StatusPill icon={Plus} value="1.2L" label="Water" />
-              <StatusPill icon={Pill} value="2/3" label="Meds" />
-            </div>
-
-            <Button
-              variant="secondary"
-              className="w-full"
-              icon={<Zap size={16} fill="currentColor" />}
-            >
-              <Link href="/fasting">Manage Fasting</Link>
-            </Button>
-          </div>
-        </Card>
+        <FastingStatusCard status={MOCK_FAST_STATUS} />
       </section>
 
       {/* Greeting Section */}
