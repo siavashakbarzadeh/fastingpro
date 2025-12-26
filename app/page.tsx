@@ -55,7 +55,6 @@ interface LearnArticle {
 // --- Mock Data ---
 
 const MODULES: Module[] = [
-  { id: 'fasting', title: 'Fasting', description: 'Track your fasting status', status: 'In Progress', icon: Timer, variant: 'secondary', link: '/fasting' },
   { id: 'sleep', title: 'Sleep', description: 'Logs last night’s sleep', status: 'Logged', icon: Moon, variant: 'primary', link: '/sleep' },
   { id: 'activity', title: 'Activity', description: 'Movement & steps', status: 'Not logged', icon: Activity, variant: 'primary', link: '/activity' },
   { id: 'meds', title: 'Medications', description: 'Schedule & tracking', status: '2/3 taken', icon: Pill, variant: 'danger', link: '/medications' },
