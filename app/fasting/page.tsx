@@ -177,9 +177,32 @@ export default function FastingPage() {
         return () => clearInterval(interval);
     }, [status, startTime]);
 
+    // --- Persistence ---
+    useEffect(() => {
+        const savedHistory = localStorage.getItem('fastingHistory');
+        if (savedHistory) {
+            try {
+                const history = JSON.parse(savedHistory);
+                // Map the simple "FastSession" format if needed, but Profile expects:
+                // { start_time: string, end_time: string }
+                setSessions(history.map((h: any) => ({
+                    id: h.id || Math.random().toString(),
+                    date: h.start_time.split('T')[0],
+                    plan: h.plan || '16:8',
+                    start: new Date(h.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+                    end: h.end_time ? new Date(h.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
+                    durationHours: h.end_time ? (new Date(h.end_time).getTime() - new Date(h.start_time).getTime()) / 3600000 : 0,
+                    goalHours: h.goalHours || 16,
+                    isGoalMet: h.isGoalMet ?? false
+                })));
+            } catch (e) { console.error(e); }
+        }
+    }, []);
+
     // --- Actions ---
     const handleStart = () => {
-        setStartTime(new Date());
+        const now = new Date();
+        setStartTime(now);
         setElapsedSeconds(0);
         setStatus('fasting');
     };
@@ -189,8 +212,29 @@ export default function FastingPage() {
 
         const now = new Date();
         const duration = elapsedSeconds / 3600;
-        const newSession: FastSession = {
+        const activePlan = PLANS.find(p => p.name === selectedPlan) || PLANS[1];
+
+        // Format for Profile page consumption
+        const storageSession = {
             id: Date.now().toString(),
+            start_time: startTime.toISOString(),
+            end_time: now.toISOString(),
+            plan: selectedPlan,
+            goalHours: activePlan.hours,
+            isGoalMet: duration >= activePlan.hours
+        };
+
+        const savedHistory = localStorage.getItem('fastingHistory');
+        const history = savedHistory ? JSON.parse(savedHistory) : [];
+        const newHistory = [storageSession, ...history];
+        localStorage.setItem('fastingHistory', JSON.stringify(newHistory));
+
+        // Trigger storage event for same-page listeners (if any)
+        window.dispatchEvent(new Event('storage'));
+
+        // Update local state UI
+        const newUISession: FastSession = {
+            id: storageSession.id,
             date: now.toISOString().split('T')[0],
             plan: selectedPlan,
             start: startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
@@ -200,7 +244,7 @@ export default function FastingPage() {
             isGoalMet: duration >= activePlan.hours
         };
 
-        setSessions([newSession, ...sessions.slice(0, 6)]);
+        setSessions([newUISession, ...sessions.slice(0, 6)]);
         setStatus('idle');
         setStartTime(null);
         setElapsedSeconds(0);
@@ -302,8 +346,8 @@ export default function FastingPage() {
                                 key={plan.name}
                                 onClick={() => setSelectedPlan(plan.name)}
                                 className={`shrink-0 p-4 rounded-3xl border-2 transition-all w-32 ${selectedPlan === plan.name
-                                        ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                                        : 'bg-white border-slate-100 text-slate-400'
+                                    ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                                    : 'bg-white border-slate-100 text-slate-400'
                                     }`}
                             >
                                 <div className="text-lg font-black mb-1">{plan.name}</div>

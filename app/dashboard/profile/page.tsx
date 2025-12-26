@@ -42,7 +42,7 @@ function useFastingStats(): FastingStats {
         streak: 0
     });
 
-    useEffect(() => {
+    const calculateStats = () => {
         const savedHistory = localStorage.getItem('fastingHistory');
         if (savedHistory) {
             try {
@@ -70,6 +70,15 @@ function useFastingStats(): FastingStats {
                 console.error('Error fetching fasting stats:', e);
             }
         }
+    };
+
+    useEffect(() => {
+        calculateStats();
+
+        // Listen for storage changes from other tabs or same-domain events
+        const handleStorageChange = () => calculateStats();
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     return stats;
