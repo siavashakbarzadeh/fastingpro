@@ -55,6 +55,7 @@ interface LearnArticle {
 // --- Mock Data ---
 
 const MODULES: Module[] = [
+  { id: 'fasting', title: 'Fasting', description: 'Track your fasting status', status: 'In Progress', icon: Timer, variant: 'secondary', link: '/fasting' },
   { id: 'sleep', title: 'Sleep', description: 'Logs last night’s sleep', status: 'Logged', icon: Moon, variant: 'primary', link: '/sleep' },
   { id: 'activity', title: 'Activity', description: 'Movement & steps', status: 'Not logged', icon: Activity, variant: 'primary', link: '/activity' },
   { id: 'meds', title: 'Medications', description: 'Schedule & tracking', status: '2/3 taken', icon: Pill, variant: 'danger', link: '/medications' },
@@ -82,6 +83,42 @@ const LEARN_ARTICLES: LearnArticle[] = [
 export default function MobileDashboard() {
   return (
     <AppShell activeTab="me">
+      {/* Hero Section */}
+      <section className="px-6 pt-4 pb-2">
+        <Card
+          variant="dark"
+          padding="none"
+          className="p-6 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <Timer size={100} />
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fast in Progress</span>
+            </div>
+            <h2 className="text-3xl font-black mb-1">14:22:08</h2>
+            <p className="text-xs font-bold text-slate-400 mb-6">Started today at 8:00 AM</p>
+
+            <div className="grid grid-cols-4 gap-2 mb-6">
+              <StatusPill icon={Activity} value="2.4k" label="Steps" />
+              <StatusPill icon={Moon} value="7h" label="Sleep" />
+              <StatusPill icon={Plus} value="1.2L" label="Water" />
+              <StatusPill icon={Pill} value="2/3" label="Meds" />
+            </div>
+
+            <Button
+              variant="secondary"
+              className="w-full"
+              icon={<Zap size={16} fill="currentColor" />}
+            >
+              <Link href="/fasting">Manage Fasting</Link>
+            </Button>
+          </div>
+        </Card>
+      </section>
+
       {/* Greeting Section */}
       <section className="px-6 pt-10 pb-4">
         <h1 className="text-4xl font-black text-slate-800 tracking-tighter mb-1">Hello, Siavash</h1>
