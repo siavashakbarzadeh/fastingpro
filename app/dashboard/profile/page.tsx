@@ -2,70 +2,112 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { AppShell } from '@/components/ui/AppShell';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Chip } from '@/components/ui/Chip';
 import {
+    User,
+    Scale,
+    Ruler,
+    Calendar,
+    Target,
+    Info,
+    Save,
+    CheckCircle2,
+    AlertCircle,
+    Timer,
+    Activity,
+    Moon,
+    Flame,
+    Trophy,
     ChevronLeft,
     Settings,
-    Flame,
-    Timer,
-    Trophy,
-    Target,
-    ChevronRight,
-    User,
-    ArrowRight
+    ChevronRight
 } from 'lucide-react';
 
-interface Stats {
-    weight: number;
+// Mock hook for fasting stats - structured for future shared state/API integration
+export type FastingStats = {
+    fastingMinutes: number;
     fastingDays: number;
-    totalFastingHours: number;
-    longestFast: number;
+    longestFastMinutes: number;
     streak: number;
-}
+};
 
-export default function ProfileDashboardPage() {
-    const router = useRouter();
-    const [stats, setStats] = useState<Stats>({
-        weight: 0,
+function useFastingStats(): FastingStats {
+    const [stats, setStats] = useState<FastingStats>({
+        fastingMinutes: 0,
         fastingDays: 0,
-        totalFastingHours: 0,
-        longestFast: 0,
+        longestFastMinutes: 0,
         streak: 0
     });
 
     useEffect(() => {
-        // Load stats from localStorage
         const savedHistory = localStorage.getItem('fastingHistory');
-        const userProfile = localStorage.getItem('user_profile');
-
-        let fastingDays = 0;
-        let totalMinutes = 0;
-        let longestMin = 0;
-
         if (savedHistory) {
             try {
                 const history = JSON.parse(savedHistory);
-                const completed = history.filter((f: any) => f.end_time);
-                fastingDays = new Set(completed.map((f: any) => f.start_time.split('T')[0])).size;
-                totalMinutes = completed.reduce((acc: number, f: any) => {
+                const completedFasts = history.filter((f: any) => f.end_time);
+
+                const fastingDaysSet = new Set(completedFasts.map((f: any) => f.start_time.split('T')[0]));
+                const fastingDays = fastingDaysSet.size;
+                const fastingMinutes = completedFasts.reduce((acc: number, f: any) => {
                     const duration = new Date(f.end_time).getTime() - new Date(f.start_time).getTime();
                     return acc + Math.floor(duration / 60000);
                 }, 0);
-                longestMin = completed.reduce((max: number, f: any) => {
+                const longestFastMinutes = completedFasts.reduce((max: number, f: any) => {
                     const duration = new Date(f.end_time).getTime() - new Date(f.start_time).getTime();
                     return Math.max(max, Math.floor(duration / 60000));
                 }, 0);
+
+                setStats({
+                    fastingMinutes,
+                    fastingDays,
+                    longestFastMinutes,
+                    streak: fastingDays > 0 ? 1 : 0 // Dummy streak for now
+                });
             } catch (e) {
-                console.error(e);
+                console.error('Error fetching fasting stats:', e);
             }
         }
+    }, []);
 
-        let currentWeight = 0;
-        if (userProfile) {
+    return stats;
+}
+
+export default function ProfilePage() {
+    const router = useRouter();
+
+    // Form State
+    const [gender, setGender] = useState('female');
+    const [age, setAge] = useState<number | string>(28);
+    const [height, setHeight] = useState<number | string>(170);
+    const [weight, setWeight] = useState<number | string>(65);
+    const [goalWeight, setGoalWeight] = useState<number | string>(60);
+    const [units, setUnits] = useState<'metric' | 'imperial'>('metric');
+    const [primaryGoal, setPrimaryGoal] = useState('lose weight');
+
+    // UI State
+    const [isSaving, setIsSaving] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // Fasting Stats
+    const fastingStats = useFastingStats();
+
+    // Load saved data
+    useEffect(() => {
+        const savedProfile = localStorage.getItem('user_profile');
+        if (savedProfile) {
             try {
-                const profile = JSON.parse(userProfile);
-                currentWeight = profile.weight || 0;
+                const data = JSON.parse(savedProfile);
+                setGender(data.gender || 'female');
+                setAge(data.age || 28);
+                setHeight(data.height || 170);
+                setWeight(data.weight || 65);
+                setGoalWeight(data.goalWeight || 60);
+                setUnits(data.units || 'metric');
+                setPrimaryGoal(data.primaryGoal || 'lose weight');
             } catch (e) {
                 console.error(e);
             }
@@ -74,126 +116,441 @@ export default function ProfileDashboardPage() {
             if (legacy) {
                 try {
                     const data = JSON.parse(legacy);
-                    currentWeight = data.currentWeight || 0;
+                    if (data.currentWeight) setWeight(data.currentWeight);
+                    if (data.answers?.goal_weight) setGoalWeight(data.answers.goal_weight);
                 } catch (e) { console.error(e); }
             }
         }
-
-        setStats({
-            weight: currentWeight,
-            fastingDays,
-            totalFastingHours: Math.floor(totalMinutes / 60),
-            longestFast: parseFloat((longestMin / 60).toFixed(1)),
-            streak: fastingDays > 0 ? 1 : 0 // Dummy streak for now
-        });
     }, []);
 
-    return (
-        <main className="min-h-screen bg-slate-50 text-slate-900 pb-24">
-            {/* Header */}
-            <header className="p-6 flex justify-between items-center bg-white border-b border-slate-100 sticky top-0 z-10">
-                <button onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
-                    <ChevronLeft size={20} />
-                </button>
-                <h1 className="text-lg font-black text-slate-800">Me</h1>
-                <button
-                    onClick={() => router.push('/me')}
-                    className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600"
-                >
-                    <Settings size={20} />
-                </button>
-            </header>
+    // BMI Calculation
+    const calculateBMI = () => {
+        const h = typeof height === 'string' ? parseFloat(height) : height;
+        const w = typeof weight === 'string' ? parseFloat(weight) : weight;
+        if (!h || !w || h <= 0) return 0;
 
-            <div className="p-6 space-y-6">
-                {/* User Info Card */}
-                <div className="flex items-center gap-4 py-2">
-                    <div className="w-20 h-20 rounded-[2rem] bg-indigo-500 border-4 border-white shadow-xl flex items-center justify-center text-white">
-                        <User size={40} fill="currentColor" />
-                    </div>
+        const bmi = w / Math.pow(h / 100, 2);
+        return parseFloat(bmi.toFixed(1));
+    };
+
+    const bmi = calculateBMI();
+
+    const getBMIRecommendation = (bmiValue: number) => {
+        if (bmiValue <= 0) return null;
+        if (bmiValue < 18.5) {
+            return {
+                category: 'Underweight',
+                color: 'text-blue-600',
+                bg: 'bg-blue-50',
+                border: 'border-blue-100',
+                text: 'Your BMI is below the normal range. Before changing your diet or starting fasting, talk to your doctor.'
+            };
+        } else if (bmiValue < 25) {
+            return {
+                category: 'Normal',
+                color: 'text-emerald-600',
+                bg: 'bg-emerald-50',
+                border: 'border-emerald-100',
+                text: 'Your BMI is in the normal range. You can use gentle fasting and regular activity to maintain your health.'
+            };
+        } else if (bmiValue < 30) {
+            return {
+                category: 'Overweight',
+                color: 'text-amber-600',
+                bg: 'bg-amber-50',
+                border: 'border-amber-100',
+                text: 'Your BMI is above the normal range. This app can help you with intermittent fasting and activity plans, but it does not replace medical advice.'
+            };
+        } else {
+            return {
+                category: 'Obesity',
+                color: 'text-rose-600',
+                bg: 'bg-rose-50',
+                border: 'border-rose-100',
+                text: 'Your BMI is in the obesity range. It’s helpful to use both fasting plans and activity plans in this app, and if possible talk to a doctor or dietitian.'
+            };
+        }
+    };
+
+    const recommendation = getBMIRecommendation(bmi);
+
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const newErrors: Record<string, string> = {};
+        if (!height || Number(height) <= 0) newErrors.height = 'Please enter a valid height';
+        if (!weight || Number(weight) <= 0) newErrors.weight = 'Please enter a valid weight';
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        setErrors({});
+        setIsSaving(true);
+
+        setTimeout(() => {
+            const profileData = { gender, age, height, weight, goalWeight, units, primaryGoal };
+            localStorage.setItem('user_profile', JSON.stringify(profileData));
+            localStorage.setItem('currentWeight', weight.toString());
+
+            setIsSaving(false);
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 3000);
+        }, 1000);
+    };
+
+    return (
+        <AppShell title="Me" activeTab="me" hideTopBar>
+            <div className="max-w-md mx-auto p-4 space-y-6 pb-32">
+                {/* Header Section */}
+                <div className="pt-4 px-2 flex justify-between items-center">
                     <div>
-                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Health Profile</h2>
-                        <button
-                            onClick={() => router.push('/me')}
-                            className="text-indigo-500 font-bold text-sm flex items-center gap-1 group"
-                        >
-                            View & Edit Stats
-                            <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                        </button>
+                        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Profile</h1>
+                        <p className="text-slate-400 font-bold">Health & Fasting Overview</p>
+                    </div>
+                    <div className="w-16 h-16 rounded-[2rem] bg-indigo-500 border-4 border-white shadow-lg flex items-center justify-center text-white">
+                        <User size={30} fill="currentColor" />
                     </div>
                 </div>
 
-                {/* Stats Grid */}
+                {/* Quick Stats Grid */}
                 <div className="grid grid-cols-2 gap-4">
                     <Card className="p-4 bg-white border-none shadow-sm flex flex-col items-center text-center space-y-2">
                         <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
                             <Scale size={20} />
                         </div>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Weight</p>
-                        <p className="text-xl font-black text-slate-800">{stats.weight || '--'} <span className="text-xs text-slate-400">kg</span></p>
+                        <p className="text-xl font-black text-slate-800">{weight || '--'} <span className="text-xs text-slate-400">kg</span></p>
                     </Card>
                     <Card className="p-4 bg-white border-none shadow-sm flex flex-col items-center text-center space-y-2">
                         <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500">
                             <Timer size={20} />
                         </div>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fasting Days</p>
-                        <p className="text-xl font-black text-slate-800">{stats.fastingDays}</p>
+                        <p className="text-xl font-black text-slate-800">{fastingStats.fastingDays}</p>
                     </Card>
                     <Card className="p-4 bg-white border-none shadow-sm flex flex-col items-center text-center space-y-2">
                         <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
                             <Flame size={20} fill="currentColor" />
                         </div>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Streak</p>
-                        <p className="text-xl font-black text-slate-800">{stats.streak} <span className="text-xs text-slate-400">days</span></p>
+                        <p className="text-xl font-black text-slate-800">{fastingStats.streak} <span className="text-xs text-slate-400">days</span></p>
                     </Card>
                     <Card className="p-4 bg-white border-none shadow-sm flex flex-col items-center text-center space-y-2">
                         <div className="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500">
                             <Target size={20} />
                         </div>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Longest</p>
-                        <p className="text-xl font-black text-slate-800">{stats.longestFast} <span className="text-xs text-slate-400">hrs</span></p>
+                        <p className="text-xl font-black text-slate-800">{(fastingStats.longestFastMinutes / 60).toFixed(1)} <span className="text-xs text-slate-400">hrs</span></p>
                     </Card>
                 </div>
 
                 {/* Achievements Card */}
-                <Card className="p-6 bg-[#002855] text-white">
+                <Card className="p-6 bg-[#002855] text-white overflow-hidden relative">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="font-black text-lg">Achievements</h3>
                         <Trophy size={20} className="text-amber-400" />
                     </div>
-                    <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+                    <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 relative z-10">
                         {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="flex-shrink-0 w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 grayscale opacity-40">
+                            <div key={i} className="flex-shrink-0 w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 grayscale opacity-40 hover:opacity-100 transition-opacity">
                                 <Trophy size={24} />
                             </div>
                         ))}
                     </div>
                     <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mt-4">Complete fasts to unlock</p>
+                    <div className="absolute -right-4 -bottom-4 opacity-5">
+                        <Trophy size={100} />
+                    </div>
                 </Card>
 
-                {/* Call to action */}
-                <Card className="p-6 bg-indigo-500 text-white relative overflow-hidden group">
-                    <div className="relative z-10 space-y-2">
-                        <h3 className="text-xl font-black">Complete Your Profile</h3>
-                        <p className="text-indigo-100 text-sm font-bold max-w-[200px]">
-                            Add your height and goals to get personal BMI recommendations.
-                        </p>
-                        <Button
-                            variant="primary"
-                            className="bg-white text-indigo-500 border-none mt-2 px-8"
-                            onClick={() => router.push('/me')}
-                        >
-                            Open Profile Hub
-                        </Button>
+                {/* Health Profile Form & BMI */}
+                <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                            <Activity size={24} />
+                        </div>
+                        <h2 className="text-xl font-black text-slate-800">Health Profile</h2>
                     </div>
-                    <User
-                        size={120}
-                        className="absolute -right-8 -bottom-8 text-white/10 rotate-12 group-hover:rotate-0 transition-transform duration-500"
-                        fill="currentColor"
-                    />
+
+                    <form onSubmit={handleSave} className="space-y-6">
+                        {/* Gender Select */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Gender</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {['female', 'male', 'other'].map((g) => (
+                                    <button
+                                        key={g}
+                                        type="button"
+                                        onClick={() => setGender(g)}
+                                        className={`py-3 rounded-2xl font-black text-sm capitalize transition-all border-2 ${gender === g ? 'bg-primary border-primary text-white shadow-lg' : 'bg-slate-50 border-slate-50 text-slate-400'}`}
+                                    >
+                                        {g === 'other' ? 'Other' : g}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Age Input */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Age</label>
+                            <div className="relative">
+                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                <input
+                                    type="number"
+                                    value={age}
+                                    onChange={(e) => setAge(e.target.value)}
+                                    className="w-full bg-slate-50 border-2 border-slate-50 focus:border-primary/20 focus:bg-white rounded-2xl py-3.5 pl-12 pr-4 font-black text-slate-800 outline-none transition-all"
+                                    placeholder="Enter age"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Height Input */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Height (cm)</label>
+                                <div className="relative">
+                                    <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                    <input
+                                        type="number"
+                                        value={height}
+                                        onChange={(e) => setHeight(e.target.value)}
+                                        className={`w-full bg-slate-50 border-2 ${errors.height ? 'border-rose-200 bg-rose-50' : 'border-slate-50 focus:border-primary/20 focus:bg-white'} rounded-2xl py-3.5 pl-12 pr-4 font-black text-slate-800 outline-none transition-all`}
+                                        placeholder="cm"
+                                    />
+                                </div>
+                                {errors.height && <p className="text-[10px] text-rose-500 font-bold pl-1">{errors.height}</p>}
+                            </div>
+
+                            {/* Current Weight Input */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Weight (kg)</label>
+                                <div className="relative">
+                                    <Scale className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                    <input
+                                        type="number"
+                                        value={weight}
+                                        onChange={(e) => setWeight(e.target.value)}
+                                        className={`w-full bg-slate-50 border-2 ${errors.weight ? 'border-rose-200 bg-rose-50' : 'border-slate-50 focus:border-primary/20 focus:bg-white'} rounded-2xl py-3.5 pl-12 pr-4 font-black text-slate-800 outline-none transition-all`}
+                                        placeholder="kg"
+                                    />
+                                </div>
+                                {errors.weight && <p className="text-[10px] text-rose-500 font-bold pl-1">{errors.weight}</p>}
+                            </div>
+                        </div>
+
+                        {/* Goal Weight Input */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Goal Weight (kg)</label>
+                            <div className="relative">
+                                <Target className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                <input
+                                    type="number"
+                                    value={goalWeight}
+                                    onChange={(e) => setGoalWeight(e.target.value)}
+                                    className="w-full bg-slate-50 border-2 border-slate-50 focus:border-primary/20 focus:bg-white rounded-2xl py-3.5 pl-12 pr-4 font-black text-slate-800 outline-none transition-all"
+                                    placeholder="Optional"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Units Control */}
+                        <div className="space-y-2 pt-2">
+                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Units</label>
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setUnits('metric')}
+                                    className="flex items-center gap-2 group"
+                                >
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${units === 'metric' ? 'border-primary' : 'border-slate-200'}`}>
+                                        {units === 'metric' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                                    </div>
+                                    <span className={`text-sm font-black ${units === 'metric' ? 'text-slate-800' : 'text-slate-400'}`}>Metric (cm, kg)</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setUnits('imperial')}
+                                    className="flex items-center gap-2 group"
+                                >
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${units === 'imperial' ? 'border-primary' : 'border-slate-200'}`}>
+                                        {units === 'imperial' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                                    </div>
+                                    <span className={`text-sm font-black ${units === 'imperial' ? 'text-slate-800' : 'text-slate-400'}`}>Imperial (in, lb)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Save Button */}
+                        <button
+                            type="submit"
+                            disabled={isSaving}
+                            className={`w-full py-4 rounded-[2rem] font-black text-lg transition-all flex items-center justify-center gap-2 shadow-lg ${isSaved
+                                ? 'bg-emerald-500 text-white shadow-emerald-500/20'
+                                : 'bg-primary text-white shadow-primary/20 hover:scale-[1.02] active:scale-95'
+                                }`}
+                        >
+                            {isSaving ? (
+                                <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : isSaved ? (
+                                <>
+                                    <CheckCircle2 size={24} />
+                                    Profile Saved
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={24} />
+                                    Save Profile
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    {/* BMI Section inside Health Profile Card */}
+                    {bmi > 0 && recommendation && (
+                        <div className="mt-8 pt-6 border-t border-slate-50 space-y-4">
+                            <div className="flex justify-between items-end">
+                                <div>
+                                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Your BMI</p>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-5xl font-black text-slate-800 tracking-tighter">{bmi}</span>
+                                        <span className={`text-sm font-black px-3 py-1 rounded-full ${recommendation.bg} ${recommendation.color}`}>
+                                            {recommendation.category}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* BMI Recommendation Box */}
+                            <div className={`p-4 rounded-2xl border ${recommendation.bg} ${recommendation.border} flex gap-3`}>
+                                <Info className={`flex-shrink-0 mt-0.5 ${recommendation.color}`} size={18} />
+                                <p className={`text-sm font-bold leading-snug ${recommendation.color}`}>
+                                    {recommendation.text}
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </Card>
+
+                {/* Detailed Fasting Summary Card */}
+                <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+                            <Timer size={24} />
+                        </div>
+                        <h2 className="text-xl font-black text-slate-800">Fasting Summary</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-slate-50 rounded-2xl p-4 flex flex-col justify-center border border-slate-100/50">
+                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Total fasting minutes</p>
+                            <span className="text-2xl font-black text-slate-800">{fastingStats.fastingMinutes}</span>
+                        </div>
+                        <div className="bg-slate-50 rounded-2xl p-4 flex flex-col justify-center border border-slate-100/50">
+                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Fasting days</p>
+                            <span className="text-2xl font-black text-slate-800">{fastingStats.fastingDays}</span>
+                        </div>
+                        <div className="bg-indigo-50/50 md:col-span-2 rounded-2xl p-4 flex justify-between items-center border border-indigo-100/50">
+                            <div>
+                                <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-1">Longest fast</p>
+                                <span className="text-3xl font-black text-indigo-900">
+                                    {(fastingStats.longestFastMinutes / 60).toFixed(1)} <span className="text-sm font-black text-indigo-900/40">hours</span>
+                                </span>
+                            </div>
+                            <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-indigo-500">
+                                <Flame size={24} fill="currentColor" />
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Goals Card */}
+                <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
+                            <Target size={24} />
+                        </div>
+                        <h2 className="text-xl font-black text-slate-800">Goals</h2>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        {[
+                            'lose weight',
+                            'maintain weight',
+                            'gain weight',
+                            'improve sleep',
+                            'move more'
+                        ].map((goal) => (
+                            <Chip
+                                key={goal}
+                                label={goal}
+                                active={primaryGoal === goal}
+                                onClick={() => setPrimaryGoal(goal)}
+                                className="py-3 px-5 text-xs"
+                            />
+                        ))}
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-slate-50">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-black text-slate-600">Weekly weight change goal</span>
+                            <span className="text-lg font-black text-primary">-0.5 kg/week</span>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Connected Modules Card */}
+                <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+                            <Activity size={24} />
+                        </div>
+                        <h2 className="text-xl font-black text-slate-800">Connected modules</h2>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex gap-4 items-start">
+                            <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 flex-shrink-0 mt-1">
+                                <Flame size={16} fill="currentColor" />
+                            </div>
+                            <p className="text-sm font-bold text-slate-500 leading-relaxed">
+                                Calories & activity use your height and weight to estimate daily goals.
+                            </p>
+                        </div>
+                        <div className="flex gap-4 items-start">
+                            <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 flex-shrink-0 mt-1">
+                                <Timer size={16} />
+                            </div>
+                            <p className="text-sm font-bold text-slate-500 leading-relaxed">
+                                Fasting uses your goals to suggest plans.
+                            </p>
+                        </div>
+                        <div className="flex gap-4 items-start">
+                            <div className="w-8 h-8 rounded-xl bg-pink-50 flex items-center justify-center text-pink-500 flex-shrink-0 mt-1">
+                                <Moon size={16} fill="currentColor" />
+                            </div>
+                            <p className="text-sm font-bold text-slate-500 leading-relaxed">
+                                Women’s health modules use your age and cycle data.
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Safety Privacy Note */}
+                <div className="px-4 py-8 space-y-4">
+                    <div className="flex gap-2 text-slate-300 justify-center">
+                        <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
+                        <p className="text-[10px] font-bold leading-relaxed uppercase tracking-widest text-center">
+                            Safety & Privacy Note
+                        </p>
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-400 text-center leading-relaxed px-4">
+                        Your profile is used to personalize goals in this app. This app does not provide medical diagnosis, and your data should not replace advice from your doctor.
+                    </p>
+                </div>
             </div>
-        </main>
+        </AppShell>
     );
 }
-
-import { Scale } from 'lucide-react';
