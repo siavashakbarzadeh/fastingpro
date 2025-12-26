@@ -214,56 +214,6 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                {/* Quick Stats Grid */}
-                <div className="grid grid-cols-2 gap-4">
-                    <Card className="p-4 bg-white border-none shadow-sm flex flex-col items-center text-center space-y-2">
-                        <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
-                            <Scale size={20} />
-                        </div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Weight</p>
-                        <p className="text-xl font-black text-slate-800">{weight || '--'} <span className="text-xs text-slate-400">kg</span></p>
-                    </Card>
-                    <Card className="p-4 bg-white border-none shadow-sm flex flex-col items-center text-center space-y-2">
-                        <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500">
-                            <Timer size={20} />
-                        </div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fasting Days</p>
-                        <p className="text-xl font-black text-slate-800">{fastingStats.fastingDays}</p>
-                    </Card>
-                    <Card className="p-4 bg-white border-none shadow-sm flex flex-col items-center text-center space-y-2">
-                        <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
-                            <Flame size={20} fill="currentColor" />
-                        </div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Streak</p>
-                        <p className="text-xl font-black text-slate-800">{fastingStats.streak} <span className="text-xs text-slate-400">days</span></p>
-                    </Card>
-                    <Card className="p-4 bg-white border-none shadow-sm flex flex-col items-center text-center space-y-2">
-                        <div className="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500">
-                            <Target size={20} />
-                        </div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Longest</p>
-                        <p className="text-xl font-black text-slate-800">{(fastingStats.longestFastMinutes / 60).toFixed(1)} <span className="text-xs text-slate-400">hrs</span></p>
-                    </Card>
-                </div>
-
-                {/* Achievements Card */}
-                <Card className="p-6 bg-[#002855] text-white overflow-hidden relative">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-black text-lg">Achievements</h3>
-                        <Trophy size={20} className="text-amber-400" />
-                    </div>
-                    <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 relative z-10">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="flex-shrink-0 w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 grayscale opacity-40 hover:opacity-100 transition-opacity">
-                                <Trophy size={24} />
-                            </div>
-                        ))}
-                    </div>
-                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mt-4">Complete fasts to unlock</p>
-                    <div className="absolute -right-4 -bottom-4 opacity-5">
-                        <Trophy size={100} />
-                    </div>
-                </Card>
 
                 {/* Health Profile Form & BMI */}
                 <Card className="p-6">
