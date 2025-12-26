@@ -230,6 +230,8 @@ export default function MobileDashboard() {
         </div>
       </section>
     </AppShell>
+    {/* Bottom Navigation */}
+    <BottomNav />
   );
 }
 
