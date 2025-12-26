@@ -329,22 +329,6 @@ export default function DashboardPage() {
                     </button>
                 </div>
 
-                {/* Fasting summary card */}
-                <div className="rounded-2xl border bg-white p-3 flex justify-between text-sm">
-                    <div>
-                        <p className="text-xs text-slate-500">Fasting days</p>
-                        <p className="text-lg font-bold text-slate-800">{fastingDays}</p>
-                    </div>
-                    <div>
-                        <p className="text-xs text-slate-500">Longest fast</p>
-                        <p className="text-lg font-bold text-slate-800">{longestFastHours}h</p>
-                    </div>
-                    <div>
-                        <p className="text-xs text-slate-500">Streak</p>
-                        <p className="text-lg font-bold text-slate-800">{currentStreak} days</p>
-                    </div>
-                </div>
-
                 {/* Calories today card */}
                 <CaloriesTodayCard
                     caloriesIn={caloriesInToday}
