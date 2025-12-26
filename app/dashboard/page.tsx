@@ -39,18 +39,176 @@ interface CycleTodaySummary {
 type MedStatus = "scheduled" | "taken" | "skipped";
 
 interface TodayDose {
-    import BottomNav from '@/components/ui/BottomNav';
+    id: string;
+    time: string;
+    name: string;
+    dose: string;
+    status: MedStatus;
+}
 
-    export default function DashboardPage() {
-        // ...existing code...
+interface MedicationsTodaySummary {
+    totalDoses: number;
+    takenDoses: number;
+    nextDose?: TodayDose;
+}
 
-        return (
-            <div className="max-w-md mx-auto px-4 py-4 space-y-6 bg-slate-50 min-h-screen pb-24">
-                {/* ...existing dashboard content... */}
-                <BottomNav />
-            </div>
-        );
-    }
+export default function DashboardPage() {
+    const router = useRouter();
+    const { summary: brushingSummary, logTodayBrushed } = useBrushingTracker();
+
+    // Fasting state
+    const [isFasting, setIsFasting] = useState(false);
+    const [elapsedMinutes, setElapsedMinutes] = useState(0);
+    const [remainingMinutes, setRemainingMinutes] = useState(0);
+    const [protocolName] = useState("16:8");
+
+    // Today habits state
+    const [waterMl, setWaterMl] = useState(0);
+    const [waterGoalMl] = useState(2500);
+    const [lastSleepMinutes] = useState(440); // 7h 20m
+    const [sleepGoalMinutes] = useState(480); // 8h
+    const [steps, setSteps] = useState(4300);
+    const [stepsGoal] = useState(8000);
+
+    // Body state
+    const [weightKg, setWeightKg] = useState(68.4);
+    const [prevWeekWeightKg] = useState(68.8);
+    const [heightCm] = useState(170);
+    const [fastingDays] = useState(12);
+    const [longestFastHours] = useState(18);
+    const [currentStreak] = useState(3);
+
+    // Calories state
+    const [caloriesInToday, setCaloriesInToday] = useState(1450);
+    const [caloriesOutToday, setCaloriesOutToday] = useState(2050);
+    const [calorieGoal] = useState(1800);
+
+    // Cycle state (mock data)
+    const cycleToday: CycleTodaySummary = {
+        dateLabel: "Today, Dec 26",
+        cycleDay: 16,
+        fertilityLevel: "low",
+        message: "It's currently a lower chance to conceive",
+    };
+
+    // Medications state (mock data)
+    const todayDoses: TodayDose[] = [
+        { id: "1", time: "08:00", name: "Metformin", dose: "500mg", status: "taken" },
+        { id: "2", time: "14:00", name: "Vitamin D", dose: "1000 IU", status: "scheduled" },
+        { id: "3", time: "20:00", name: "Omega-3", dose: "1000mg", status: "scheduled" },
+    ];
+
+    const medSummary: MedicationsTodaySummary = {
+        totalDoses: todayDoses.length,
+        takenDoses: todayDoses.filter(d => d.status === "taken").length,
+        nextDose: todayDoses.find(d => d.status === "scheduled"),
+    };
+
+    // Computed values
+    const bmi = weightKg && heightCm ? weightKg / Math.pow(heightCm / 100, 2) : 0;
+    const bmiCategory = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obesity';
+    const weeklyDiff = weightKg - prevWeekWeightKg;
+    const waterProgress = (waterMl / waterGoalMl) * 100;
+    const sleepHours = Math.floor(lastSleepMinutes / 60);
+    const sleepMins = lastSleepMinutes % 60;
+    const sleepStatus = lastSleepMinutes >= sleepGoalMinutes ? 'Good' : lastSleepMinutes >= sleepGoalMinutes * 0.9 ? 'OK' : 'Low';
+    const stepsProgress = (steps / stepsGoal) * 100;
+
+    // Fasting timer simulation
+    useEffect(() => {
+        if (isFasting) {
+            const interval = setInterval(() => {
+                setElapsedMinutes(prev => prev + 1);
+                setRemainingMinutes(prev => Math.max(0, prev - 1));
+            }, 60000); // Update every minute
+            return () => clearInterval(interval);
+        }
+    }, [isFasting]);
+
+    const handleStartFast = () => {
+        setIsFasting(true);
+        setElapsedMinutes(0);
+        setRemainingMinutes(16 * 60); // 16 hours for 16:8
+    };
+
+    const handleEndFast = () => {
+        setIsFasting(false);
+        setElapsedMinutes(0);
+        setRemainingMinutes(0);
+    };
+
+    const addWater = () => {
+        setWaterMl(prev => Math.min(prev + 250, waterGoalMl + 1000));
+    };
+
+    const formatTime = (minutes: number) => {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return `${h}h ${m}m`;
+    };
+
+    const modules = [
+        { href: "/dental", icon: Smile, title: "Dental Health", subtitle: "Daily tracker" },
+        { href: "/mental-health", icon: Heart, title: "Mental Health", subtitle: "Mood & self-care" },
+        { href: "/cycle", icon: Heart, title: "Cycle / Pregnancy", subtitle: "Your cycle history" },
+        { href: "/symptoms", icon: Stethoscope, title: "Symptoms", subtitle: "Diary & patterns" },
+        { href: "/understand-body", icon: Brain, title: "My Body", subtitle: "Literacy & patterns" },
+        { href: "/medications", icon: Pill, title: "Medications", subtitle: "Reminders & tracking" },
+    ];
+
+    return (
+        <div className="max-w-md mx-auto px-4 py-4 space-y-6 bg-slate-50 min-h-screen pb-24">
+
+            {/* Section 1: Fasting */}
+            <section>
+                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                    Fasting
+                </h2>
+                <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-3">
+                    {isFasting ? (
+                        <>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-800">{protocolName} today</h3>
+                                    <p className="text-sm text-slate-500">Active fast</p>
+                                </div>
+                                <Flame className="text-orange-500" size={24} />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-xs text-slate-500 uppercase tracking-wider">Elapsed</p>
+                                    <p className="text-2xl font-bold text-slate-800">{formatTime(elapsedMinutes)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-slate-500 uppercase tracking-wider">Remaining</p>
+                                    <p className="text-2xl font-bold text-slate-800">{formatTime(remainingMinutes)}</p>
+                                </div>
+                            </div>
+
+                            {/* Progress bar */}
+                            <div className="w-full bg-slate-100 rounded-full h-2">
+                                <div
+                                    className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${(elapsedMinutes / (16 * 60)) * 100}%` }}
+                                />
+                            </div>
+
+                            <button
+                                onClick={handleEndFast}
+                                className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                            >
+                                <Pause size={18} />
+                                End fast
+                            </button>
+
+                            {/* Fasting statistics */}
+                            <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-100">
+                                <div className="text-center">
+                                    <p className="text-xs text-slate-500">Total fasting minutes</p>
+                                    <p className="text-lg font-bold text-slate-800">{elapsedMinutes + (fastingDays * 16 * 60)}</p>
+                                </div>
+                                <div className="text-center">
                                     <p className="text-xs text-slate-500">Fasting days</p>
                                     <p className="text-lg font-bold text-slate-800">{fastingDays}</p>
                                 </div>
