@@ -1,3 +1,19 @@
+import React from 'react';
+import { AppShell } from '@/components/ui/AppShell';
+import FastingStatusCard, { MOCK_FAST_STATUS } from '@/components/dashboard/FastingStatusCard';
+
+export default function DashboardPage() {
+  return (
+    <AppShell activeTab="me">
+      <section className="px-6 pt-6">
+        <h1 className="text-2xl font-black mb-3">Dashboard</h1>
+        <div className="space-y-4">
+          <FastingStatusCard status={MOCK_FAST_STATUS} />
+        </div>
+      </section>
+    </AppShell>
+  );
+}
 'use client';
 
 import { useState, useEffect } from 'react';
