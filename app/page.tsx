@@ -28,7 +28,9 @@ import {
   Droplets,
   Flower2,
   Users,
-  Info
+  Info,
+  BookOpen,
+  Briefcase
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -282,36 +284,36 @@ const ModulesSection = () => {
     {
       name: "Fasting & Food",
       items: [
-        { label: "Fasting", icon: "⚖️", sub: "Timer & logs" },
-        { label: "Recipes", icon: "🥗", sub: "Healthy meals" },
-        { label: "Diet plans", icon: "📋", sub: "Structured eating" }
+        { label: "Fasting", icon: "⚖️", sub: "Timer & logs", link: "/fasting" },
+        { label: "Recipes", icon: "🥗", sub: "Healthy meals", link: "/dashboard/recipes" },
+        { label: "Diet plans", icon: "📋", sub: "Structured eating", link: "/dashboard/recipes" }
       ]
     },
     {
       name: "Daily Health",
       items: [
-        { label: "Sleep", icon: "😴", sub: "Diary & score" },
-        { label: "Activity", icon: "🏃", sub: "Daily movement" },
-        { label: "Medications", icon: "💊", sub: "Reminder & logs" },
-        { label: "Symptoms", icon: "🤒", sub: "Track patterns" },
-        { label: "Dental Health", icon: "🦷", sub: "Checkup logs" }
+        { label: "Sleep", icon: "😴", sub: "Diary & score", link: "/sleep" },
+        { label: "Activity", icon: "🏃", sub: "Daily movement", link: "/activity" },
+        { label: "Medications", icon: "💊", sub: "Reminder & logs", link: "/medications" },
+        { label: "Symptoms", icon: "🤒", sub: "Track patterns", link: "/symptoms" },
+        { label: "Dental Health", icon: "🦷", sub: "Checkup logs", link: "/dental" }
       ]
     },
     {
       name: "Women's Health",
       items: [
-        { label: "Track my period", icon: "📅", sub: "Cycle insights" },
-        { label: "Track my pregnancy", icon: "👶", sub: "Baby growth" },
-        { label: "Get pregnant", icon: "🤰", sub: "Fertility support" },
-        { label: "Decode discharge", icon: "🧪", sub: "Cervical mucus" },
-        { label: "Understand my body", icon: "🧠", sub: "Hormone literacy" }
+        { label: "Track my period", icon: "📅", sub: "Cycle insights", link: "/period-tracker" },
+        { label: "Track my pregnancy", icon: "👶", sub: "Baby growth", link: "/pregnancy" },
+        { label: "Get pregnant", icon: "🤰", sub: "Fertility support", link: "/get-pregnant" },
+        { label: "Decode discharge", icon: "🧪", sub: "Cervical mucus", link: "/discharge" },
+        { label: "Understand my body", icon: "🧠", sub: "Hormone literacy", link: "/understand-body" }
       ]
     },
     {
       name: "Mind & Relationships",
       items: [
-        { label: "Mental Health", icon: "🧘", sub: "Mood & self-care" },
-        { label: "Enhance my sex life", icon: "🔥", sub: "Intimacy tracking" }
+        { label: "Mental Health", icon: "🧘", sub: "Mood & self-care", link: "/mental-health" },
+        { label: "Enhance my sex life", icon: "🔥", sub: "Intimacy tracking", link: "/sex-life" }
       ]
     }
   ];
@@ -336,13 +338,17 @@ const ModulesSection = () => {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                 {cat.items.map((item, j) => (
-                  <div key={j} className="bg-white p-6 rounded-[2rem] border border-slate-100 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all group cursor-default">
+                  <Link
+                    key={j}
+                    href={item.link}
+                    className="bg-white p-6 rounded-[2rem] border border-slate-100 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all group block"
+                  >
                     <div className="text-3xl mb-4 group-hover:scale-125 transition-transform duration-300">
                       {item.icon}
                     </div>
                     <p className="font-black text-slate-900 text-sm mb-1 leading-tight tracking-tight">{item.label}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.sub}</p>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
