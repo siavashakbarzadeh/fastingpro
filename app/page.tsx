@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 import {
   Timer,
   Moon,
@@ -15,15 +15,15 @@ import {
   Plus,
   HeartPulse,
   Flame,
-  ChevronRight
-} from 'lucide-react';
+  ChevronRight,
+} from "lucide-react";
 
-import { AppShell } from '@/components/ui/AppShell';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Chip } from '@/components/ui/Chip';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { ProgressBar } from '@/components/ui/ProgressBar';
+import { AppShell } from "@/components/ui/AppShell";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
 // --- Types ---
 
@@ -33,7 +33,7 @@ interface Module {
   description: string;
   status?: string;
   icon: React.ElementType;
-  variant: 'primary' | 'secondary' | 'accent' | 'danger' | 'slate';
+  variant: "primary" | "secondary" | "accent" | "danger" | "slate";
   link: string;
 }
 
@@ -55,27 +55,132 @@ interface LearnArticle {
 // --- Mock Data ---
 
 const MODULES: Module[] = [
-  { id: 'fasting', title: 'Fasting', description: 'Track your fasting status', status: 'In Progress', icon: Timer, variant: 'secondary', link: '/fasting' },
-  { id: 'sleep', title: 'Sleep', description: 'Logs last night’s sleep', status: 'Logged', icon: Moon, variant: 'primary', link: '/sleep' },
-  { id: 'activity', title: 'Activity', description: 'Movement & steps', status: 'Not logged', icon: Activity, variant: 'primary', link: '/activity' },
-  { id: 'meds', title: 'Medications', description: 'Schedule & tracking', status: '2/3 taken', icon: Pill, variant: 'danger', link: '/medications' },
-  { id: 'dental', title: 'Dental', description: 'Routine & oral health', status: 'Logged', icon: HeartPulse, variant: 'primary', link: '/dental' },
-  { id: 'mental', title: 'Mental Health', description: 'AI Companion & check-ins', status: 'Not logged', icon: Brain, variant: 'secondary', link: '/mental-health' },
-  { id: 'period', title: 'Women’s Health', description: 'Cycle & pregnancy', status: 'Phase 2', icon: Flower2, variant: 'danger', link: '/period-tracker' },
-  { id: 'recipes', title: 'Recipes', description: 'Healthy meal ideas', status: 'Explore', icon: Utensils, variant: 'accent', link: '/dashboard/recipes' },
-  { id: 'calories', title: 'Calories', description: 'Fuel & activity log', status: 'Log now', icon: Flame, variant: 'accent', link: '/calories' },
+  {
+    id: "fasting",
+    title: "Fasting",
+    description: "Track your fasting status",
+    status: "In Progress",
+    icon: Timer,
+    variant: "secondary",
+    link: "/fasting",
+  },
+  {
+    id: "sleep",
+    title: "Sleep",
+    description: "Logs last night’s sleep",
+    status: "Logged",
+    icon: Moon,
+    variant: "primary",
+    link: "/sleep",
+  },
+  {
+    id: "activity",
+    title: "Activity",
+    description: "Movement & steps",
+    status: "Not logged",
+    icon: Activity,
+    variant: "primary",
+    link: "/activity",
+  },
+  {
+    id: "meds",
+    title: "Medications",
+    description: "Schedule & tracking",
+    status: "2/3 taken",
+    icon: Pill,
+    variant: "danger",
+    link: "/medications",
+  },
+  {
+    id: "dental",
+    title: "Dental",
+    description: "Routine & oral health",
+    status: "Logged",
+    icon: HeartPulse,
+    variant: "primary",
+    link: "/dental",
+  },
+  {
+    id: "mental",
+    title: "Mental Health",
+    description: "AI Companion & check-ins",
+    status: "Not logged",
+    icon: Brain,
+    variant: "secondary",
+    link: "/mental-health",
+  },
+  {
+    id: "period",
+    title: "Women’s Health",
+    description: "Cycle & pregnancy",
+    status: "Phase 2",
+    icon: Flower2,
+    variant: "danger",
+    link: "/period-tracker",
+  },
+  {
+    id: "recipes",
+    title: "Recipes",
+    description: "Healthy meal ideas",
+    status: "Explore",
+    icon: Utensils,
+    variant: "accent",
+    link: "/dashboard/recipes",
+  },
+  {
+    id: "calories",
+    title: "Calories",
+    description: "Fuel & activity log",
+    status: "Log now",
+    icon: Flame,
+    variant: "accent",
+    link: "/calories",
+  },
 ];
 
 const CONTINUE_ACTIONS: ContinueAction[] = [
-  { id: '1', title: 'Summer Weight Loss', subtitle: 'Continue plan', link: '/dashboard/plans' },
-  { id: '2', title: 'Log Hydration', subtitle: '2L remaining', link: '/water-tracker' },
-  { id: '3', title: 'Mental Health', subtitle: 'Check-in required', link: '/mental-health' },
+  {
+    id: "1",
+    title: "Summer Weight Loss",
+    subtitle: "Continue plan",
+    link: "/dashboard/plans",
+  },
+  {
+    id: "2",
+    title: "Log Hydration",
+    subtitle: "2L remaining",
+    link: "/water-tracker",
+  },
+  {
+    id: "3",
+    title: "Mental Health",
+    subtitle: "Check-in required",
+    link: "/mental-health",
+  },
 ];
 
 const LEARN_ARTICLES: LearnArticle[] = [
-  { id: 'l1', title: 'Beginner’s guide to fasting', category: 'Fasting 101', time: '5 min', link: '/dashboard/learn' },
-  { id: 'l2', title: 'Sleep hygiene basics', category: 'Recovery', time: '3 min', link: '/dashboard/learn' },
-  { id: 'l3', title: 'Understanding your cycle', category: 'Health', time: '7 min', link: '/dashboard/learn' },
+  {
+    id: "l1",
+    title: "Beginner’s guide to fasting",
+    category: "Fasting 101",
+    time: "5 min",
+    link: "/dashboard/learn",
+  },
+  {
+    id: "l2",
+    title: "Sleep hygiene basics",
+    category: "Recovery",
+    time: "3 min",
+    link: "/dashboard/learn",
+  },
+  {
+    id: "l3",
+    title: "Understanding your cycle",
+    category: "Health",
+    time: "7 min",
+    link: "/dashboard/learn",
+  },
 ];
 
 // --- Fasting Status (mock) ---
@@ -89,10 +194,10 @@ interface DashboardFastStatus {
 
 const MOCK_FAST_STATUS: DashboardFastStatus = {
   isActive: true,
-  protocolName: '16:8',
+  protocolName: "16:8",
   elapsedMinutes: 260, // 4h20m
   remainingMinutes: 220, // 3h40m
-  endTimeLabel: 'Ends at 20:00',
+  endTimeLabel: "Ends at 20:00",
 };
 
 function formatMinutes(mins: number) {
@@ -103,30 +208,47 @@ function formatMinutes(mins: number) {
 }
 
 function FastingStatusCard({ status }: { status: DashboardFastStatus }) {
-  const pct = status.remainingMinutes !== undefined
-    ? Math.min(100, Math.round((status.elapsedMinutes / (status.elapsedMinutes + status.remainingMinutes)) * 100))
-    : 0;
+  const pct =
+    status.remainingMinutes !== undefined
+      ? Math.min(
+          100,
+          Math.round((status.elapsedMinutes / (status.elapsedMinutes + status.remainingMinutes)) * 100)
+        )
+      : 0;
 
   return (
     <Link href="/fasting" className="block">
       <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-2 cursor-pointer">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-black text-slate-800">{status.isActive ? 'Fasting now' : 'No active fast'}</h3>
-            <p className="text-xs font-bold text-slate-400">{status.isActive ? status.protocolName : `Next: ${status.protocolName} today`}</p>
+            <h3 className="text-sm font-black text-slate-800">
+              {status.isActive ? "Fasting now" : "No active fast"}
+            </h3>
+            <p className="text-xs font-bold text-slate-400">
+              {status.isActive ? status.protocolName : `Next: ${status.protocolName} today`}
+            </p>
           </div>
-          <div className="text-xs text-slate-400 font-bold">{status.isActive ? status.endTimeLabel : ''}</div>
+          <div className="text-xs text-slate-400 font-bold">
+            {status.isActive ? status.endTimeLabel : ""}
+          </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="text-[13px] font-black text-slate-800">
-            {status.isActive ? `Elapsed: ${formatMinutes(status.elapsedMinutes)}` : '—'}
+            {status.isActive ? `Elapsed: ${formatMinutes(status.elapsedMinutes)}` : "—"}
           </div>
-          <div className="text-[12px] text-slate-500">{status.isActive && status.remainingMinutes ? `Remaining: ${formatMinutes(status.remainingMinutes)}` : ''}</div>
+          <div className="text-[12px] text-slate-500">
+            {status.isActive && status.remainingMinutes
+              ? `Remaining: ${formatMinutes(status.remainingMinutes)}`
+              : ""}
+          </div>
         </div>
 
         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div className={`h-full bg-emerald-400 rounded-full transition-all`} style={{ width: `${pct}%` }} />
+          <div
+            className={`h-full bg-emerald-400 rounded-full transition-all`}
+            style={{ width: `${pct}%` }}
+          />
         </div>
       </div>
     </Link>
@@ -145,8 +267,12 @@ export default function MobileDashboard() {
 
       {/* Greeting Section */}
       <section className="px-6 pt-10 pb-4">
-        <h1 className="text-4xl font-black text-slate-800 tracking-tighter mb-1">Hello, Siavash</h1>
-        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Your health summary for today</p>
+        <h1 className="text-4xl font-black text-slate-800 tracking-tighter mb-1">
+          Hello, Siavash
+        </h1>
+        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+          Your health summary for today
+        </p>
       </section>
 
       {/* Continue Strip */}
@@ -159,8 +285,12 @@ export default function MobileDashboard() {
               href={action.link}
               className="min-w-[160px] bg-secondary/5 p-5 rounded-3xl border border-secondary/10 group hover:scale-[1.02] transition-all"
             >
-              <h4 className="text-[13px] font-black text-secondary-text leading-tight mb-1">{action.title}</h4>
-              <p className="text-[10px] font-bold text-secondary/60 uppercase tracking-tighter">{action.subtitle}</p>
+              <h4 className="text-[13px] font-black text-secondary-text leading-tight mb-1">
+                {action.title}
+              </h4>
+              <p className="text-[10px] font-bold text-secondary/60 uppercase tracking-tighter">
+                {action.subtitle}
+              </p>
             </Link>
           ))}
         </div>
@@ -171,32 +301,41 @@ export default function MobileDashboard() {
         <SectionHeader
           title="Health Modules"
           action={
-            <button className="text-[10px] font-black text-primary uppercase tracking-widest">See All</button>
+            <button className="text-[10px] font-black text-primary uppercase tracking-widest">
+              See All
+            </button>
           }
         />
         <div className="grid grid-cols-2 gap-4">
           {MODULES.map((module) => (
-            <Link
-              key={module.id}
-              href={module.link}
-              className="group"
-            >
+            <Link key={module.id} href={module.link} className="group">
               <Card
                 padding="sm"
                 className="h-full hover:shadow-md active:scale-95 transition-all flex flex-col items-start"
               >
-                <div className={`p-3 rounded-2xl mb-4 transition-transform group-hover:scale-110 ${module.variant === 'primary' ? 'bg-primary/10 text-primary' :
-                  module.variant === 'secondary' ? 'bg-secondary/10 text-secondary' :
-                    module.variant === 'accent' ? 'bg-accent/10 text-accent' :
-                      module.variant === 'danger' ? 'bg-danger/10 text-danger' :
-                        'bg-slate-50 text-slate-500'
-                  }`}>
+                <div
+                  className={`p-3 rounded-2xl mb-4 transition-transform group-hover:scale-110 ${
+                    module.variant === "primary"
+                      ? "bg-primary/10 text-primary"
+                      : module.variant === "secondary"
+                      ? "bg-secondary/10 text-secondary"
+                      : module.variant === "accent"
+                      ? "bg-accent/10 text-accent"
+                      : module.variant === "danger"
+                      ? "bg-danger/10 text-danger"
+                      : "bg-slate-50 text-slate-500"
+                  }`}
+                >
                   <module.icon size={22} />
                 </div>
-                <h4 className="text-sm font-black text-slate-800 mb-1">{module.title}</h4>
-                <p className="text-[9px] font-bold text-slate-400 leading-tight mb-3">{module.description}</p>
+                <h4 className="text-sm font-black text-slate-800 mb-1">
+                  {module.title}
+                </h4>
+                <p className="text-[9px] font-bold text-slate-400 leading-tight mb-3">
+                  {module.description}
+                </p>
                 <div className="mt-auto">
-                  <Chip label={module.status || ''} variant={module.variant} />
+                  <Chip label={module.status || ""} variant={module.variant} />
                 </div>
               </Card>
             </Link>
@@ -219,14 +358,102 @@ export default function MobileDashboard() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[9px] font-black text-primary uppercase tracking-tighter">{article.category}</span>
-                  <span className="text-[9px] font-bold text-slate-300">• {article.time} read</span>
+                  <span className="text-[9px] font-black text-primary uppercase tracking-tighter">
+                    {article.category}
+                  </span>
+                  <span className="text-[9px] font-bold text-slate-300">
+                    • {article.time} read
+                  </span>
                 </div>
-                <h4 className="text-[13px] font-bold text-slate-800 leading-tight">{article.title}</h4>
+                <h4 className="text-[13px] font-bold text-slate-800 leading-tight">
+                  {article.title}
+                </h4>
               </div>
-              <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight
+                size={16}
+                className="text-slate-300 group-hover:translate-x-1 transition-transform"
+              />
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* Today Habits */}
+      <section className="mt-10 px-6 mb-8">
+        <SectionHeader title="Today Habits" />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-2xl border bg-white shadow-sm p-4">
+            <h3 className="text-sm font-semibold">Water</h3>
+            <p className="text-xs text-gray-600">5/8 glasses</p>
+          </div>
+          <div className="rounded-2xl border bg-white shadow-sm p-4">
+            <h3 className="text-sm font-semibold">Sleep</h3>
+            <p className="text-xs text-gray-600">7h 10m</p>
+          </div>
+          <div className="rounded-2xl border bg-white shadow-sm p-4">
+            <h3 className="text-sm font-semibold">Brushing</h3>
+            <p className="text-xs text-gray-600">Brushed</p>
+          </div>
+          <div className="rounded-2xl border bg-white shadow-sm p-4">
+            <h3 className="text-sm font-semibold">Activity</h3>
+            <p className="text-xs text-gray-600">3,000 steps</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Body Section */}
+      <section className="mt-10 px-6 mb-8">
+        <div className="rounded-2xl border bg-white shadow-sm p-4">
+          <h2 className="text-lg font-semibold">Body</h2>
+          <p className="text-sm text-gray-600">Weight: 68.4 kg</p>
+          <p className="text-sm text-gray-600">BMI: 22.5 (Normal)</p>
+          <p className="text-sm text-gray-600">Calories: 1,200 in / 1,600 out</p>
+        </div>
+      </section>
+
+      {/* Cycle Summary */}
+      <section className="mt-10 px-6 mb-8">
+        <Link href="/period-tracker">
+          <div className="rounded-2xl border bg-white shadow-sm p-4">
+            <h2 className="text-lg font-semibold">Cycle Summary</h2>
+            <p className="text-sm text-gray-600">Day 16 of cycle</p>
+            <p className="text-sm text-gray-600">Low chance to conceive</p>
+          </div>
+        </Link>
+      </section>
+
+      {/* Medications Today */}
+      <section className="mt-10 px-6 mb-8">
+        <Link href="/medications">
+          <div className="rounded-2xl border bg-white shadow-sm p-4">
+            <h2 className="text-lg font-semibold">Medications</h2>
+            <p className="text-sm text-gray-600">3 doses scheduled · 0/3 taken</p>
+            <p className="text-sm text-gray-600">Next: Metformin 500mg at 20:00</p>
+          </div>
+        </Link>
+      </section>
+
+      {/* Modules List */}
+      <section className="mt-10 px-6 mb-8">
+        <div className="space-y-3">
+          <Link href="/dental">
+            <div className="rounded-2xl border bg-white shadow-sm p-4">
+              <h3 className="text-sm font-semibold">Dental</h3>
+              <p className="text-xs text-gray-600">Brushing tracker</p>
+            </div>
+          </Link>
+          <Link href="/mental-health">
+            <div className="rounded-2xl border bg-white shadow-sm p-4">
+              <h3 className="text-sm font-semibold">Mental Health</h3>
+              <p className="text-xs text-gray-600">Mood & stress logs</p>
+            </div>
+          </Link>
+          <Link href="/pregnancy">
+            <div className="rounded-2xl border bg-white shadow-sm p-4">
+              <h3 className="text-sm font-semibold">Pregnancy</h3>
+              <p className="text-xs text-gray-600">Track your journey</p>
+            </div>
+          </Link>
         </div>
       </section>
     </AppShell>
@@ -235,12 +462,22 @@ export default function MobileDashboard() {
 
 // --- Subcomponents ---
 
-function StatusPill({ icon: Icon, value, label }: { icon: React.ElementType; value: string; label: string }) {
+function StatusPill({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: React.ElementType;
+  value: string;
+  label: string;
+}) {
   return (
     <div className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-white/5 border border-white/10">
       <Icon size={14} className="text-secondary" />
       <div className="text-[10px] font-black">{value}</div>
-      <div className="text-[7px] font-black uppercase text-slate-500 tracking-tighter">{label}</div>
+      <div className="text-[7px] font-black uppercase text-slate-500 tracking-tighter">
+        {label}
+      </div>
     </div>
   );
 }
