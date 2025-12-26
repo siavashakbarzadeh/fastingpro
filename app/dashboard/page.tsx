@@ -1,243 +1,43 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
+import { AppShell } from '@/components/ui/AppShell';
+import FastingStatusCard, { MOCK_FAST_STATUS } from '@/components/dashboard/FastingStatusCard';
+import BottomNav from '@/components/ui/BottomNav';
 import Link from 'next/link';
-import {
-    Play,
-    Pause,
-    Droplet,
-    Moon,
-    Smile,
-    Activity,
-    Scale,
-    TrendingDown,
-    TrendingUp,
-    Flame,
-    ChevronRight,
-    Heart,
-    Brain,
-    ShieldAlert,
-    Baby,
-    Pill,
-    Stethoscope,
-    Plus
-} from 'lucide-react';
-import { useBrushingTracker } from '@/lib/hooks/useBrushingTracker';
+import { ChevronRight } from 'lucide-react';
 
-// Cycle types
-type FertilityLevel = "low" | "medium" | "high";
+export default function DashboardPage() {
+  return (
+    <>
+    <AppShell activeTab="me">
+      <section className="px-6 pt-6">
+        <h1 className="text-2xl font-black mb-3">Dashboard</h1>
+        <div className="space-y-4">
+          <FastingStatusCard status={MOCK_FAST_STATUS} />
 
-interface CycleTodaySummary {
-    dateLabel: string;
-    cycleDay: number;
-    fertilityLevel: FertilityLevel;
-    message: string;
-}
-
-// Medications types
-type MedStatus = "scheduled" | "taken" | "skipped";
-
-interface TodayDose {
-    import BottomNav from '@/components/ui/BottomNav';
-
-    export default function DashboardPage() {
-        // ...existing code...
-
-        return (
-            <div className="max-w-md mx-auto px-4 py-4 space-y-6 bg-slate-50 min-h-screen pb-24">
-                {/* ...existing dashboard content... */}
-                <BottomNav />
+          <div className="rounded-2xl border bg-white p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-slate-700">Quick actions</h2>
+              <Link href="/dashboard/plans" className="text-xs font-black text-primary">See all</Link>
             </div>
-        );
-    }
-                                    <p className="text-xs text-slate-500">Fasting days</p>
-                                    <p className="text-lg font-bold text-slate-800">{fastingDays}</p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-xs text-slate-500">Longest fast</p>
-                                    <p className="text-lg font-bold text-slate-800">{longestFastHours} hours</p>
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="text-lg font-bold text-slate-800">No active fast</h3>
-                                    <p className="text-sm text-slate-500">Protocol: {protocolName}</p>
-                                </div>
-                                <Flame className="text-slate-300" size={24} />
-                            </div>
-
-                            <button
-                                onClick={handleStartFast}
-                                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
-                            >
-                                <Play size={18} />
-                                Start fast
-                            </button>
-                        </>
-                    )}
+            <div className="space-y-2">
+              <Link href="/water-tracker" className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                <div>
+                  <div className="text-sm font-bold">Hydration</div>
+                  <div className="text-xs text-slate-400">Log water</div>
                 </div>
-            </section>
-
-            {/* Section 2: Today habits */}
-            <section>
-                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                    Today habits
-                </h2>
-                <div className="grid grid-cols-2 gap-3">
-
-                    {/* Water card */}
-                    <div className="rounded-2xl border bg-white p-3 flex flex-col justify-between gap-2 cursor-pointer hover:border-blue-200 transition-colors">
-                        <div className="flex items-center justify-between">
-                            <Droplet className="text-blue-500" size={20} />
-                            <span className="text-xs font-bold text-slate-500">{Math.round(waterProgress)}%</span>
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-bold text-slate-800">Water</h3>
-                            <p className="text-xs text-slate-500">{waterMl} / {waterGoalMl} ml</p>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-1.5">
-                            <div
-                                className="bg-blue-500 h-1.5 rounded-full transition-all"
-                                style={{ width: `${Math.min(waterProgress, 100)}%` }}
-                            />
-                        </div>
-                        <button
-                            onClick={addWater}
-                            className="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold text-xs py-1.5 rounded-lg transition-colors"
-                        >
-                            +1 glass
-                        </button>
-                    </div>
-
-                    {/* Sleep card */}
-                    <div className="rounded-2xl border bg-white p-3 flex flex-col justify-between gap-2 cursor-pointer hover:border-purple-200 transition-colors">
-                        <div className="flex items-center justify-between">
-                            <Moon className="text-purple-500" size={20} />
-                            <span className={`text-xs font-bold ${sleepStatus === 'Good' ? 'text-green-500' : sleepStatus === 'OK' ? 'text-yellow-500' : 'text-red-500'}`}>
-                                {sleepStatus}
-                            </span>
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-bold text-slate-800">Sleep</h3>
-                            <p className="text-xs text-slate-500">{sleepHours}h {sleepMins}m</p>
-                        </div>
-                        <p className="text-xs text-slate-400">Avg. rest</p>
-                    </div>
-
-                    {/* Brushing card */}
-                    <div className="rounded-2xl border bg-white p-3 flex flex-col justify-between gap-2 cursor-pointer hover:border-teal-200 transition-colors">
-                        <div className="flex items-center justify-between">
-                            <Smile className="text-teal-500" size={20} />
-                            {brushingSummary.status === 'brushed' && (
-                                <span className="text-xs font-bold text-green-500">✓</span>
-                            )}
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-bold text-slate-800">Dental</h3>
-                            <p className="text-xs text-slate-500">
-                                {brushingSummary.status === 'brushed' ? 'Brushed ✅' : 'Not brushed yet'}
-                            </p>
-                        </div>
-                        {brushingSummary.status !== 'brushed' && (
-                            <button
-                                onClick={logTodayBrushed}
-                                className="w-full bg-teal-50 hover:bg-teal-100 text-teal-600 font-semibold text-xs py-1.5 rounded-lg transition-colors"
-                            >
-                                Log brushing
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Activity/Steps card */}
-                    <div className="rounded-2xl border bg-white p-3 flex flex-col justify-between gap-2 cursor-pointer hover:border-green-200 transition-colors">
-                        <div className="flex items-center justify-between">
-                            <Activity className="text-green-500" size={20} />
-                            <span className="text-xs font-bold text-slate-500">{Math.round(stepsProgress)}%</span>
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-bold text-slate-800">Activity</h3>
-                            <p className="text-xs text-slate-500">{steps.toLocaleString()} / {stepsGoal.toLocaleString()}</p>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-1.5">
-                            <div
-                                className="bg-green-500 h-1.5 rounded-full transition-all"
-                                style={{ width: `${Math.min(stepsProgress, 100)}%` }}
-                            />
-                        </div>
-                    </div>
-
-                </div>
-
-                {/* Cycle summary card */}
-                <div className="mt-3">
-                    <CycleTodayCard summary={cycleToday} />
-                </div>
-
-                {/* Medications summary card */}
-                <div className="mt-3">
-                    <MedicationsTodayCard summary={medSummary} />
-                </div>
-            </section>
-
-            {/* Section 3: Body */}
-            <section>
-                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                    Body
-                </h2>
-
-                {/* Calories today card */}
-                <CaloriesTodayCard
-                    caloriesIn={caloriesInToday}
-                    caloriesOut={caloriesOutToday}
-                    calorieGoal={calorieGoal}
-                />
-            </section>
-
-            {/* Section 4: Modules */}
-            <section>
-                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                    Modules
-                </h2>
-                <div className="space-y-2">
-                    {modules.map((module, idx) => (
-                        <Link key={idx} href={module.href}>
-                            <div className="flex items-center justify-between rounded-2xl bg-white border shadow-sm px-4 py-3 hover:border-slate-300 transition-colors cursor-pointer">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
-                                        <module.icon className="text-slate-600" size={20} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-slate-800">{module.title}</h3>
-                                        <p className="text-xs text-slate-500">{module.subtitle}</p>
-                                    </div>
-                                </div>
-                                <ChevronRight className="text-slate-400" size={18} />
-                            </div>
-                        </Link>
-                    ))}
-                </div>
-            </section>
-
+                <ChevronRight size={16} className="text-slate-300" />
+              </Link>
+            </div>
+          </div>
         </div>
-    );
+      </section>
+    </AppShell>
+    <BottomNav />
+    </>
+  );
 }
-
-// Calories Today Card Component
-function CaloriesTodayCard(props: {
-    caloriesIn: number;
-    caloriesOut: number;
-    calorieGoal: number;
-}) {
-    const { caloriesIn, caloriesOut, calorieGoal } = props;
-    const net = caloriesIn - caloriesOut;
-    const progress = calorieGoal > 0 ? Math.min(caloriesIn / calorieGoal, 1) : 0;
-
-    const netLabel = net > 0 ? `+${net} kcal` : net < 0 ? `${net} kcal` : "0 kcal";
-    const netColor = net < 0 ? "text-emerald-600" : net > 0 ? "text-amber-600" : "text-slate-600";
 
     return (
         <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-3">
