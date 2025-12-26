@@ -171,6 +171,22 @@ export default function DashboardPage() {
                                 <Pause size={18} />
                                 End fast
                             </button>
+
+                            {/* Fasting statistics */}
+                            <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-100">
+                                <div className="text-center">
+                                    <p className="text-xs text-slate-500">Total fasting minutes</p>
+                                    <p className="text-lg font-bold text-slate-800">{elapsedMinutes + (fastingDays * 16 * 60)}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-xs text-slate-500">Fasting days</p>
+                                    <p className="text-lg font-bold text-slate-800">{fastingDays}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-xs text-slate-500">Longest fast</p>
+                                    <p className="text-lg font-bold text-slate-800">{longestFastHours} hours</p>
+                                </div>
+                            </div>
                         </>
                     ) : (
                         <>
