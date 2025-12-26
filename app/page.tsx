@@ -62,6 +62,7 @@ const MODULES: Module[] = [
   { id: 'mental', title: 'Mental Health', description: 'AI Companion & check-ins', status: 'Not logged', icon: Brain, color: 'text-purple-600', bg: 'bg-purple-50', link: '/mental-health' },
   { id: 'period', title: 'Women’s Health', description: 'Cycle & pregnancy', status: 'Phase 2', icon: Flower2, color: 'text-pink-600', bg: 'bg-pink-50', link: '/period-tracker' },
   { id: 'recipes', title: 'Recipes', description: 'Healthy meal ideas', status: 'Explore', icon: Utensils, color: 'text-orange-600', bg: 'bg-orange-50', link: '/dashboard/recipes' },
+  { id: 'calories', title: 'Calories', description: 'Fuel & activity log', status: 'Log now', icon: Flame, color: 'text-amber-600', bg: 'bg-amber-50', link: '/calories' },
 ];
 
 const CONTINUE_ACTIONS: ContinueAction[] = [
