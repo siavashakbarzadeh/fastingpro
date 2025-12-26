@@ -56,7 +56,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                             <button className="p-2 bg-slate-50 rounded-full text-slate-400">
                                 <Bell size={18} />
                             </button>
-                            <Link href="/me" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
+                            <Link href="/dashboard/profile" className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
                                 <img src="https://ui-avatars.com/api/?name=User&background=14b8a6&color=fff" alt="Profile" className="w-full h-full object-cover" />
                             </Link>
                         </div>
@@ -64,11 +64,36 @@ export const AppShell: React.FC<AppShellProps> = ({
                 )}
 
                 {/* Main Content */}
-                <main className={`flex-1 overflow-y-auto no-scrollbar ${hideTopBar ? 'pb-4' : 'pt-2 pb-24'}`}>
+                <main className={`flex-1 overflow-y-auto no-scrollbar pb-24 ${hideTopBar ? '' : 'pt-2'}`}>
                     {children}
                 </main>
+
+                {/* Bottom Navigation */}
+                {!hideBottomNav && (
+                    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur-md border-t border-border px-6 pt-3 pb-8 flex items-center justify-between z-30">
+                        <NavItem href="/fasting" icon={Timer} label="Fasting" active={activeTab === 'fasting'} />
+                        <NavItem href="/dashboard/plans" icon={Calendar} label="Plan" active={activeTab === 'plan'} />
+                        <NavItem href="/dashboard/learn" icon={BookOpen} label="Learn" active={activeTab === 'learn'} />
+                        <NavItem href="/dashboard/recipes" icon={Utensils} label="Recipes" active={activeTab === 'recipes'} />
+                        <NavItem href="/dashboard/profile" icon={User} label="Me" active={activeTab === 'me'} />
+                    </nav>
+                )}
+
             </div>
         </div>
     );
 };
+
+function NavItem({ href, icon: Icon, label, active = false }: { href: string; icon: React.ElementType; label: string; active?: boolean }) {
+    return (
+        <Link href={href} className="flex flex-col items-center gap-1.5 group">
+            <div className={`p-2.5 rounded-2xl transition-all duration-300 ${active ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-110' : 'text-slate-300 group-hover:text-primary/60'}`}>
+                <Icon size={20} fill={active ? "currentColor" : "none"} />
+            </div>
+            <span className={`text-[9px] font-black uppercase tracking-tighter ${active ? 'text-primary' : 'text-slate-400'}`}>
+                {label}
+            </span>
+        </Link>
+    );
+}
 
