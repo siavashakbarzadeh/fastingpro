@@ -83,40 +83,10 @@ const LEARN_ARTICLES: LearnArticle[] = [
 export default function MobileDashboard() {
   return (
     <AppShell activeTab="me">
-      {/* Hero Section */}
-      <section className="px-6 pt-4 pb-2">
-        <Card
-          variant="dark"
-          padding="none"
-          className="p-6 relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <Timer size={100} />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fast in Progress</span>
-            </div>
-            <h2 className="text-3xl font-black mb-1">14:22:08</h2>
-            <p className="text-xs font-bold text-slate-400 mb-6">Started today at 8:00 AM</p>
-
-            <div className="grid grid-cols-4 gap-2 mb-6">
-              <StatusPill icon={Activity} value="2.4k" label="Steps" />
-              <StatusPill icon={Moon} value="7h" label="Sleep" />
-              <StatusPill icon={Plus} value="1.2L" label="Water" />
-              <StatusPill icon={Pill} value="2/3" label="Meds" />
-            </div>
-
-            <Button
-              variant="secondary"
-              className="w-full"
-              icon={<Zap size={16} fill="currentColor" />}
-            >
-              <Link href="/fasting">Manage Fasting</Link>
-            </Button>
-          </div>
-        </Card>
+      {/* Greeting Section */}
+      <section className="px-6 pt-10 pb-4">
+        <h1 className="text-4xl font-black text-slate-800 tracking-tighter mb-1">Hello, Siavash</h1>
+        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Your health summary for today</p>
       </section>
 
       {/* Continue Strip */}
@@ -156,10 +126,10 @@ export default function MobileDashboard() {
                 className="h-full hover:shadow-md active:scale-95 transition-all flex flex-col items-start"
               >
                 <div className={`p-3 rounded-2xl mb-4 transition-transform group-hover:scale-110 ${module.variant === 'primary' ? 'bg-primary/10 text-primary' :
-                    module.variant === 'secondary' ? 'bg-secondary/10 text-secondary' :
-                      module.variant === 'accent' ? 'bg-accent/10 text-accent' :
-                        module.variant === 'danger' ? 'bg-danger/10 text-danger' :
-                          'bg-slate-50 text-slate-500'
+                  module.variant === 'secondary' ? 'bg-secondary/10 text-secondary' :
+                    module.variant === 'accent' ? 'bg-accent/10 text-accent' :
+                      module.variant === 'danger' ? 'bg-danger/10 text-danger' :
+                        'bg-slate-50 text-slate-500'
                   }`}>
                   <module.icon size={22} />
                 </div>
