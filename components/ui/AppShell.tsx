@@ -32,9 +32,9 @@ export const AppShell: React.FC<AppShellProps> = ({
     activeTab,
 }) => {
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center">
-            {/* Desktop Wrapper Centering */}
-            <div className="w-full max-w-md bg-white min-h-screen shadow-2xl flex flex-col relative overflow-hidden ring-1 ring-slate-100">
+        <div className="min-h-screen bg-slate-50 flex flex-col">
+            {/* The wrapper now handles centering and max-width for the whole app */}
+            <div className="w-full max-w-screen-xl mx-auto flex-1 flex flex-col relative overflow-hidden bg-white md:bg-transparent min-h-screen">
 
                 {/* Top App Bar */}
                 {!hideTopBar && (
