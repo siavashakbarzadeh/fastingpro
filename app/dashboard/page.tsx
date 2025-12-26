@@ -9,6 +9,7 @@ import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain, P
 import CycleHistoryWidget from '@/components/dashboard/cycle-history';
 import ConceptionGauge from '@/components/dashboard/conception-gauge';
 import ConceptionLikelihoodChart from '@/components/dashboard/conception-likelihood-chart';
+import { useBrushingTracker } from '@/lib/hooks/useBrushingTracker';
 
 interface CycleData {
     last_period_start: string;
@@ -27,6 +28,7 @@ export default function DashboardPage() {
     const [waterIntake, setWaterIntake] = useState(0);
     const [cycleData, setCycleData] = useState<CycleData | null>(null);
     const router = useRouter();
+    const { summary: brushingSummary, logTodayBrushed, isTodayLateWarning } = useBrushingTracker();
 
     useEffect(() => {
         const loadWaterIntake = async () => {
@@ -176,8 +178,59 @@ export default function DashboardPage() {
 
                 {/* Other Mini Widgets */}
                 <div className="md:col-span-2 lg:col-span-1 grid grid-cols-1 gap-4">
+                    {/* Brushing Tracker Widget - Custom */}
+                    {brushingSummary.status === 'brushed' ? (
+                        <Link href="/dental" className="block group">
+                            <div className="bg-emerald-50 border-2 border-emerald-100 shadow-md shadow-emerald-200/50 rounded-3xl p-4 flex items-center justify-between hover:scale-[1.02] transition-transform cursor-pointer">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                                        <Smile size={24} strokeWidth={2.5} />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-emerald-900 font-black text-base">Brushed Today ✅</h4>
+                                        <p className="text-emerald-600 font-bold text-[10px] uppercase tracking-wider">Oral Health</p>
+                                    </div>
+                                </div>
+                                <LucideChevronRight size={16} className="text-emerald-400 group-hover:text-emerald-600 transition-colors" />
+                            </div>
+                        </Link>
+                    ) : isTodayLateWarning ? (
+                        <div className="bg-amber-50 border-2 border-amber-300 shadow-md shadow-amber-200/50 rounded-3xl p-4">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                                    <Smile size={20} strokeWidth={2.5} />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="text-amber-900 font-black text-sm">Haven't brushed today</h4>
+                                    <p className="text-amber-700 font-bold text-[9px]">Take 2 minutes now</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={logTodayBrushed}
+                                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-2 px-4 rounded-xl transition-colors"
+                            >
+                                Log Brushing
+                            </button>
+                        </div>
+                    ) : (
+                        <Link href="/dental" className="block group">
+                            <div className="bg-white border-2 border-slate-50 shadow-md shadow-slate-200/50 rounded-3xl p-4 flex items-center justify-between hover:scale-[1.02] transition-transform cursor-pointer">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-500 group-hover:scale-110 transition-transform">
+                                        <Smile size={24} strokeWidth={2.5} />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-slate-800 font-black text-base">Dental Health</h4>
+                                        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Not brushed yet</p>
+                                    </div>
+                                </div>
+                                <LucideChevronRight size={16} className="text-slate-300 group-hover:text-primary transition-colors" />
+                            </div>
+                        </Link>
+                    )}
+
+                    {/* Other widgets */}
                     {[
-                        { href: "/dental", icon: Smile, color: "teal", title: "Dental Health", subtitle: "Daily Tracker" },
                         { href: "/sex-life", icon: Heart, color: "rose", title: "Enhance Sex Life", subtitle: "Mood & Intimacy" },
                         { href: "/discharge", icon: ShieldAlert, color: "violet", title: "Decode Discharge", subtitle: "Self-Check Tool" },
                         { href: "/pregnancy", icon: Baby, color: "sky", title: "Pregnancy", subtitle: "Weekly Journey" },

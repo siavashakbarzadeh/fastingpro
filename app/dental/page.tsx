@@ -16,8 +16,10 @@ import {
     Play,
     Pause,
     RotateCcw,
-    Trophy
+    Trophy,
+    AlertCircle
 } from 'lucide-react';
+import { useBrushingTracker } from '@/lib/hooks/useBrushingTracker';
 
 // --- Types ---
 
@@ -189,28 +191,13 @@ export default function DentalPage() {
         markHabitDone
     } = useDentalState();
 
+    // Shared brushing tracker
+    const { summary: brushingSummary, logTodayBrushed, isTodayLateWarning } = useBrushingTracker();
+
     const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
 
-    // Computed Stats
-    const brushingStreak = habitsHistory.reduce((streak, day, idx) => {
-        // simple streak logic: consecutive days from yesterday going back
-        // Since history sorts today -> back (index 0 is today), look at 1 onwards
-        if (idx === 0) return 0; // skip today for *past* streak calculation or include? 
-        // Let's count consecutive true from yesterday
-        // Simplified for demo: count total recent 'brushed'
-        // A real streak algorithm would be more complex
-        return streak;
-    }, 0);
-
-    // Better simple streak: count consecutive 'brushed' starting from yesterday (index 1)
-    let currentStreak = 0;
-    for (let i = 1; i < habitsHistory.length; i++) {
-        if (habitsHistory[i].brushed) currentStreak++;
-        else break;
-    }
-    // If today is brushed, add 1? standard streak usually counts finished days. 
-    if (todayHabits.brushed) currentStreak++;
-
+    // Computed Stats - use shared brushing data
+    const currentStreak = brushingSummary.streakDays;
     const last7DaysBrushed = habitsHistory.filter(h => h.brushed).length;
 
     const lastVisitDate = new Date(visitInfo.date);
@@ -224,12 +211,63 @@ export default function DentalPage() {
             {/* Header */}
             <div className="bg-white p-6 pb-8 border-b border-slate-100">
                 <div className="max-w-4xl mx-auto">
-                    <h1 className="text-2xl font-bold text-slate-900">Dental / Oral Health</h1>
+                    <h1 className="text-2xl font-black text-slate-900">Dental / Oral Health</h1>
                     <p className="text-slate-500 mt-1">Track your brushing, flossing and visits in one place.</p>
                 </div>
             </div>
 
+            {/* Late Warning Banner */}
+            {isTodayLateWarning && (
+                <div className="max-w-4xl mx-auto px-4 pt-4">
+                    <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 flex items-center gap-3">
+                        <AlertCircle className="text-amber-600 flex-shrink-0" size={24} />
+                        <div className="flex-1">
+                            <h3 className="text-amber-900 font-bold text-sm">You haven't brushed today</h3>
+                            <p className="text-amber-700 text-xs">Brush before sleep for optimal oral health.</p>
+                        </div>
+                        <button
+                            onClick={logTodayBrushed}
+                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-2 px-4 rounded-xl transition-colors whitespace-nowrap"
+                        >
+                            Log Now
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="max-w-4xl mx-auto p-4 space-y-6 -mt-4">
+
+                {/* Brushing Status Card - Using Shared State */}
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-6 text-white shadow-xl">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 className="text-xl font-bold">Brushing Status</h2>
+                            <p className="text-blue-100 text-sm">Today: {brushingSummary.date}</p>
+                        </div>
+                        {brushingSummary.status === 'brushed' ? (
+                            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                                <Check size={28} strokeWidth={3} />
+                            </div>
+                        ) : (
+                            <button
+                                onClick={logTodayBrushed}
+                                className="bg-white text-blue-600 font-bold py-2 px-4 rounded-xl hover:bg-blue-50 transition-colors"
+                            >
+                                Log Brushing Now
+                            </button>
+                        )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <p className="text-blue-100 text-xs uppercase tracking-wider">Streak</p>
+                            <p className="text-3xl font-black">{brushingSummary.streakDays} days</p>
+                        </div>
+                        <div>
+                            <p className="text-blue-100 text-xs uppercase tracking-wider">Last Brushed</p>
+                            <p className="text-lg font-bold">{brushingSummary.lastBrushed || 'Never'}</p>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Top Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -416,8 +454,8 @@ function HabitToggle({ label, icon, active, color, onClick }: { label: string, i
         <button
             onClick={onClick}
             className={`relative group p-4 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center gap-3 ${active
-                    ? `${colorMap[color]} border-transparent shadow-lg transform scale-[1.02]`
-                    : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50'
+                ? `${colorMap[color]} border-transparent shadow-lg transform scale-[1.02]`
+                : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50'
                 }`}
         >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${active ? 'bg-white/20 text-white' : `bg-slate-100 ${textMap[color]}`}`}>
