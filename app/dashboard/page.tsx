@@ -1,306 +1,348 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
-import api from '@/lib/api';
 import Link from 'next/link';
-import { Flame, Info, Bell, Settings, Droplet, Activity, Scale, Target, Brain, Pencil, ChevronRight as LucideChevronRight, Smile, Heart, ShieldAlert, Baby, Pill, Stethoscope, Moon, Trees } from 'lucide-react';
-import CycleHistoryWidget from '@/components/dashboard/cycle-history';
-import ConceptionGauge from '@/components/dashboard/conception-gauge';
-import ConceptionLikelihoodChart from '@/components/dashboard/conception-likelihood-chart';
+import {
+    Play,
+    Pause,
+    Droplet,
+    Moon,
+    Smile,
+    Activity,
+    Scale,
+    TrendingDown,
+    TrendingUp,
+    Flame,
+    ChevronRight,
+    Heart,
+    Brain,
+    ShieldAlert,
+    Baby,
+    Pill,
+    Stethoscope,
+    Plus
+} from 'lucide-react';
 import { useBrushingTracker } from '@/lib/hooks/useBrushingTracker';
 
-interface CycleData {
-    last_period_start: string;
-    cycle_length: number;
-    period_duration: number;
-}
-
-interface CycleData {
-    last_period_start: string;
-    cycle_length: number;
-    period_duration: number;
-}
-
 export default function DashboardPage() {
-    const [loading, setLoading] = useState(true);
-    const [waterIntake, setWaterIntake] = useState(0);
-    const [cycleData, setCycleData] = useState<CycleData | null>(null);
     const router = useRouter();
-    const { summary: brushingSummary, logTodayBrushed, isTodayLateWarning } = useBrushingTracker();
+    const { summary: brushingSummary, logTodayBrushed } = useBrushingTracker();
 
+    // Fasting state
+    const [isFasting, setIsFasting] = useState(false);
+    const [elapsedMinutes, setElapsedMinutes] = useState(0);
+    const [remainingMinutes, setRemainingMinutes] = useState(0);
+    const [protocolName] = useState("16:8");
+
+    // Today habits state
+    const [waterMl, setWaterMl] = useState(0);
+    const [waterGoalMl] = useState(2500);
+    const [lastSleepMinutes] = useState(440); // 7h 20m
+    const [sleepGoalMinutes] = useState(480); // 8h
+    const [steps, setSteps] = useState(4300);
+    const [stepsGoal] = useState(8000);
+
+    // Body state
+    const [weightKg, setWeightKg] = useState(68.4);
+    const [prevWeekWeightKg] = useState(68.8);
+    const [heightCm] = useState(170);
+    const [fastingDays] = useState(12);
+    const [longestFastHours] = useState(18);
+    const [currentStreak] = useState(3);
+
+    // Computed values
+    const bmi = weightKg && heightCm ? weightKg / Math.pow(heightCm / 100, 2) : 0;
+    const bmiCategory = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obesity';
+    const weeklyDiff = weightKg - prevWeekWeightKg;
+    const waterProgress = (waterMl / waterGoalMl) * 100;
+    const sleepHours = Math.floor(lastSleepMinutes / 60);
+    const sleepMins = lastSleepMinutes % 60;
+    const sleepStatus = lastSleepMinutes >= sleepGoalMinutes ? 'Good' : lastSleepMinutes >= sleepGoalMinutes * 0.9 ? 'OK' : 'Low';
+    const stepsProgress = (steps / stepsGoal) * 100;
+
+    // Fasting timer simulation
     useEffect(() => {
-        const loadWaterIntake = async () => {
-            try {
-                const res = await api.get('/water/logs');
-                const logs = res.data;
-                const d = new Date();
-                const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        if (isFasting) {
+            const interval = setInterval(() => {
+                setElapsedMinutes(prev => prev + 1);
+                setRemainingMinutes(prev => Math.max(0, prev - 1));
+            }, 60000); // Update every minute
+            return () => clearInterval(interval);
+        }
+    }, [isFasting]);
 
-                const todayTotal = logs
-                    .filter((log: any) => log.logged_at.startsWith(today))
-                    .reduce((sum: number, log: any) => sum + log.amount_ml, 0);
+    const handleStartFast = () => {
+        setIsFasting(true);
+        setElapsedMinutes(0);
+        setRemainingMinutes(16 * 60); // 16 hours for 16:8
+    };
 
-                setWaterIntake(todayTotal);
-                localStorage.setItem('waterIntake_total_today', todayTotal.toString());
-            } catch (e) {
-                console.error('Failed to fetch water logs', e);
-                // Fallback to local
-                const saved = localStorage.getItem('waterIntake');
-                if (saved) {
-                    try {
-                        const data = JSON.parse(saved);
-                        const d = new Date();
-                        const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                        if (typeof data[today] === 'number') {
-                            setWaterIntake(data[today]);
-                        }
-                    } catch (err) {
-                        console.error(err);
-                    }
-                }
-            }
-        };
+    const handleEndFast = () => {
+        setIsFasting(false);
+        setElapsedMinutes(0);
+        setRemainingMinutes(0);
+    };
 
-        const loadCycleData = async () => {
-            try {
-                const res = await api.get('/cycle-data');
-                setCycleData(res.data);
-                localStorage.setItem('cycleData', JSON.stringify(res.data));
-            } catch (e) {
-                console.error('Failed to fetch cycle data', e);
-                const saved = localStorage.getItem('cycleData');
-                if (saved) {
-                    try {
-                        setCycleData(JSON.parse(saved));
-                    } catch (err) {
-                        console.error(err);
-                    }
-                }
-            }
-        };
+    const addWater = () => {
+        setWaterMl(prev => Math.min(prev + 250, waterGoalMl + 1000));
+    };
 
-        loadWaterIntake();
-        loadCycleData();
-        setLoading(false);
+    const formatTime = (minutes: number) => {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return `${h}h ${m}m`;
+    };
 
-        // Optional: listen for storage changes
-        const handleStorage = () => {
-            loadWaterIntake();
-            loadCycleData();
-        };
-        window.addEventListener('storage', handleStorage);
-        return () => window.removeEventListener('storage', handleStorage);
-    }, []);
-
-    // Calculate water progress
-    const waterGoal = 2500;
-    const waterPercentage = Math.min(waterIntake / waterGoal, 1);
-    const circumference = 339.29;
-    const offset = circumference * (1 - waterPercentage);
-
-    if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-white">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
-        </div>
-    );
+    const modules = [
+        { href: "/dental", icon: Smile, title: "Dental Health", subtitle: "Daily tracker" },
+        { href: "/mental-health", icon: Heart, title: "Mental Health", subtitle: "Mood & self-care" },
+        { href: "/cycle", icon: Heart, title: "Cycle / Pregnancy", subtitle: "Your cycle history" },
+        { href: "/symptoms", icon: Stethoscope, title: "Symptoms", subtitle: "Diary & patterns" },
+        { href: "/understand-body", icon: Brain, title: "My Body", subtitle: "Literacy & patterns" },
+        { href: "/medications", icon: Pill, title: "Medications", subtitle: "Reminders & tracking" },
+    ];
 
     return (
-        <div className="w-full space-y-8 p-6 animate-fade-in pb-32">
-            <header className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-800">Dashboard</h1>
-                    <p className="text-slate-400 font-bold">Your daily health overview</p>
+        <div className="max-w-md mx-auto px-4 py-4 space-y-6 bg-slate-50 min-h-screen pb-24">
+
+            {/* Section 1: Fasting */}
+            <section>
+                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                    Fasting
+                </h2>
+                <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-3">
+                    {isFasting ? (
+                        <>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-800">{protocolName} today</h3>
+                                    <p className="text-sm text-slate-500">Active fast</p>
+                                </div>
+                                <Flame className="text-orange-500" size={24} />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-xs text-slate-500 uppercase tracking-wider">Elapsed</p>
+                                    <p className="text-2xl font-bold text-slate-800">{formatTime(elapsedMinutes)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-slate-500 uppercase tracking-wider">Remaining</p>
+                                    <p className="text-2xl font-bold text-slate-800">{formatTime(remainingMinutes)}</p>
+                                </div>
+                            </div>
+
+                            {/* Progress bar */}
+                            <div className="w-full bg-slate-100 rounded-full h-2">
+                                <div
+                                    className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${(elapsedMinutes / (16 * 60)) * 100}%` }}
+                                />
+                            </div>
+
+                            <button
+                                onClick={handleEndFast}
+                                className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                            >
+                                <Pause size={18} />
+                                End fast
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-800">No active fast</h3>
+                                    <p className="text-sm text-slate-500">Protocol: {protocolName}</p>
+                                </div>
+                                <Flame className="text-slate-300" size={24} />
+                            </div>
+
+                            <button
+                                onClick={handleStartFast}
+                                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                            >
+                                <Play size={18} />
+                                Start fast
+                            </button>
+                        </>
+                    )}
                 </div>
-                <div className="flex gap-2">
-                    <button className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors">
-                        <Bell size={24} />
-                    </button>
-                    <div className="h-12 w-12 rounded-2xl bg-orange-50 flex items-center justify-center shadow-sm border border-orange-100/50">
-                        <Flame className="text-orange-500" size={24} fill="currentColor" />
+            </section>
+
+            {/* Section 2: Today habits */}
+            <section>
+                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                    Today habits
+                </h2>
+                <div className="grid grid-cols-2 gap-3">
+
+                    {/* Water card */}
+                    <div className="rounded-2xl border bg-white p-3 flex flex-col justify-between gap-2 cursor-pointer hover:border-blue-200 transition-colors">
+                        <div className="flex items-center justify-between">
+                            <Droplet className="text-blue-500" size={20} />
+                            <span className="text-xs font-bold text-slate-500">{Math.round(waterProgress)}%</span>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800">Water</h3>
+                            <p className="text-xs text-slate-500">{waterMl} / {waterGoalMl} ml</p>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-1.5">
+                            <div
+                                className="bg-blue-500 h-1.5 rounded-full transition-all"
+                                style={{ width: `${Math.min(waterProgress, 100)}%` }}
+                            />
+                        </div>
+                        <button
+                            onClick={addWater}
+                            className="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold text-xs py-1.5 rounded-lg transition-colors"
+                        >
+                            +1 glass
+                        </button>
                     </div>
-                </div>
-            </header>
 
-            {/* Main Widgets Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Water Tracker Widget */}
-                <Link href="/water-tracker" className="block">
-                    <div className="bg-white border-2 border-slate-50 shadow-xl shadow-blue-500/5 rounded-[2.5rem] p-8 flex flex-col items-center justify-center gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden h-full">
-                        <div className="absolute top-0 right-0 p-8 opacity-5">
-                            <Droplet size={120} fill="currentColor" className="text-blue-500" />
+                    {/* Sleep card */}
+                    <div className="rounded-2xl border bg-white p-3 flex flex-col justify-between gap-2 cursor-pointer hover:border-purple-200 transition-colors">
+                        <div className="flex items-center justify-between">
+                            <Moon className="text-purple-500" size={20} />
+                            <span className={`text-xs font-bold ${sleepStatus === 'Good' ? 'text-green-500' : sleepStatus === 'OK' ? 'text-yellow-500' : 'text-red-500'}`}>
+                                {sleepStatus}
+                            </span>
                         </div>
-                        <div className="w-full flex justify-between items-center z-10">
-                            <h4 className="text-slate-800 font-black text-xl">Water</h4>
-                            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-                                <LucideChevronRight size={16} strokeWidth={4} />
-                            </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800">Sleep</h3>
+                            <p className="text-xs text-slate-500">{sleepHours}h {sleepMins}m</p>
                         </div>
-
-                        <div className="relative w-32 h-32 z-10">
-                            <svg className="w-full h-full transform -rotate-90">
-                                <circle cx="64" cy="64" r="54" stroke="#eff6ff" strokeWidth="12" fill="none" />
-                                <circle cx="64" cy="64" r="54" stroke="#3b82f6" strokeWidth="12" fill="none" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
-                            </svg>
-                            <div className="absolute inset-0 flex items-center justify-center text-blue-500">
-                                <Droplet fill="currentColor" size={32} />
-                            </div>
-                        </div>
-
-                        <div className="text-center z-10">
-                            <span className="text-4xl font-black text-slate-800 block mb-1">{waterIntake}</span>
-                            <span className="text-slate-400 font-bold text-lg">/ {waterGoal} ml</span>
-                        </div>
+                        <p className="text-xs text-slate-400">Avg. rest</p>
                     </div>
-                </Link>
 
-                {/* Sleep Widget (Dark Theme) */}
-                <Link href="/sleep" className="block order-last lg:order-none">
-                    <div className="bg-slate-900 border-2 border-slate-800 shadow-xl shadow-indigo-900/20 rounded-[2.5rem] p-8 flex flex-col items-center justify-center gap-6 hover:scale-[1.02] transition-transform cursor-pointer relative overflow-hidden h-full">
-                        <div className="w-full flex justify-between items-center z-10">
-                            <h4 className="text-white font-black text-xl">Sleep</h4>
-                            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300">
-                                <LucideChevronRight size={16} strokeWidth={4} />
-                            </div>
+                    {/* Brushing card */}
+                    <div className="rounded-2xl border bg-white p-3 flex flex-col justify-between gap-2 cursor-pointer hover:border-teal-200 transition-colors">
+                        <div className="flex items-center justify-between">
+                            <Smile className="text-teal-500" size={20} />
+                            {brushingSummary.status === 'brushed' && (
+                                <span className="text-xs font-bold text-green-500">✓</span>
+                            )}
                         </div>
-                        <div className="py-4 z-10">
-                            <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center text-indigo-300 shadow-inner">
-                                <Moon size={40} strokeWidth={2.5} />
-                            </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800">Dental</h3>
+                            <p className="text-xs text-slate-500">
+                                {brushingSummary.status === 'brushed' ? 'Brushed ✅' : 'Not brushed yet'}
+                            </p>
                         </div>
-                        <div className="text-center z-10">
-                            <span className="text-4xl font-black text-white block mb-1">7h 20m</span>
-                            <span className="text-indigo-300/60 font-bold text-lg">Avg. Rest</span>
-                        </div>
-                    </div>
-                </Link>
-
-                {/* Other Mini Widgets */}
-                <div className="md:col-span-2 lg:col-span-1 grid grid-cols-1 gap-4">
-                    {/* Brushing Tracker Widget - Custom */}
-                    {brushingSummary.status === 'brushed' ? (
-                        <Link href="/dental" className="block group">
-                            <div className="bg-emerald-50 border-2 border-emerald-100 shadow-md shadow-emerald-200/50 rounded-3xl p-4 flex items-center justify-between hover:scale-[1.02] transition-transform cursor-pointer">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
-                                        <Smile size={24} strokeWidth={2.5} />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-emerald-900 font-black text-base">Brushed Today ✅</h4>
-                                        <p className="text-emerald-600 font-bold text-[10px] uppercase tracking-wider">Oral Health</p>
-                                    </div>
-                                </div>
-                                <LucideChevronRight size={16} className="text-emerald-400 group-hover:text-emerald-600 transition-colors" />
-                            </div>
-                        </Link>
-                    ) : isTodayLateWarning ? (
-                        <div className="bg-amber-50 border-2 border-amber-300 shadow-md shadow-amber-200/50 rounded-3xl p-4">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
-                                    <Smile size={20} strokeWidth={2.5} />
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className="text-amber-900 font-black text-sm">Haven't brushed today</h4>
-                                    <p className="text-amber-700 font-bold text-[9px]">Take 2 minutes now</p>
-                                </div>
-                            </div>
+                        {brushingSummary.status !== 'brushed' && (
                             <button
                                 onClick={logTodayBrushed}
-                                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-2 px-4 rounded-xl transition-colors"
+                                className="w-full bg-teal-50 hover:bg-teal-100 text-teal-600 font-semibold text-xs py-1.5 rounded-lg transition-colors"
                             >
-                                Log Brushing
+                                Log brushing
                             </button>
-                        </div>
-                    ) : (
-                        <Link href="/dental" className="block group">
-                            <div className="bg-white border-2 border-slate-50 shadow-md shadow-slate-200/50 rounded-3xl p-4 flex items-center justify-between hover:scale-[1.02] transition-transform cursor-pointer">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-500 group-hover:scale-110 transition-transform">
-                                        <Smile size={24} strokeWidth={2.5} />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-slate-800 font-black text-base">Dental Health</h4>
-                                        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Not brushed yet</p>
-                                    </div>
-                                </div>
-                                <LucideChevronRight size={16} className="text-slate-300 group-hover:text-primary transition-colors" />
-                            </div>
-                        </Link>
-                    )}
+                        )}
+                    </div>
 
-                    {/* Other widgets */}
-                    {[
-                        { href: "/sex-life", icon: Heart, color: "rose", title: "Enhance Sex Life", subtitle: "Mood & Intimacy" },
-                        { href: "/discharge", icon: ShieldAlert, color: "violet", title: "Decode Discharge", subtitle: "Self-Check Tool" },
-                        { href: "/pregnancy", icon: Baby, color: "sky", title: "Pregnancy", subtitle: "Weekly Journey" },
-                        { href: "/understand-body", icon: Brain, color: "violet", title: "My Body", subtitle: "Literacy & Patterns" },
-                        { href: "/medications", icon: Pill, color: "teal", title: "Medications", subtitle: "Tracker" },
-                        { href: "/symptoms", icon: Stethoscope, color: "rose", title: "Symptoms", subtitle: "Diary & Patterns" },
-                        { href: "/mental-health", icon: Heart, color: "indigo", title: "Mental Health", subtitle: "Mood & Self-Care", fill: true },
-                    ].map((item, idx) => (
-                        <Link key={idx} href={item.href} className="block group">
-                            <div className="bg-white border-2 border-slate-50 shadow-md shadow-slate-200/50 rounded-3xl p-4 flex items-center justify-between hover:scale-[1.02] transition-transform cursor-pointer">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-2xl bg-${item.color}-50 flex items-center justify-center text-${item.color}-500 group-hover:scale-110 transition-transform`}>
-                                        <item.icon size={24} strokeWidth={2.5} fill={item.fill ? "currentColor" : "none"} />
+                    {/* Activity/Steps card */}
+                    <div className="rounded-2xl border bg-white p-3 flex flex-col justify-between gap-2 cursor-pointer hover:border-green-200 transition-colors">
+                        <div className="flex items-center justify-between">
+                            <Activity className="text-green-500" size={20} />
+                            <span className="text-xs font-bold text-slate-500">{Math.round(stepsProgress)}%</span>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800">Activity</h3>
+                            <p className="text-xs text-slate-500">{steps.toLocaleString()} / {stepsGoal.toLocaleString()}</p>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-1.5">
+                            <div
+                                className="bg-green-500 h-1.5 rounded-full transition-all"
+                                style={{ width: `${Math.min(stepsProgress, 100)}%` }}
+                            />
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            {/* Section 3: Body */}
+            <section>
+                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                    Body
+                </h2>
+
+                {/* Weight + BMI card */}
+                <div className="rounded-2xl border bg-white shadow-sm p-4 space-y-3 mb-3">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <div className="flex items-baseline gap-2">
+                                <h3 className="text-3xl font-black text-slate-800">{weightKg}</h3>
+                                <span className="text-lg text-slate-500">kg</span>
+                            </div>
+                            <div className="flex items-center gap-1 mt-1">
+                                {weeklyDiff < 0 ? (
+                                    <TrendingDown className="text-green-500" size={16} />
+                                ) : (
+                                    <TrendingUp className="text-red-500" size={16} />
+                                )}
+                                <p className={`text-sm font-semibold ${weeklyDiff < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {weeklyDiff > 0 ? '+' : ''}{weeklyDiff.toFixed(1)} kg this week
+                                </p>
+                            </div>
+                        </div>
+                        <Scale className="text-slate-400" size={24} />
+                    </div>
+
+                    <div className="bg-slate-50 rounded-xl p-3">
+                        <p className="text-sm text-slate-600">
+                            BMI <span className="font-bold text-slate-800">{bmi.toFixed(1)}</span> – {bmiCategory}
+                        </p>
+                    </div>
+
+                    <button className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2 rounded-lg transition-colors">
+                        Log weight
+                    </button>
+                </div>
+
+                {/* Fasting summary card */}
+                <div className="rounded-2xl border bg-white p-3 flex justify-between text-sm">
+                    <div>
+                        <p className="text-xs text-slate-500">Fasting days</p>
+                        <p className="text-lg font-bold text-slate-800">{fastingDays}</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-slate-500">Longest fast</p>
+                        <p className="text-lg font-bold text-slate-800">{longestFastHours}h</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-slate-500">Streak</p>
+                        <p className="text-lg font-bold text-slate-800">{currentStreak} days</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section 4: Modules */}
+            <section>
+                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                    Modules
+                </h2>
+                <div className="space-y-2">
+                    {modules.map((module, idx) => (
+                        <Link key={idx} href={module.href}>
+                            <div className="flex items-center justify-between rounded-2xl bg-white border shadow-sm px-4 py-3 hover:border-slate-300 transition-colors cursor-pointer">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
+                                        <module.icon className="text-slate-600" size={20} />
                                     </div>
                                     <div>
-                                        <h4 className="text-slate-800 font-black text-base">{item.title}</h4>
-                                        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">{item.subtitle}</p>
+                                        <h3 className="text-sm font-bold text-slate-800">{module.title}</h3>
+                                        <p className="text-xs text-slate-500">{module.subtitle}</p>
                                     </div>
                                 </div>
-                                <LucideChevronRight size={16} className="text-slate-300 group-hover:text-primary transition-colors" />
+                                <ChevronRight className="text-slate-400" size={18} />
                             </div>
                         </Link>
                     ))}
                 </div>
-            </div>
+            </section>
 
-            {/* Insights & History */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-6">
-                    <div className="bg-indigo-50 border-2 border-indigo-100 rounded-[2rem] p-6 flex items-center justify-between group cursor-pointer hover:bg-indigo-100 transition-colors h-full">
-                        <div className="space-y-1">
-                            <h4 className="text-indigo-900 font-black text-lg">Daily Insight</h4>
-                            <p className="text-indigo-600/70 font-bold text-sm">How hydration affects fat loss.</p>
-                        </div>
-                        <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center text-indigo-500 shadow-sm group-hover:scale-110 transition-transform">
-                            <LucideChevronRight size={24} strokeWidth={3} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="space-y-6">
-                    <div className="bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-sm">
-                        <CycleHistoryWidget cycleData={cycleData} />
-                    </div>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ConceptionGauge cycleData={cycleData} />
-                <ConceptionLikelihoodChart cycleData={cycleData} />
-            </div>
         </div>
     );
-}
-
-function ChevronRight({ size, strokeWidth, className }: { size: number, strokeWidth: number, className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-        >
-            <path d="m9 18 6-6-6-6" />
-        </svg>
-    )
 }
