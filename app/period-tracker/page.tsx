@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { ChevronLeft, Calendar, Droplets, Info, ChevronRight, Save, ChevronDown, ChevronUp } from "lucide-react";
-import Link from "next/link";
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, Calendar, Droplets, Info, ChevronRight, Save, ChevronDown, ChevronUp } from 'lucide-react';
+import Link from 'next/link';
 
 // Types
 type FertilityLevel = "low" | "medium" | "high";
